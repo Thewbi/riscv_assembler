@@ -54,4 +54,3 @@ lex.yy.c
 parser.cpp
 parser.hpp
 parser.output
-lexer.l
