@@ -1,5 +1,10 @@
 # Building on Windows
 
+Download https://cmocka.org/files/1.1/cmocka-1.1.7.tar.xz and extract it to the folder
+riscv_assembler\test
+
+Install a gcc toolchain using cygwin
+
 Install GnuWin32 to C:\GnuWin32
 This is very important because the path to GnuWin32 is not allowed to contain any spaces.
 

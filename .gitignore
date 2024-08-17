@@ -54,3 +54,5 @@ lex.yy.c
 parser.cpp
 parser.hpp
 parser.output
+test/cmocka-1.1.0
+test/cmocka-1.1.7
