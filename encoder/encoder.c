@@ -31,11 +31,15 @@ uint32_t encode_add(asm_line_t* asm_line) {
     uint8_t funct3 = 0b000;
     uint8_t opcode = 0b0110011;
 
-    printf("encode_add %d %d %d\n", asm_line->reg_1, asm_line->reg_2, asm_line->reg_3);
+    //printf("encode_add %d %d %d\n", asm_line->reg_1, asm_line->reg_2, asm_line->reg_3);
 
-    uint8_t rd = encode_register(asm_line->reg_1);
-    uint8_t rs1 = encode_register(asm_line->reg_2);
-    uint8_t rs2 = encode_register(asm_line->reg_3);
+    // uint8_t rd = encode_register(asm_line->reg_1);
+    // uint8_t rs1 = encode_register(asm_line->reg_2);
+    // uint8_t rs2 = encode_register(asm_line->reg_3);
+
+    uint8_t rd = encode_register(asm_line->reg_rd);
+    uint8_t rs1 = encode_register(asm_line->reg_rs1);
+    uint8_t rs2 = encode_register(asm_line->reg_rs2);
 
     return encode_r_type(funct7, rs2, rs1, funct3, rd, opcode);
 }
@@ -154,13 +158,13 @@ uint8_t encode_register(enum register_ data) {
             return 0b11100;
 
         case R_T4: // 29, Temporary
-            return 0b11001;
-            
+            return 0b11101;
+
         case R_T5: // 30, Temporary
-            return 0b11010;
+            return 0b11110;
 
         case R_T6: // 31, Temporary
-            return 0b11011;
+            return 0b11111;
 
         default:
             printf("unknown register %d\n", data); 

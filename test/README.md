@@ -30,6 +30,24 @@ copy cmocka-1.1.7\build\cmocka-1.1.7\build\output\lib\libcmocka.dll.a to the tes
 copy cmocka-1.1.7\build\cmocka-1.1.7\build\output\include\cmocka.h to the test/include folder
 copy cmocka-1.1.7\build\cmocka-1.1.7\build\output\include\cmocka_pbc.h to the test/include folder
 
+
+
+Now edit parser.y and remove or comment the line
+
+```
+#define USE_INTERNAL_DRIVER 1
+```
+
+Next clean and build the parser. (The purpose of all this is that the main() function is removed 
+because the cmocka unit test has it's own main() function and there may only be one main() function)
+
+```
+make clean
+make
+```
+
+The build will end in an error but that does not matter.
+
 Execute 
 
 ```

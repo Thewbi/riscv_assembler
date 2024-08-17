@@ -54,9 +54,13 @@ typedef struct asm_line {
 
     enum instruction instruction;
 
-    enum register_ reg_1;
-    enum register_ reg_2;
-    enum register_ reg_3;
+    // enum register_ reg_1;
+    // enum register_ reg_2;
+    // enum register_ reg_3;
+
+    enum register_ reg_rd;
+    enum register_ reg_rs1;
+    enum register_ reg_rs2;
 
 } asm_line_t;
 

@@ -6,8 +6,8 @@ CMOCKA_OUT_DIR=$(CMOCKA_BUILD_DIR)/output
 
 all: test
 
-test:
-	gcc unit_tests/add_test.c ../data/asm_line.c ../parser.c ../lex.yy.c -L./lib -I./ -I./include -I../data -I../ -lcmocka -o cmockatest
+test: unit_tests/main.c unit_tests/add_encode_test.c unit_tests/add_encode_test.h unit_tests/add_decode_test.c unit_tests/add_decode_test.h ../data/asm_line.c ../parser.c ../parser.h
+	gcc unit_tests/main.c unit_tests/add_encode_test.c unit_tests/add_decode_test.c ../data/asm_line.c ../decoder/decoder.c ../parser.c ../lex.yy.c -L./lib -I./ -I./include -I./unit_tests -I../data -I../encoder -I../decoder -I../ -lcmocka -o cmockatest
 
 install:
 	mkdir -p $(CMOCKA_OUT_DIR)

@@ -1,5 +1,9 @@
 {
     "files.associations": {
-        "cstdlib": "c"
+        "cstdlib": "c",
+        "add_decode_test.h": "c",
+        "xstring": "c",
+        "xutility": "c",
+        "stdarg.h": "c"
     }
 }

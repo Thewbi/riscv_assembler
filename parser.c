@@ -72,8 +72,8 @@
 
 #include <stdio.h>
 
-#include "asm_line.h"
-#include "encoder.h"
+#include <asm_line.h>
+#include <encoder.h>
 
 #define YYDEBUG 1
 
@@ -84,7 +84,7 @@
 // If you would rather not have the symbols
 // defined because you are building an external driver, then do not
 // define the USE_INTERNAL_DRIVER symbol
-#define USE_INTERNAL_DRIVER 1
+//#define USE_INTERNAL_DRIVER 1
 
 //-- Lexer prototype required by bison, aka getNextToken()
 int yylex(); 
