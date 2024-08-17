@@ -1,5 +1,5 @@
-app: parser.hpp parser.cpp lex.yy.c
-	g++ -o riscv parser.cpp lex.yy.c
+app: parser.hpp parser.cpp lex.yy.c data\asm_line.c
+	g++ -o riscv parser.cpp lex.yy.c data\asm_line.c -I data
 
 lex.yy.c: lexer.l
 	flex -d lexer.l
