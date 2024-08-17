@@ -91,9 +91,9 @@ int yylex();
 int yyerror(const char *p) { printf("Error!\n"); return 1; }
 
 #ifdef USE_INTERNAL_DRIVER
-    asm_line_t asm_line;
+    asm_line_t parser_asm_line;
 #else
-    extern asm_line_t asm_line;
+    extern asm_line_t parser_asm_line;
 #endif
 
 // https://www.geeksforgeeks.org/function-pointer-in-c/
@@ -1189,217 +1189,217 @@ yyreduce:
     {
   case 6: /* asm_line: label mnemonic params  */
 #line 67 "parser.y"
-                                { print_asm_line(&asm_line); if (fp_emit != NULL) { (*fp_emit)(&asm_line); } }
+                                { print_asm_line(&parser_asm_line); if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); } }
 #line 1194 "parser.c"
     break;
 
   case 7: /* asm_line: mnemonic params  */
 #line 69 "parser.y"
-                        { print_asm_line(&asm_line); if (fp_emit != NULL) { (*fp_emit)(&asm_line); } }
+                        { print_asm_line(&parser_asm_line); if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); } }
 #line 1200 "parser.c"
     break;
 
   case 17: /* mnemonic: ADD  */
 #line 87 "parser.y"
-              { asm_line.instruction = I_ADD; }
+              { parser_asm_line.instruction = I_ADD; }
 #line 1206 "parser.c"
     break;
 
   case 20: /* register: REG_ZERO  */
 #line 89 "parser.y"
-                   { printf("REG_ZERO\n"); insert_register(&asm_line, R_ZERO); }
+                   { printf("REG_ZERO\n"); insert_register(&parser_asm_line, R_ZERO); }
 #line 1212 "parser.c"
     break;
 
   case 21: /* register: REG_RA  */
 #line 90 "parser.y"
-             { printf("REG_RA\n"); insert_register(&asm_line, R_RA); }
+             { printf("REG_RA\n"); insert_register(&parser_asm_line, R_RA); }
 #line 1218 "parser.c"
     break;
 
   case 22: /* register: REG_SP  */
 #line 91 "parser.y"
-             { printf("REG_SP\n"); insert_register(&asm_line, R_SP); }
+             { printf("REG_SP\n"); insert_register(&parser_asm_line, R_SP); }
 #line 1224 "parser.c"
     break;
 
   case 23: /* register: REG_GP  */
 #line 92 "parser.y"
-             { printf("REG_GP\n"); insert_register(&asm_line, R_GP); }
+             { printf("REG_GP\n"); insert_register(&parser_asm_line, R_GP); }
 #line 1230 "parser.c"
     break;
 
   case 24: /* register: REG_TP  */
 #line 93 "parser.y"
-             { printf("REG_TP\n"); insert_register(&asm_line, R_TP); }
+             { printf("REG_TP\n"); insert_register(&parser_asm_line, R_TP); }
 #line 1236 "parser.c"
     break;
 
   case 25: /* register: REG_T0  */
 #line 94 "parser.y"
-             { printf("REG_T0\n"); insert_register(&asm_line, R_T0); }
+             { printf("REG_T0\n"); insert_register(&parser_asm_line, R_T0); }
 #line 1242 "parser.c"
     break;
 
   case 26: /* register: REG_T1  */
 #line 95 "parser.y"
-             { printf("REG_T1\n"); insert_register(&asm_line, R_T1); }
+             { printf("REG_T1\n"); insert_register(&parser_asm_line, R_T1); }
 #line 1248 "parser.c"
     break;
 
   case 27: /* register: REG_T2  */
 #line 96 "parser.y"
-             { printf("REG_T2\n"); insert_register(&asm_line, R_T2); }
+             { printf("REG_T2\n"); insert_register(&parser_asm_line, R_T2); }
 #line 1254 "parser.c"
     break;
 
   case 28: /* register: REG_T3  */
 #line 97 "parser.y"
-             { printf("REG_T3\n"); insert_register(&asm_line, R_T3); }
+             { printf("REG_T3\n"); insert_register(&parser_asm_line, R_T3); }
 #line 1260 "parser.c"
     break;
 
   case 29: /* register: REG_T4  */
 #line 98 "parser.y"
-             { printf("REG_T4\n"); insert_register(&asm_line, R_T4); }
+             { printf("REG_T4\n"); insert_register(&parser_asm_line, R_T4); }
 #line 1266 "parser.c"
     break;
 
   case 30: /* register: REG_T5  */
 #line 99 "parser.y"
-             { printf("REG_T5\n"); insert_register(&asm_line, R_T5); }
+             { printf("REG_T5\n"); insert_register(&parser_asm_line, R_T5); }
 #line 1272 "parser.c"
     break;
 
   case 31: /* register: REG_T6  */
 #line 100 "parser.y"
-             { printf("REG_T6\n"); insert_register(&asm_line, R_T6); }
+             { printf("REG_T6\n"); insert_register(&parser_asm_line, R_T6); }
 #line 1278 "parser.c"
     break;
 
   case 32: /* register: REG_FP  */
 #line 101 "parser.y"
-             { printf("REG_FP\n"); insert_register(&asm_line, R_S0); }
+             { printf("REG_FP\n"); insert_register(&parser_asm_line, R_S0); }
 #line 1284 "parser.c"
     break;
 
   case 33: /* register: REG_A0  */
 #line 102 "parser.y"
-             { printf("REG_A0\n"); insert_register(&asm_line, R_A0); }
+             { printf("REG_A0\n"); insert_register(&parser_asm_line, R_A0); }
 #line 1290 "parser.c"
     break;
 
   case 34: /* register: REG_A1  */
 #line 103 "parser.y"
-             { printf("REG_A1\n"); insert_register(&asm_line, R_A1); }
+             { printf("REG_A1\n"); insert_register(&parser_asm_line, R_A1); }
 #line 1296 "parser.c"
     break;
 
   case 35: /* register: REG_A2  */
 #line 104 "parser.y"
-             { printf("REG_A2\n"); insert_register(&asm_line, R_A2); }
+             { printf("REG_A2\n"); insert_register(&parser_asm_line, R_A2); }
 #line 1302 "parser.c"
     break;
 
   case 36: /* register: REG_A3  */
 #line 105 "parser.y"
-             { printf("REG_A3\n"); insert_register(&asm_line, R_A3); }
+             { printf("REG_A3\n"); insert_register(&parser_asm_line, R_A3); }
 #line 1308 "parser.c"
     break;
 
   case 37: /* register: REG_A4  */
 #line 106 "parser.y"
-             { printf("REG_A4\n"); insert_register(&asm_line, R_A4); }
+             { printf("REG_A4\n"); insert_register(&parser_asm_line, R_A4); }
 #line 1314 "parser.c"
     break;
 
   case 38: /* register: REG_A5  */
 #line 107 "parser.y"
-             { printf("REG_A5\n"); insert_register(&asm_line, R_A5); }
+             { printf("REG_A5\n"); insert_register(&parser_asm_line, R_A5); }
 #line 1320 "parser.c"
     break;
 
   case 39: /* register: REG_A6  */
 #line 108 "parser.y"
-             { printf("REG_A6\n"); insert_register(&asm_line, R_A6); }
+             { printf("REG_A6\n"); insert_register(&parser_asm_line, R_A6); }
 #line 1326 "parser.c"
     break;
 
   case 40: /* register: REG_A7  */
 #line 109 "parser.y"
-             { printf("REG_A7\n"); insert_register(&asm_line, R_A7); }
+             { printf("REG_A7\n"); insert_register(&parser_asm_line, R_A7); }
 #line 1332 "parser.c"
     break;
 
   case 41: /* register: REG_S0  */
 #line 110 "parser.y"
-             { printf("REG_S0\n"); insert_register(&asm_line, R_S0); }
+             { printf("REG_S0\n"); insert_register(&parser_asm_line, R_S0); }
 #line 1338 "parser.c"
     break;
 
   case 42: /* register: REG_S1  */
 #line 111 "parser.y"
-             { printf("REG_S1\n"); insert_register(&asm_line, R_S1); }
+             { printf("REG_S1\n"); insert_register(&parser_asm_line, R_S1); }
 #line 1344 "parser.c"
     break;
 
   case 43: /* register: REG_S2  */
 #line 112 "parser.y"
-             { printf("REG_S2\n"); insert_register(&asm_line, R_S2); }
+             { printf("REG_S2\n"); insert_register(&parser_asm_line, R_S2); }
 #line 1350 "parser.c"
     break;
 
   case 44: /* register: REG_S3  */
 #line 113 "parser.y"
-             { printf("REG_S3\n"); insert_register(&asm_line, R_S3); }
+             { printf("REG_S3\n"); insert_register(&parser_asm_line, R_S3); }
 #line 1356 "parser.c"
     break;
 
   case 45: /* register: REG_S4  */
 #line 114 "parser.y"
-             { printf("REG_S4\n"); insert_register(&asm_line, R_S4); }
+             { printf("REG_S4\n"); insert_register(&parser_asm_line, R_S4); }
 #line 1362 "parser.c"
     break;
 
   case 46: /* register: REG_S5  */
 #line 115 "parser.y"
-             { printf("REG_S5\n"); insert_register(&asm_line, R_S5); }
+             { printf("REG_S5\n"); insert_register(&parser_asm_line, R_S5); }
 #line 1368 "parser.c"
     break;
 
   case 47: /* register: REG_S6  */
 #line 116 "parser.y"
-             { printf("REG_S6\n"); insert_register(&asm_line, R_S6); }
+             { printf("REG_S6\n"); insert_register(&parser_asm_line, R_S6); }
 #line 1374 "parser.c"
     break;
 
   case 48: /* register: REG_S7  */
 #line 117 "parser.y"
-             { printf("REG_S7\n"); insert_register(&asm_line, R_S7); }
+             { printf("REG_S7\n"); insert_register(&parser_asm_line, R_S7); }
 #line 1380 "parser.c"
     break;
 
   case 49: /* register: REG_S8  */
 #line 118 "parser.y"
-             { printf("REG_S8\n"); insert_register(&asm_line, R_S8); }
+             { printf("REG_S8\n"); insert_register(&parser_asm_line, R_S8); }
 #line 1386 "parser.c"
     break;
 
   case 50: /* register: REG_S9  */
 #line 119 "parser.y"
-             { printf("REG_S9\n"); insert_register(&asm_line, R_S9); }
+             { printf("REG_S9\n"); insert_register(&parser_asm_line, R_S9); }
 #line 1392 "parser.c"
     break;
 
   case 51: /* register: REG_S10  */
 #line 120 "parser.y"
-              { printf("REG_S10\n"); insert_register(&asm_line, R_S10); }
+              { printf("REG_S10\n"); insert_register(&parser_asm_line, R_S10); }
 #line 1398 "parser.c"
     break;
 
   case 52: /* register: REG_S11  */
 #line 121 "parser.y"
-              { printf("REG_S11\n"); insert_register(&asm_line, R_S11); }
+              { printf("REG_S11\n"); insert_register(&parser_asm_line, R_S11); }
 #line 1404 "parser.c"
     break;
 
@@ -1597,11 +1597,10 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 157 "parser.y"
+#line 154 "parser.y"
 
 
 //-- SECTION 4: FUNCTION DEFINITIONS ---------------------------------
-
 
 // only define this symbol if there is not external application that uses the parser
 #ifdef USE_INTERNAL_DRIVER
@@ -1613,10 +1612,9 @@ extern int yy_flex_debug;
     printf("emit LUL\n");
 } */
 
-
 int main(int argc, char **argv)
 {
-    reset_asm_line(&asm_line);
+    reset_asm_line(&parser_asm_line);
 
     //fp_emit = &emit;
     fp_emit = &encoder_callback;

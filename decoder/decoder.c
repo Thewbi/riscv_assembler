@@ -3,12 +3,15 @@
 void decode(uint32_t data, asm_line_t* asm_line) {
 
     uint8_t instruction = data & 0b1111111;
-    
 
     switch (instruction) {
+
         case 0b0110011:
             decode_r_type(data, asm_line);
             break;
+
+        default:
+            printf("Unknown instruction!\n");
 
     }
 
@@ -35,7 +38,6 @@ void decode_r_type(uint32_t data, asm_line_t* asm_line) {
             }
         break;
     }
-            
 }
 
 enum register_ decode_register(uint8_t data) {
@@ -145,6 +147,6 @@ enum register_ decode_register(uint8_t data) {
 
         default:
             printf("unknown register %d\n", data); 
-            return 0;
+            return R_UNDEFINED_REGISTER;
     }
 }
