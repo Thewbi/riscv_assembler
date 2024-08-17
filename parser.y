@@ -86,39 +86,39 @@ label: IDENTIFIER COLON
 
 mnemonic: ADD { asm_line.instruction = I_ADD; } | JALR | LI
 
-register: REG_ZERO | 
-    REG_RA | 
-    REG_SP | 
-    REG_GP | 
-    REG_TP | 
-    REG_T0 { printf("test\n"); insert_register(&asm_line, R_T0); } | 
-    REG_T1 | 
-    REG_T2 | 
-    REG_T3 | 
-    REG_T4 | 
-    REG_T5 | 
-    REG_T6 | 
-    REG_FP | 
-    REG_A0 | 
-    REG_A1 | 
-    REG_A2 | 
-    REG_A3 | 
-    REG_A4 | 
-    REG_A5 | 
-    REG_A6 | 
-    REG_A7 | 
-    REG_S0 | 
-    REG_S1 | 
-    REG_S2 | 
-    REG_S3 | 
-    REG_S4 | 
-    REG_S5 | 
-    REG_S6 | 
-    REG_S7 | 
-    REG_S8 | 
-    REG_S9 | 
-    REG_S10 |
-    REG_S11
+register: REG_ZERO { printf("REG_ZERO\n"); insert_register(&asm_line, R_ZERO); }
+    | REG_RA { printf("REG_RA\n"); insert_register(&asm_line, R_RA); }
+    | REG_SP { printf("REG_SP\n"); insert_register(&asm_line, R_SP); }
+    | REG_GP { printf("REG_GP\n"); insert_register(&asm_line, R_GP); }
+    | REG_TP { printf("REG_TP\n"); insert_register(&asm_line, R_TP); }
+    | REG_T0 { printf("REG_T0\n"); insert_register(&asm_line, R_T0); }
+    | REG_T1 { printf("REG_T1\n"); insert_register(&asm_line, R_T1); }
+    | REG_T2 { printf("REG_T2\n"); insert_register(&asm_line, R_T2); }
+    | REG_T3 { printf("REG_T3\n"); insert_register(&asm_line, R_T3); }
+    | REG_T4 { printf("REG_T4\n"); insert_register(&asm_line, R_T4); }
+    | REG_T5 { printf("REG_T5\n"); insert_register(&asm_line, R_T5); }
+    | REG_T6 { printf("REG_T6\n"); insert_register(&asm_line, R_T6); }
+    | REG_FP { printf("REG_FP\n"); insert_register(&asm_line, R_S0); }
+    | REG_A0 { printf("REG_A0\n"); insert_register(&asm_line, R_A0); }
+    | REG_A1 { printf("REG_A1\n"); insert_register(&asm_line, R_A1); }
+    | REG_A2 { printf("REG_A2\n"); insert_register(&asm_line, R_A2); }
+    | REG_A3 { printf("REG_A3\n"); insert_register(&asm_line, R_A3); }
+    | REG_A4 { printf("REG_A4\n"); insert_register(&asm_line, R_A4); }
+    | REG_A5 { printf("REG_A5\n"); insert_register(&asm_line, R_A5); }
+    | REG_A6 { printf("REG_A6\n"); insert_register(&asm_line, R_A6); }
+    | REG_A7 { printf("REG_A7\n"); insert_register(&asm_line, R_A7); }
+    | REG_S0 { printf("REG_S0\n"); insert_register(&asm_line, R_S0); }
+    | REG_S1 { printf("REG_S1\n"); insert_register(&asm_line, R_S1); }
+    | REG_S2 { printf("REG_S2\n"); insert_register(&asm_line, R_S2); }
+    | REG_S3 { printf("REG_S3\n"); insert_register(&asm_line, R_S3); }
+    | REG_S4 { printf("REG_S4\n"); insert_register(&asm_line, R_S4); }
+    | REG_S5 { printf("REG_S5\n"); insert_register(&asm_line, R_S5); }
+    | REG_S6 { printf("REG_S6\n"); insert_register(&asm_line, R_S6); }
+    | REG_S7 { printf("REG_S7\n"); insert_register(&asm_line, R_S7); }
+    | REG_S8 { printf("REG_S8\n"); insert_register(&asm_line, R_S8); }
+    | REG_S9 { printf("REG_S9\n"); insert_register(&asm_line, R_S9); }
+    | REG_S10 { printf("REG_S10\n"); insert_register(&asm_line, R_S10); }
+    | REG_S11 { printf("REG_S11\n"); insert_register(&asm_line, R_S11); }
 
 expr : NUMERIC | register
 
