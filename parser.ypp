@@ -15,13 +15,22 @@
 
 #define YYDEBUG 1
 
+//#define USE_INTERNAL_DRIVER 1
+
 //using namespace std;
 
 //-- Lexer prototype required by bison, aka getNextToken()
 int yylex(); 
 int yyerror(const char *p) { printf("Error!\n"); return 1; }
 
-extern asm_line_t asm_line;
+#ifdef USE_INTERNAL_DRIVER
+    asm_line_t asm_line;
+#else
+    extern asm_line_t asm_line;
+#endif
+
+// https://www.geeksforgeeks.org/function-pointer-in-c/
+void (*fp_emit)(asm_line_t*);
 
 %}
 
@@ -54,9 +63,9 @@ asm_file: line_end asm_file | asm_line line_end asm_file | asm_line line_end
 
 line_end: NEW_LINE
 
-asm_line: label mnemonic params { print_asm_line(&asm_line); }
+asm_line: label mnemonic params { print_asm_line(&asm_line); if (fp_emit != NULL) { (*fp_emit)(&asm_line); } }
 	|
-	mnemonic params { print_asm_line(&asm_line); }
+	mnemonic params { print_asm_line(&asm_line); if (fp_emit != NULL) { (*fp_emit)(&asm_line); } }
 	|
 	label mnemonic
 	|
@@ -117,15 +126,23 @@ factor: NUM           { $$ = $1; }
 //-- SECTION 4: FUNCTION DEFINITIONS ---------------------------------
 
 
-/* extern FILE* yyin;
+// only define this symbol if there is not external application that uses the parser
+#ifdef USE_INTERNAL_DRIVER
+
+extern FILE* yyin;
 extern int yy_flex_debug;
+
+void emit(asm_line_t* asm_line) {
+    printf("emit LUL\n");
+}
 
 int main(int argc, char **argv)
 {
     reset_asm_line(&asm_line);
 
-    yyin = fopen(argv[1], "r");
+    fp_emit = &emit;
 
+    yyin = fopen(argv[1], "r");
     if (!yyin) {
         printf("Cannot open '%s'. Aborting.\n", argv[1]);
     }
@@ -135,4 +152,6 @@ int main(int argc, char **argv)
     yyparse();
 
     return 0;
-} */
+}
+
+#endif

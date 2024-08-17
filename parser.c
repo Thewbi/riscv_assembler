@@ -81,16 +81,25 @@
 
 #define YYDEBUG 1
 
+//#define USE_INTERNAL_DRIVER 1
+
 //using namespace std;
 
 //-- Lexer prototype required by bison, aka getNextToken()
 int yylex(); 
 int yyerror(const char *p) { printf("Error!\n"); return 1; }
 
-extern asm_line_t asm_line;
+#ifdef USE_INTERNAL_DRIVER
+    asm_line_t asm_line;
+#else
+    extern asm_line_t asm_line;
+#endif
+
+// https://www.geeksforgeeks.org/function-pointer-in-c/
+void (*fp_emit)(asm_line_t*);
 
 
-#line 94 "parser.c"
+#line 103 "parser.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -567,12 +576,12 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    53,    53,    53,    53,    55,    57,    59,    61,    63,
-      65,    67,    69,    70,    71,    73,    75,    77,    77,    77,
-      79,    79,    79,    79,    79,    79,    79,    79,    79,    79,
-      79,    79,    79,    79,    79,    79,    79,    79,    79,    79,
-      79,    79,    79,    79,    79,    79,    79,    79,    79,    79,
-      79,    79,    79,    81,    81,    84,    86,    88
+       0,    62,    62,    62,    62,    64,    66,    68,    70,    72,
+      74,    76,    78,    79,    80,    82,    84,    86,    86,    86,
+      88,    88,    88,    88,    88,    88,    88,    88,    88,    88,
+      88,    88,    88,    88,    88,    88,    88,    88,    88,    88,
+      88,    88,    88,    88,    88,    88,    88,    88,    88,    88,
+      88,    88,    88,    90,    90,    93,    95,    97
 };
 #endif
 
@@ -1178,25 +1187,25 @@ yyreduce:
   switch (yyn)
     {
   case 6: /* asm_line: label mnemonic params  */
-#line 57 "parser.ypp"
-                                { print_asm_line(&asm_line); }
-#line 1184 "parser.c"
+#line 66 "parser.ypp"
+                                { print_asm_line(&asm_line); if (fp_emit != NULL) { (*fp_emit)(&asm_line); } }
+#line 1193 "parser.c"
     break;
 
   case 7: /* asm_line: mnemonic params  */
-#line 59 "parser.ypp"
-                        { print_asm_line(&asm_line); }
-#line 1190 "parser.c"
+#line 68 "parser.ypp"
+                        { print_asm_line(&asm_line); if (fp_emit != NULL) { (*fp_emit)(&asm_line); } }
+#line 1199 "parser.c"
     break;
 
   case 17: /* mnemonic: ADD  */
-#line 77 "parser.ypp"
+#line 86 "parser.ypp"
               { asm_line.instruction = I_ADD; }
-#line 1196 "parser.c"
+#line 1205 "parser.c"
     break;
 
 
-#line 1200 "parser.c"
+#line 1209 "parser.c"
 
       default: break;
     }
@@ -1389,21 +1398,29 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 115 "parser.ypp"
+#line 124 "parser.ypp"
 
 
 //-- SECTION 4: FUNCTION DEFINITIONS ---------------------------------
 
 
-/* extern FILE* yyin;
+// only define this symbol if there is not external application that uses the parser
+#ifdef USE_INTERNAL_DRIVER
+
+extern FILE* yyin;
 extern int yy_flex_debug;
+
+void emit(asm_line_t* asm_line) {
+    printf("emit LUL\n");
+}
 
 int main(int argc, char **argv)
 {
     reset_asm_line(&asm_line);
 
-    yyin = fopen(argv[1], "r");
+    fp_emit = &emit;
 
+    yyin = fopen(argv[1], "r");
     if (!yyin) {
         printf("Cannot open '%s'. Aborting.\n", argv[1]);
     }
@@ -1413,4 +1430,6 @@ int main(int argc, char **argv)
     yyparse();
 
     return 0;
-} */
+}
+
+#endif
