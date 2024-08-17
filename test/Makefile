@@ -7,7 +7,7 @@ CMOCKA_OUT_DIR=$(CMOCKA_BUILD_DIR)/output
 all: test
 
 test:
-	gcc unit_tests/add_test.c -L./lib -I./ -I./include -lcmocka -o cmockatest
+	gcc unit_tests/add_test.c ../data/asm_line.c ../parser.c ../lex.yy.c -L./lib -I./ -I./include -I../data -I../ -lcmocka -o cmockatest
 
 install:
 	mkdir -p $(CMOCKA_OUT_DIR)

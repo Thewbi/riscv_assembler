@@ -4,22 +4,24 @@
 
 %{
 
-#include <iostream>
-#include <string>
-#include <map>
-#include <cstdlib>
+//#include <iostream>
+//#include <string>
+//#include <map>
+//#include <cstdlib>
+
+#include <stdio.h>
 
 #include "asm_line.h"
 
 #define YYDEBUG 1
 
-using namespace std;
+//using namespace std;
 
 //-- Lexer prototype required by bison, aka getNextToken()
 int yylex(); 
-int yyerror(const char *p) { cerr << "Error!" << endl; return 1; }
+int yyerror(const char *p) { printf("Error!\n"); return 1; }
 
-asm_line_t asm_line;
+extern asm_line_t asm_line;
 
 %}
 
@@ -114,7 +116,8 @@ factor: NUM           { $$ = $1; }
 
 //-- SECTION 4: FUNCTION DEFINITIONS ---------------------------------
 
-extern FILE* yyin;
+
+/* extern FILE* yyin;
 extern int yy_flex_debug;
 
 int main(int argc, char **argv)
@@ -132,4 +135,4 @@ int main(int argc, char **argv)
     yyparse();
 
     return 0;
-}
+} */

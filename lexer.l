@@ -2,9 +2,12 @@
  * ex1.l 
  ********************************************************/
 %{
-#include "parser.hpp"
-#include <iostream>
-using namespace std;
+#include "parser.h"
+
+//#include <iostream>
+//using namespace std;
+
+#include <stdio.h>
 %}
 
 %option noyywrap

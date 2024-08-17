@@ -1,7 +1,8 @@
 #ifndef _ASM_LINE
 #define _ASM_LINE
 
-#include <cstdio>
+//#include <cstdio>
+#include <stdio.h>
 
 enum instruction {
     I_ADD,
