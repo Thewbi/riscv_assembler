@@ -9,6 +9,22 @@ void reset_asm_line(asm_line_t *data) {
     data->reg_3 = R_UNDEFINED_REGISTER;
 }
 
+void insert_register(asm_line_t *data, enum register_ reg) {
+
+    if (R_UNDEFINED_REGISTER == data->reg_1) {
+        data->reg_1 = reg;
+        return;
+    }
+    if (R_UNDEFINED_REGISTER == data->reg_2) {
+        data->reg_2 = reg;
+        return;
+    }
+    if (R_UNDEFINED_REGISTER == data->reg_3) {
+        data->reg_3 = reg;
+        return;
+    }
+}
+
 void print_asm_line(const asm_line_t *data) {
 
     printf("[Instr: %s]\n", instruction_to_string(data->instruction));

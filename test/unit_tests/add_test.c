@@ -2,11 +2,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-//#include <iostream>
-//#include <string>
-//#include <map>
-//#include <cstdlib>
-
 #include <setjmp.h>
 #include <cmocka.h>
 
@@ -14,12 +9,6 @@
 
 #include "asm_line.h"
 #include "parser.h"
-
-
-
-//-- Lexer prototype required by bison, aka getNextToken()
-//int yylex(); 
-//int yyerror(const char *p) { printf("Error!\n"); return 1; }
 
 asm_line_t asm_line;
 

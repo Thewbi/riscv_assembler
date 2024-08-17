@@ -67,23 +67,24 @@
 
 
 /* First part of user prologue.  */
-#line 5 "parser.ypp"
+#line 5 "parser.y"
 
-
-//#include <iostream>
-//#include <string>
-//#include <map>
-//#include <cstdlib>
 
 #include <stdio.h>
 
 #include "asm_line.h"
+#include "encoder.h"
 
 #define YYDEBUG 1
 
-//#define USE_INTERNAL_DRIVER 1
-
-//using namespace std;
+// defining this symbol makes the generated riscv.exe a self sustained
+// application that works without an external driver. It defines all
+// symbols to become self-sustained. 
+//
+// If you would rather not have the symbols
+// defined because you are building an external driver, then do not
+// define the USE_INTERNAL_DRIVER symbol
+#define USE_INTERNAL_DRIVER 1
 
 //-- Lexer prototype required by bison, aka getNextToken()
 int yylex(); 
@@ -99,7 +100,7 @@ int yyerror(const char *p) { printf("Error!\n"); return 1; }
 void (*fp_emit)(asm_line_t*);
 
 
-#line 103 "parser.c"
+#line 104 "parser.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -574,14 +575,14 @@ static const yytype_int8 yytranslate[] =
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_int8 yyrline[] =
+static const yytype_uint8 yyrline[] =
 {
-       0,    62,    62,    62,    62,    64,    66,    68,    70,    72,
-      74,    76,    78,    79,    80,    82,    84,    86,    86,    86,
-      88,    88,    88,    88,    88,    88,    88,    88,    88,    88,
-      88,    88,    88,    88,    88,    88,    88,    88,    88,    88,
-      88,    88,    88,    88,    88,    88,    88,    88,    88,    88,
-      88,    88,    88,    90,    90,    93,    95,    97
+       0,    63,    63,    63,    63,    65,    67,    69,    71,    73,
+      75,    77,    79,    80,    81,    83,    85,    87,    87,    87,
+      89,    90,    91,    92,    93,    94,    95,    96,    97,    98,
+      99,   100,   101,   102,   103,   104,   105,   106,   107,   108,
+     109,   110,   111,   112,   113,   114,   115,   116,   117,   118,
+     119,   120,   121,   123,   123,   126,   128,   130
 };
 #endif
 
@@ -1187,25 +1188,31 @@ yyreduce:
   switch (yyn)
     {
   case 6: /* asm_line: label mnemonic params  */
-#line 66 "parser.ypp"
+#line 67 "parser.y"
                                 { print_asm_line(&asm_line); if (fp_emit != NULL) { (*fp_emit)(&asm_line); } }
-#line 1193 "parser.c"
+#line 1194 "parser.c"
     break;
 
   case 7: /* asm_line: mnemonic params  */
-#line 68 "parser.ypp"
+#line 69 "parser.y"
                         { print_asm_line(&asm_line); if (fp_emit != NULL) { (*fp_emit)(&asm_line); } }
-#line 1199 "parser.c"
+#line 1200 "parser.c"
     break;
 
   case 17: /* mnemonic: ADD  */
-#line 86 "parser.ypp"
+#line 87 "parser.y"
               { asm_line.instruction = I_ADD; }
-#line 1205 "parser.c"
+#line 1206 "parser.c"
+    break;
+
+  case 25: /* register: REG_T0  */
+#line 94 "parser.y"
+           { printf("test\n"); insert_register(&asm_line, R_T0); }
+#line 1212 "parser.c"
     break;
 
 
-#line 1209 "parser.c"
+#line 1216 "parser.c"
 
       default: break;
     }
@@ -1398,7 +1405,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 124 "parser.ypp"
+#line 157 "parser.y"
 
 
 //-- SECTION 4: FUNCTION DEFINITIONS ---------------------------------
@@ -1410,15 +1417,17 @@ yyreturnlab:
 extern FILE* yyin;
 extern int yy_flex_debug;
 
-void emit(asm_line_t* asm_line) {
+/* void emit(asm_line_t* asm_line) {
     printf("emit LUL\n");
-}
+} */
+
 
 int main(int argc, char **argv)
 {
     reset_asm_line(&asm_line);
 
-    fp_emit = &emit;
+    //fp_emit = &emit;
+    fp_emit = &encoder_callback;
 
     yyin = fopen(argv[1], "r");
     if (!yyin) {

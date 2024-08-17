@@ -11,9 +11,21 @@ enum instruction {
 
 // cannot use name register since it is a reserved keyword in C
 enum register_ {
-  R_A0,
-  R_T0,
+
+  R_ZERO, // 0
+  R_RA, // 1
+  R_SP, // 2
+  R_GP, // 3
+  R_TP, // 4
+  R_T0, // 5
+  R_T1, // 6
+  R_T2, // 7
+  R_S0, // 8
+  R_FP, // 9
+  R_A0,  // 10
+  
   R_UNDEFINED_REGISTER
+
 };
 
 typedef struct asm_line {
@@ -32,6 +44,8 @@ typedef struct asm_line {
  * @param data the asm_line to reset.
  */
 void reset_asm_line(asm_line_t *data);
+
+void insert_register(asm_line_t *data, enum register_);
 
 /**
  * Prints a asm_line using printf().
