@@ -6,7 +6,10 @@
 #include <iostream>
 #include <string>
 #include <map>
-#include <cstdlib> //-- I need this for atoi
+#include <cstdlib>
+
+#define YYDEBUG 1
+
 using namespace std;
 
 //-- Lexer prototype required by bison, aka getNextToken()
@@ -38,25 +41,28 @@ int yyerror(const char *p) { cerr << "Error!" << endl; return 1; }
 
 /* https://stackoverflow.com/questions/47687247/does-bison-allow-in-its-syntax */
 
-asm_file: asm_line asm_file | asm_line
+//asm_file: asm_line line_end asm_file | asm_line line_end
+asm_file: line_end asm_file | asm_line line_end asm_file | asm_line line_end
 
-asm_line: label mnemonic params NEW_LINE
-	|
-	mnemonic params NEW_LINE
-	|
-	label mnemonic NEW_LINE
-	|
-	mnemonic NEW_LINE
-    |
-    label NEW_LINE
-    |
-    assembler_instruction NEW_LINE
+line_end: NEW_LINE
 
-params: param 
+asm_line: label mnemonic params
+	|
+	mnemonic params
+	|
+	label mnemonic
+	|
+	mnemonic
+    |
+    label
+    |
+    assembler_instruction
+
+params: param COMMA param COMMA param
     | param COMMA param 
-    | param COMMA param COMMA param
+    | param
 
-param:  expr
+param: expr
 
 label: IDENTIFIER COLON
 
@@ -102,8 +108,20 @@ factor: NUM           { $$ = $1; }
 
 //-- SECTION 4: FUNCTION DEFINITIONS ---------------------------------
 
-int main()
+extern FILE* yyin;
+extern int yy_flex_debug;
+
+int main(int argc, char **argv)
 {
-  yyparse();
-  return 0;
+    yyin = fopen(argv[1], "r");
+
+    if (!yyin) {
+        printf("Cannot open '%s'. Aborting.\n", argv[1]);
+    } 
+
+    yy_flex_debug = 0;
+    yydebug = 0;
+    yyparse();
+
+    return 0;
 }

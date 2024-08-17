@@ -12,15 +12,7 @@ using namespace std;
 
 %%
 
-	/*
-	[0-9]+   { yylval.val = atoi(yytext); return NUM; }
-	[\+|\-]  { yylval.sym = yytext[0]; return OPA; }
-	[\*|/]   { yylval.sym = yytext[0]; return OPM; }
-	"("      { return LP; }
-	")"      { return RP; }
-	*/
-	
-"add"	{ return ADD; }
+"add"	{ printf("ADD\n"); return ADD; }
 
 "jalr"  { return JALR; }
 
@@ -64,12 +56,11 @@ using namespace std;
 "s10"   { printf("s10\n"); return REG_S10; }
 "s11"   { printf("s11\n"); return REG_S11; }
 
-"section"		{ return SECTION; }
-"global"		{ return GLOBAL; }
+"section"   { return SECTION; }
+"global"    { return GLOBAL; }
 
-
-"//".* { /* DO NOTHING */ } /* https://stackoverflow.com/questions/25395251/detecting-and-skipping-line-comments-with-flex */
-"#".* { /* DO NOTHING */ }
+"//".*  { /* DO NOTHING */ } /* https://stackoverflow.com/questions/25395251/detecting-and-skipping-line-comments-with-flex */
+"#".*   { /* DO NOTHING */ }
 
 [/][*][^*]*[*]+([^*/][^*]*[*]+)*[/]       { /* DO NOTHING */ }
 [/][*]                                    { printf("Unterminated comment"); }
@@ -79,18 +70,16 @@ using namespace std;
 [0-9]+  { return NUMERIC; }
 
 "."     { return DOT; }
-":"		{ return COLON; }
-","		{ return COMMA; }
+":"     { return COLON; }
+","     { return COMMA; }
 
-"\n"	{ return NEW_LINE; }
-
-
-
-<<EOF>>	{ return 0; }
+(\r\n|\n) { printf("NEW_LINE\n"); return NEW_LINE; }
 
 [ \t]+	{ }
 
-.		{ cerr << "Unrecognized token!" << endl; return *yytext; }
+<<EOF>>	{ return EOF; }
+
+.       { return *yytext; }
 
 
 %%
