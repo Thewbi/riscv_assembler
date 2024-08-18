@@ -13,6 +13,7 @@
 %%
 
 "add"	{ printf("ADD\n"); return ADD; }
+"addi"	{ printf("ADDI\n"); return ADDI; }
 
 "jalr"  { return JALR; }
 
@@ -67,7 +68,7 @@
 
 [a-zA-Z_][a-zA-Z_0-9]*   { printf("identifier\n"); return IDENTIFIER; }
 
-[0-9]+  { return NUMERIC; }
+[0-9]+  { yylval.int_val = atoi(yytext); return NUMERIC; }
 
 "."     { return DOT; }
 ":"     { return COLON; }

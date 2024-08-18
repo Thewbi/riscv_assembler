@@ -10,25 +10,29 @@
 #include "asm_line.h"
 #include "parser.h"
 
-asm_line_t asm_line;
+// this asm_line is used inside the parser as workspace.
+// It is declared as an external variable within the parser which
+// means the driver has to provide the real variable by declaring
+// it.
+asm_line_t parser_asm_line;
 
 extern FILE* yyin;
 extern int yy_flex_debug;
 
 extern void (*fp_emit)(asm_line_t*);
 
-void emit(asm_line_t* asm_line) {
-    printf("emit LUL\n");
-}
+// void emit(asm_line_t* asm_line) {
+//     printf("emit\n");
+// }
 
 /* A test case that does nothing and succeeds. */
 void add_encode_valid_input_test(void **state)
 {
     // Arrange
 
-    reset_asm_line(&asm_line);
+    reset_asm_line(&parser_asm_line);
 
-    fp_emit = &emit;
+    //fp_emit = &emit;
 
     yyin = fopen("resources/add.s", "r");
     if (!yyin) {
@@ -44,6 +48,6 @@ void add_encode_valid_input_test(void **state)
 
     // Assert
 
-    assert_int_equal(I_ADD, asm_line.instruction);
+    assert_int_equal(I_ADD, parser_asm_line.instruction);
 }
 

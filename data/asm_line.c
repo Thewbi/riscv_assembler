@@ -28,18 +28,27 @@ void insert_register(asm_line_t *data, enum register_ reg) {
     //     return;
     // }
 
-    if (R_UNDEFINED_REGISTER == data->reg_rs2) {
-        data->reg_rs2 = reg;
+    // add  rd, rs1, rs2
+    // addi  rd, rs1, imm
+
+    if (R_UNDEFINED_REGISTER == data->reg_rd) {
+        data->reg_rd = reg;
         return;
     }
     if (R_UNDEFINED_REGISTER == data->reg_rs1) {
         data->reg_rs1 = reg;
         return;
     }
-    if (R_UNDEFINED_REGISTER == data->reg_rd) {
-        data->reg_rd = reg;
+    if (R_UNDEFINED_REGISTER == data->reg_rs2) {
+        data->reg_rs2 = reg;
         return;
     }
+    
+}
+
+void insert_integer_immediate(asm_line_t *data, uint16_t imm) {
+    printf("ASM_LINE: insert_integer_immediate: %d\n", imm);
+    data->imm = imm;
 }
 
 void print_asm_line(const asm_line_t *data) {

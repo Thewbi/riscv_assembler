@@ -1,11 +1,13 @@
 #ifndef _ASM_LINE
 #define _ASM_LINE
 
-//#include <cstdio>
 #include <stdio.h>
+#include <stdint.h>
+#include <inttypes.h>
 
 enum instruction {
     I_ADD,
+    I_ADDI,
     I_UNDEFINED_INSTRUCTION
 };
 
@@ -54,13 +56,11 @@ typedef struct asm_line {
 
     enum instruction instruction;
 
-    // enum register_ reg_1;
-    // enum register_ reg_2;
-    // enum register_ reg_3;
-
     enum register_ reg_rd;
     enum register_ reg_rs1;
     enum register_ reg_rs2;
+
+    uint16_t imm;
 
 } asm_line_t;
 
@@ -71,7 +71,15 @@ typedef struct asm_line {
  */
 void reset_asm_line(asm_line_t *data);
 
+/**
+ * 
+ */
 void insert_register(asm_line_t *data, enum register_);
+
+/**
+ * 
+ */
+void insert_integer_immediate(asm_line_t *data, uint16_t imm);
 
 /**
  * Prints a asm_line using printf().

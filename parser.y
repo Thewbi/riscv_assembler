@@ -38,13 +38,14 @@ void (*fp_emit)(asm_line_t*);
 //-- SECTION 2: SYMBOL SEMANTIC VALUES -----------------------------
 
 %union {
-  int val; 
+  int int_val; 
   char sym;
 };
 
-%token <sym> ADD JALR LI
+%token <sym> ADD ADDI JALR LI
 %token <sym> NEW_LINE
-%token <sym> IDENTIFIER NUMERIC
+%token <int_val> NUMERIC
+%token <sym> IDENTIFIER
 %token <sym> SECTION GLOBAL
 %token <sym> DOT COLON COMMA
 %token <sym> REG_ZERO REG_RA REG_SP REG_GP REG_TP REG_T0 REG_T1 REG_T2 REG_T3 REG_T4 REG_T5 REG_T6 REG_FP REG_A0 REG_A1 REG_A2 REG_A3 REG_A4 REG_A5 REG_A6 REG_A7 REG_S0 REG_S1 REG_S2 REG_S3 REG_S4 REG_S5 REG_S6 REG_S7 REG_S8 REG_S9 REG_S10 REG_S11
@@ -59,12 +60,11 @@ void (*fp_emit)(asm_line_t*);
 
 /* https://stackoverflow.com/questions/47687247/does-bison-allow-in-its-syntax */
 
-//asm_file: asm_line line_end asm_file | asm_line line_end
-asm_file: line_end asm_file | asm_line line_end asm_file | asm_line line_end
+asm_file : line_end asm_file | asm_line line_end asm_file | asm_line line_end
 
-line_end: NEW_LINE
+line_end : NEW_LINE
 
-asm_line: label mnemonic params { print_asm_line(&parser_asm_line); if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); } }
+asm_line : label mnemonic params { print_asm_line(&parser_asm_line); if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); } }
 	|
 	mnemonic params { print_asm_line(&parser_asm_line); if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); } }
 	|
@@ -76,17 +76,20 @@ asm_line: label mnemonic params { print_asm_line(&parser_asm_line); if (fp_emit 
     |
     assembler_instruction
 
-params: param COMMA param COMMA param
+params : param COMMA param COMMA param
     | param COMMA param 
     | param
 
-param: expr
+param : expr
 
-label: IDENTIFIER COLON
+label : IDENTIFIER COLON
 
-mnemonic: ADD { parser_asm_line.instruction = I_ADD; } | JALR | LI
+mnemonic : ADD { printf("Parser-ADD: %d\n", I_ADD); parser_asm_line.instruction = I_ADD; }
+    | ADDI { printf("Parser-ADDI: %d\n", I_ADDI); parser_asm_line.instruction = I_ADDI; }
+    | JALR 
+    | LI
 
-register: REG_ZERO { printf("REG_ZERO\n"); insert_register(&parser_asm_line, R_ZERO); }
+register : REG_ZERO { printf("REG_ZERO\n"); insert_register(&parser_asm_line, R_ZERO); }
     | REG_RA { printf("REG_RA\n"); insert_register(&parser_asm_line, R_RA); }
     | REG_SP { printf("REG_SP\n"); insert_register(&parser_asm_line, R_SP); }
     | REG_GP { printf("REG_GP\n"); insert_register(&parser_asm_line, R_GP); }
@@ -120,14 +123,17 @@ register: REG_ZERO { printf("REG_ZERO\n"); insert_register(&parser_asm_line, R_Z
     | REG_S10 { printf("REG_S10\n"); insert_register(&parser_asm_line, R_S10); }
     | REG_S11 { printf("REG_S11\n"); insert_register(&parser_asm_line, R_S11); }
 
-expr : NUMERIC | register
+// https://www.gnu.org/software/bison/manual/bison.html
+expr : NUMERIC { printf("PARSER-NUMERIC: %d\n", $1); insert_integer_immediate(&parser_asm_line, $1); }
+    | 
+    register
 
-assembler_instruction:  
+assembler_instruction :  
     DOT SECTION section_name
     |
     DOT GLOBAL IDENTIFIER
 
-section_name: DOT IDENTIFIER
+section_name : DOT IDENTIFIER
 
 /*
 asm_line: IDENTIFIER COLON ADD NEW_LINE
@@ -161,9 +167,11 @@ factor: NUM           { $$ = $1; }
 extern FILE* yyin;
 extern int yy_flex_debug;
 
-/* void emit(asm_line_t* asm_line) {
-    printf("emit LUL\n");
-} */
+/*
+void emit(asm_line_t* asm_line) {
+    printf("emit\n");
+}
+*/
 
 int main(int argc, char **argv)
 {
