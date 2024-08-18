@@ -10,6 +10,10 @@ void decode(uint32_t data, asm_line_t* asm_line) {
             decode_r_type(data, asm_line);
             break;
 
+        case 0b0010011:
+            decode_i_type(data, asm_line);
+            break;
+
         default:
             printf("Unknown instruction!\n");
 
@@ -37,6 +41,24 @@ void decode_r_type(uint32_t data, asm_line_t* asm_line) {
                     break;
             }
         break;
+    }
+}
+
+void decode_i_type(uint32_t data, asm_line_t* asm_line) {
+
+    uint8_t rd = (data >> 7) & 0b11111;
+    uint8_t funct3 = (data >> (7+5)) & 0b111;
+    uint8_t rs1 = (data >> (7+5+3)) & 0b11111;
+    uint16_t imm = (data >> (7+5+3+5)) & 0b111111111111;
+
+    asm_line->reg_rd = decode_register(rd);
+    asm_line->reg_rs1 = decode_register(rs1);
+    asm_line->imm = imm;
+
+    switch (funct3) {
+        case 0b000:
+            asm_line->instruction = I_ADDI;
+            break;
     }
 }
 

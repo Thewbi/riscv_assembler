@@ -22,7 +22,6 @@ extern void (*fp_emit)(asm_line_t*);
 //     printf("emit\n");
 // }
 
-/* A test case that does nothing and succeeds. */
 void addi_encode_valid_input_test(void **state)
 {
     // Arrange

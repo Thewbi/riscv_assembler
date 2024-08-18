@@ -10,6 +10,7 @@
 void decode(uint32_t data, asm_line_t* asm_line);
 
 void decode_r_type(uint32_t data, asm_line_t* asm_line);
+void decode_i_type(uint32_t data, asm_line_t* asm_line);
 
 enum register_ decode_register(uint8_t data);
 
