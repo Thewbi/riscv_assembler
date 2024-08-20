@@ -5,6 +5,7 @@
         "xstring": "c",
         "xutility": "c",
         "stdarg.h": "c",
-        "xiosbase": "cpp"
+        "xiosbase": "cpp",
+        "lb_with_offset_test.h": "c"
     }
 }

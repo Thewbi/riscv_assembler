@@ -42,12 +42,12 @@ void (*fp_emit)(asm_line_t*);
   char sym;
 };
 
-%token <sym> ADD ADDI JALR LI
+%token <sym> ADD ADDI JALR LB LI
 %token <sym> NEW_LINE
 %token <int_val> NUMERIC
 %token <sym> IDENTIFIER
 %token <sym> SECTION GLOBAL
-%token <sym> DOT COLON COMMA
+%token <sym> DOT COLON COMMA OPENING_BRACKET CLOSING_BRACKET
 %token <sym> REG_ZERO REG_RA REG_SP REG_GP REG_TP REG_T0 REG_T1 REG_T2 REG_T3 REG_T4 REG_T5 REG_T6 REG_FP REG_A0 REG_A1 REG_A2 REG_A3 REG_A4 REG_A5 REG_A6 REG_A7 REG_S0 REG_S1 REG_S2 REG_S3 REG_S4 REG_S5 REG_S6 REG_S7 REG_S8 REG_S9 REG_S10 REG_S11
 
 //%token <val> NUM
@@ -76,18 +76,26 @@ asm_line : label mnemonic params { print_asm_line(&parser_asm_line); if (fp_emit
     |
     assembler_instruction
 
-params : param COMMA param COMMA param
-    | param COMMA param 
-    | param
+params : param_1 COMMA param_2 COMMA param_3
+    | param_1 COMMA param_2 
+    | param_1
 
-param : expr
+param_1 : NUMERIC OPENING_BRACKET expr { printf("OFFSET 1\n"); insert_offset(&parser_asm_line, $2, 0); } CLOSING_BRACKET 
+    | expr
+
+param_2 : NUMERIC OPENING_BRACKET expr { printf("OFFSET 2\n"); insert_offset(&parser_asm_line, $2, 1); } CLOSING_BRACKET 
+    | expr
+
+param_3 : NUMERIC OPENING_BRACKET expr { printf("OFFSET 3\n"); insert_offset(&parser_asm_line, $2, 2); } CLOSING_BRACKET 
+    | expr
 
 label : IDENTIFIER COLON
 
 mnemonic : ADD { printf("Parser-ADD: %d\n", I_ADD); parser_asm_line.instruction = I_ADD; }
     | ADDI { printf("Parser-ADDI: %d\n", I_ADDI); parser_asm_line.instruction = I_ADDI; }
-    | JALR 
-    | LI
+    | JALR { printf("Parser-JALR: %d\n", I_JALR); parser_asm_line.instruction = I_JALR; } 
+    | LB { printf("Parser-LB: %d\n", I_LB); parser_asm_line.instruction = I_LB; }
+    | LI { printf("Parser-LI: %d\n", I_LI); parser_asm_line.instruction = I_LI; }
 
 register : REG_ZERO { printf("REG_ZERO\n"); insert_register(&parser_asm_line, R_ZERO); }
     | REG_RA { printf("REG_RA\n"); insert_register(&parser_asm_line, R_RA); }

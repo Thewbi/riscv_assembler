@@ -57,48 +57,51 @@ extern int yydebug;
     ADD = 258,                     /* ADD  */
     ADDI = 259,                    /* ADDI  */
     JALR = 260,                    /* JALR  */
-    LI = 261,                      /* LI  */
-    NEW_LINE = 262,                /* NEW_LINE  */
-    NUMERIC = 263,                 /* NUMERIC  */
-    IDENTIFIER = 264,              /* IDENTIFIER  */
-    SECTION = 265,                 /* SECTION  */
-    GLOBAL = 266,                  /* GLOBAL  */
-    DOT = 267,                     /* DOT  */
-    COLON = 268,                   /* COLON  */
-    COMMA = 269,                   /* COMMA  */
-    REG_ZERO = 270,                /* REG_ZERO  */
-    REG_RA = 271,                  /* REG_RA  */
-    REG_SP = 272,                  /* REG_SP  */
-    REG_GP = 273,                  /* REG_GP  */
-    REG_TP = 274,                  /* REG_TP  */
-    REG_T0 = 275,                  /* REG_T0  */
-    REG_T1 = 276,                  /* REG_T1  */
-    REG_T2 = 277,                  /* REG_T2  */
-    REG_T3 = 278,                  /* REG_T3  */
-    REG_T4 = 279,                  /* REG_T4  */
-    REG_T5 = 280,                  /* REG_T5  */
-    REG_T6 = 281,                  /* REG_T6  */
-    REG_FP = 282,                  /* REG_FP  */
-    REG_A0 = 283,                  /* REG_A0  */
-    REG_A1 = 284,                  /* REG_A1  */
-    REG_A2 = 285,                  /* REG_A2  */
-    REG_A3 = 286,                  /* REG_A3  */
-    REG_A4 = 287,                  /* REG_A4  */
-    REG_A5 = 288,                  /* REG_A5  */
-    REG_A6 = 289,                  /* REG_A6  */
-    REG_A7 = 290,                  /* REG_A7  */
-    REG_S0 = 291,                  /* REG_S0  */
-    REG_S1 = 292,                  /* REG_S1  */
-    REG_S2 = 293,                  /* REG_S2  */
-    REG_S3 = 294,                  /* REG_S3  */
-    REG_S4 = 295,                  /* REG_S4  */
-    REG_S5 = 296,                  /* REG_S5  */
-    REG_S6 = 297,                  /* REG_S6  */
-    REG_S7 = 298,                  /* REG_S7  */
-    REG_S8 = 299,                  /* REG_S8  */
-    REG_S9 = 300,                  /* REG_S9  */
-    REG_S10 = 301,                 /* REG_S10  */
-    REG_S11 = 302                  /* REG_S11  */
+    LB = 261,                      /* LB  */
+    LI = 262,                      /* LI  */
+    NEW_LINE = 263,                /* NEW_LINE  */
+    NUMERIC = 264,                 /* NUMERIC  */
+    IDENTIFIER = 265,              /* IDENTIFIER  */
+    SECTION = 266,                 /* SECTION  */
+    GLOBAL = 267,                  /* GLOBAL  */
+    DOT = 268,                     /* DOT  */
+    COLON = 269,                   /* COLON  */
+    COMMA = 270,                   /* COMMA  */
+    OPENING_BRACKET = 271,         /* OPENING_BRACKET  */
+    CLOSING_BRACKET = 272,         /* CLOSING_BRACKET  */
+    REG_ZERO = 273,                /* REG_ZERO  */
+    REG_RA = 274,                  /* REG_RA  */
+    REG_SP = 275,                  /* REG_SP  */
+    REG_GP = 276,                  /* REG_GP  */
+    REG_TP = 277,                  /* REG_TP  */
+    REG_T0 = 278,                  /* REG_T0  */
+    REG_T1 = 279,                  /* REG_T1  */
+    REG_T2 = 280,                  /* REG_T2  */
+    REG_T3 = 281,                  /* REG_T3  */
+    REG_T4 = 282,                  /* REG_T4  */
+    REG_T5 = 283,                  /* REG_T5  */
+    REG_T6 = 284,                  /* REG_T6  */
+    REG_FP = 285,                  /* REG_FP  */
+    REG_A0 = 286,                  /* REG_A0  */
+    REG_A1 = 287,                  /* REG_A1  */
+    REG_A2 = 288,                  /* REG_A2  */
+    REG_A3 = 289,                  /* REG_A3  */
+    REG_A4 = 290,                  /* REG_A4  */
+    REG_A5 = 291,                  /* REG_A5  */
+    REG_A6 = 292,                  /* REG_A6  */
+    REG_A7 = 293,                  /* REG_A7  */
+    REG_S0 = 294,                  /* REG_S0  */
+    REG_S1 = 295,                  /* REG_S1  */
+    REG_S2 = 296,                  /* REG_S2  */
+    REG_S3 = 297,                  /* REG_S3  */
+    REG_S4 = 298,                  /* REG_S4  */
+    REG_S5 = 299,                  /* REG_S5  */
+    REG_S6 = 300,                  /* REG_S6  */
+    REG_S7 = 301,                  /* REG_S7  */
+    REG_S8 = 302,                  /* REG_S8  */
+    REG_S9 = 303,                  /* REG_S9  */
+    REG_S10 = 304,                 /* REG_S10  */
+    REG_S11 = 305                  /* REG_S11  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -112,7 +115,7 @@ union YYSTYPE
   int int_val; 
   char sym;
 
-#line 116 "parser.h"
+#line 119 "parser.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

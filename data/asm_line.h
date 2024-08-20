@@ -5,9 +5,19 @@
 #include <stdint.h>
 #include <inttypes.h>
 
+// Adding new instruction
+// 1. Update the lexer lexer.l
+// 1. Update the parser parser.y
+// 1. Update instruction_to_string() in asm_line.c
+//
+// 1. Add test to test\unit_tests\main.c
+// 1. Add the test files .c/.h to test\Makefile so that they get compiled
 enum instruction {
     I_ADD,
     I_ADDI,
+    I_LB,
+    I_LI,
+    I_JALR,
     I_UNDEFINED_INSTRUCTION
 };
 
@@ -62,6 +72,14 @@ typedef struct asm_line {
 
     uint16_t imm;
 
+    uint16_t offset_0;
+    uint16_t offset_1;
+    uint16_t offset_2;
+
+    uint8_t offset_0_used;
+    uint8_t offset_1_used;
+    uint8_t offset_2_used;
+
 } asm_line_t;
 
 /**
@@ -75,6 +93,8 @@ void reset_asm_line(asm_line_t *data);
  * 
  */
 void insert_register(asm_line_t *data, enum register_);
+
+void insert_offset(asm_line_t *data, uint32_t offset, uint8_t index);
 
 /**
  * 
@@ -94,5 +114,7 @@ void print_asm_line(const asm_line_t *data);
  * @param data the instruction to convert.
  */
 const char* instruction_to_string(enum instruction data);
+
+const char* register_to_string(enum register_ data);
 
 #endif

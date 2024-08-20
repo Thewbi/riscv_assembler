@@ -15,9 +15,10 @@
 "add"	{ printf("ADD\n"); return ADD; }
 "addi"	{ printf("ADDI\n"); return ADDI; }
 
-"jalr"  { return JALR; }
+"jalr"  { printf("JALR\n"); return JALR; }
 
-"li"    { return LI; }
+"lb"	{ printf("LB\n"); return LB; }
+"li"    { printf("LI\n"); return LI; }
 
 "zero"  { printf("zero\n"); return REG_ZERO; } 
 "ra"    { printf("ra\n"); return REG_RA; } 
@@ -73,6 +74,8 @@
 "."     { return DOT; }
 ":"     { return COLON; }
 ","     { return COMMA; }
+"("     { return OPENING_BRACKET; }
+")"     { return CLOSING_BRACKET; }
 
 (\r\n|\n) { printf("NEW_LINE\n"); return NEW_LINE; }
 
