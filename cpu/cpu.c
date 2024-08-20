@@ -35,8 +35,6 @@ void cpu_step(cpu_t* cpu) {
 
     decode(encoded_instruction, &asm_line);
 
-    cpu->pc += 0x04;
-
     switch (asm_line.instruction) {
 
         case I_ADD:
@@ -45,8 +43,16 @@ void cpu_step(cpu_t* cpu) {
             cpu->reg[asm_line.reg_rd] = cpu->reg[asm_line.reg_rs1] + cpu->reg[asm_line.reg_rs2];
             break;
 
+        case I_ADDI:
+            printf("CPU ADDI detected\n");
+            printf("CPU ADDI rd: %d rs1 %d imm %d\n", cpu->reg[asm_line.reg_rd], cpu->reg[asm_line.reg_rs1], asm_line.imm);
+            cpu->reg[asm_line.reg_rd] = cpu->reg[asm_line.reg_rs1] + asm_line.imm;
+            break;
+
         default:
             printf("Unknown instruction!\n");
 
     }
+
+    cpu->pc += 0x04;
 }

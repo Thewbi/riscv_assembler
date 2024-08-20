@@ -5,13 +5,13 @@ asm_line_t parser_asm_line;
 
 int main(int argc, char **argv)
 {
-    asm_line_t asm_line;
-    reset_asm_line(&asm_line);
+    // asm_line_t asm_line;
+    // reset_asm_line(&asm_line);
 
-    asm_line.instruction = I_ADD;
-    asm_line.reg_rd = R_T0;
-    asm_line.reg_rs1 = R_T1;
-    asm_line.reg_rs2 = R_T2;
+    // asm_line.instruction = I_ADD;
+    // asm_line.reg_rd = R_T0;
+    // asm_line.reg_rs1 = R_T1;
+    // asm_line.reg_rs2 = R_T2;
 
     uint8_t memory[1024];
     for (int i = 0; i < 1024; i++) {
@@ -20,17 +20,19 @@ int main(int argc, char **argv)
 
     // https://www.eg.bucknell.edu/~csci206/riscv-converter/index.html
     // add    t1, t0, a0  == 0x00A28333 = 0000000 01010 00101 000 00110 0110011
-    //uint32_t data = 0x00A28333;
-
     memory[0] = 0x00;
     memory[1] = 0xA2;
     memory[2] = 0x83;
     memory[3] = 0x33;
 
+    // addi    t0, t0, 15  == 0x00F28293 = 000000001111 00101 000 00101 0010011
+    memory[0] = 0x00;
+    memory[1] = 0xF2;
+    memory[2] = 0x82;
+    memory[3] = 0x93;
+
     cpu_t cpu;
     cpu.memory = memory;
-
-    
 
     cpu_init(&cpu);
 
@@ -40,6 +42,7 @@ int main(int argc, char **argv)
 
     cpu_step(&cpu);
 
+    printf("REG R_T0: %d\n", cpu.reg[R_T0]);
     printf("REG R_T1: %d\n", cpu.reg[R_T1]);
 
     return 0;

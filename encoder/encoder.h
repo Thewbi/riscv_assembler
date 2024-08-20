@@ -9,7 +9,8 @@
 
 /**
  * Place the address of this function into the 'emit' function pointer
- * of the parser to feed all parsed lines into the encoder.
+ * of the parser to feed all parsed lines into the encoder directly while
+ * the parser parses lines.
  */
 void encoder_callback(asm_line_t* asm_line);
 
