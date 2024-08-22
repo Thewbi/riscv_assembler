@@ -37,7 +37,7 @@ void insert_register(asm_line_t *data, enum register_ reg) {
 }
 
 void insert_offset(asm_line_t *data, uint32_t offset, uint8_t index) {
-    printf("ASM_LINE: insert_offset: %d offset_index: %d\n", offset, index);
+    //printf("ASM_LINE: insert_offset: %d offset_index: %d\n", offset, index);
     switch(index) {
         case 0: data->offset_0 = offset; data->offset_0_used = 1; break;
         case 1: data->offset_1 = offset; data->offset_1_used = 1; break;
@@ -48,7 +48,7 @@ void insert_offset(asm_line_t *data, uint32_t offset, uint8_t index) {
 }
 
 void insert_integer_immediate(asm_line_t *data, uint16_t imm) {
-    printf("ASM_LINE: insert_integer_immediate: %d\n", imm);
+    //printf("ASM_LINE: insert_integer_immediate: %d\n", imm);
     data->imm = imm;
 }
 
@@ -68,6 +68,7 @@ const char* instruction_to_string(enum instruction data) {
         case I_LB: return "LB";
         case I_LI: return "LI";
         case I_JALR: return "JALR";
+        case I_SRLI: return "SRLI";
         
         default: return "UNKNOWN";
     }

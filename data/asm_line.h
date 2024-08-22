@@ -6,9 +6,13 @@
 #include <inttypes.h>
 
 // Adding new instruction
-// 1. Update the lexer lexer.l
-// 1. Update the parser parser.y
+// 1. Update the lexer lexer.l (add a token that matches the instruction exactly. Add that rule before the identifier rule.)
+// 1. Update the parser parser.y (add a new <sym> tokena and add the instruction to the mnemonic rule)
 // 1. Update instruction_to_string() in asm_line.c
+// 1. update the instruction-enum in asm_line.h (this file)
+//
+// 1. Update encoder/encoder.h
+// 1. Update decoder/decoder.h
 //
 // 1. Add test to test\unit_tests\main.c
 // 1. Add the test files .c/.h to test\Makefile so that they get compiled
@@ -18,6 +22,7 @@ enum instruction {
     I_LB,
     I_LI,
     I_JALR,
+    I_SRLI,
     I_UNDEFINED_INSTRUCTION
 };
 
@@ -94,6 +99,9 @@ void reset_asm_line(asm_line_t *data);
  */
 void insert_register(asm_line_t *data, enum register_);
 
+/**
+ * 
+ */
 void insert_offset(asm_line_t *data, uint32_t offset, uint8_t index);
 
 /**
@@ -115,6 +123,9 @@ void print_asm_line(const asm_line_t *data);
  */
 const char* instruction_to_string(enum instruction data);
 
+/**
+ * 
+ */
 const char* register_to_string(enum register_ data);
 
 #endif

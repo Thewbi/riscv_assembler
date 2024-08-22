@@ -2,26 +2,33 @@
 
 void decode(uint32_t data, asm_line_t* asm_line) {
 
+    printf("decode\n");
+
     uint8_t instruction = data & 0b1111111;
 
     switch (instruction) {
 
-        case 0b0110011:
+        case 0b0110011: // ADD
+            printf("decode - 0b0110011\n");
             decode_r_type(data, asm_line);
             break;
 
-        case 0b0010011:
+        case 0b0010011: // ADDI, SRLI
+            printf("decode - 0b0010011\n");
             decode_i_type(data, asm_line);
             break;
 
         default:
             printf("Unknown instruction!\n");
+            break;
 
     }
 
 }
 
 void decode_r_type(uint32_t data, asm_line_t* asm_line) {
+
+    printf("decode_r_type\n");
 
     uint8_t rd = (data >> 7) & 0b11111;
     uint8_t funct3 = (data >> (7+5)) & 0b111;
@@ -34,17 +41,30 @@ void decode_r_type(uint32_t data, asm_line_t* asm_line) {
     asm_line->reg_rs2 = decode_register(rs2);
 
     switch (funct7) {
+
         case 0b0000000:
             switch (funct3) {
                 case 0b000:
                     asm_line->instruction = I_ADD;
                     break;
             }
+
+        case 0b0010011:
+            switch (funct3) {
+
+                case 0b000:
+                    asm_line->instruction = I_ADD;
+                    break;
+
+                
+            }
         break;
     }
 }
 
 void decode_i_type(uint32_t data, asm_line_t* asm_line) {
+
+    printf("decode_i_type\n");
 
     uint8_t rd = (data >> 7) & 0b11111;
     uint8_t funct3 = (data >> (7+5)) & 0b111;
@@ -56,8 +76,14 @@ void decode_i_type(uint32_t data, asm_line_t* asm_line) {
     asm_line->imm = imm;
 
     switch (funct3) {
-        case 0b000:
+
+        case 0b000: // I_ADDI
             asm_line->instruction = I_ADDI;
+            break;
+
+        case 0b101: // SRLI
+            printf("decode_i_type SRLI\n");
+            asm_line->instruction = I_SRLI;
             break;
     }
 }
@@ -68,7 +94,7 @@ enum register_ decode_register(uint8_t data) {
 
         // 0, Hard-wired zero
         case 0b00000:
-            printf("R_ZERO\n");
+            //printf("R_ZERO\n");
             return R_ZERO;
 
         case 0b00001: // 1, Return address
@@ -85,7 +111,7 @@ enum register_ decode_register(uint8_t data) {
 
         // ABI Name: t0, Register: x5 - encoded: 0101 (= 5 decimal) 
         case 0b00101: // 5, Temporary/alternate link register
-            printf("R_T0\n");
+            //printf("R_T0\n");
             return R_T0;
 
         case 0b00110: // 6, Temporary
@@ -168,7 +194,7 @@ enum register_ decode_register(uint8_t data) {
             return R_T6;
 
         default:
-            printf("unknown register %d\n", data); 
+            //printf("unknown register %d\n", data); 
             return R_UNDEFINED_REGISTER;
     }
 }

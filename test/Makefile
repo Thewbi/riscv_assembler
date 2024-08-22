@@ -8,15 +8,21 @@ all: test
 
 test: unit_tests/main.c \
 	../decoder/decoder.h \
+	../decoder/decoder.c \
 	../encoder/encoder.h \
-	unit_tests/add_encode_test.c \
+	../encoder/encoder.c \
 	unit_tests/add_encode_test.h \
-	unit_tests/add_decode_test.c \
+	unit_tests/add_encode_test.c \
 	unit_tests/addi_encode_test.h \
 	unit_tests/addi_decode_test.c \
 	unit_tests/add_decode_test.h \
+	unit_tests/add_decode_test.c \
 	unit_tests/lb_with_offset_test.c \
 	unit_tests/lb_with_offset_test.h \
+	unit_tests/srli_decode_test.c \
+	unit_tests/srli_decode_test.h \
+	unit_tests/srli_encode_test.c \
+	unit_tests/srli_encode_test.h \
 	../data/asm_line.c \
 	../parser.c \
 	../parser.h
@@ -26,6 +32,8 @@ test: unit_tests/main.c \
 	unit_tests/addi_encode_test.c \
 	unit_tests/addi_decode_test.c \
 	unit_tests/lb_with_offset_test.c \
+	unit_tests/srli_decode_test.c \
+	unit_tests/srli_encode_test.c \
 	../data/asm_line.c \
 	../decoder/decoder.c \
 	../encoder/encoder.c \

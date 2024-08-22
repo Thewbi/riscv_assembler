@@ -42,7 +42,7 @@ void (*fp_emit)(asm_line_t*);
   char sym;
 };
 
-%token <sym> ADD ADDI JALR LB LI
+%token <sym> ADD ADDI JALR LB LI SRLI
 %token <sym> NEW_LINE
 %token <int_val> NUMERIC
 %token <sym> IDENTIFIER
@@ -64,9 +64,9 @@ asm_file : line_end asm_file | asm_line line_end asm_file | asm_line line_end
 
 line_end : NEW_LINE
 
-asm_line : label mnemonic params { print_asm_line(&parser_asm_line); if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); } }
+asm_line : label mnemonic params { /*print_asm_line(&parser_asm_line);*/ if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); } }
 	|
-	mnemonic params { print_asm_line(&parser_asm_line); if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); } }
+	mnemonic params { /*print_asm_line(&parser_asm_line);*/ if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); } }
 	|
 	label mnemonic
 	|
@@ -80,59 +80,60 @@ params : param_1 COMMA param_2 COMMA param_3
     | param_1 COMMA param_2 
     | param_1
 
-param_1 : NUMERIC OPENING_BRACKET expr { printf("OFFSET 1\n"); insert_offset(&parser_asm_line, $2, 0); } CLOSING_BRACKET 
+param_1 : NUMERIC OPENING_BRACKET expr { /*printf("OFFSET 1\n");*/ insert_offset(&parser_asm_line, $2, 0); } CLOSING_BRACKET 
     | expr
 
-param_2 : NUMERIC OPENING_BRACKET expr { printf("OFFSET 2\n"); insert_offset(&parser_asm_line, $2, 1); } CLOSING_BRACKET 
+param_2 : NUMERIC OPENING_BRACKET expr { /*printf("OFFSET 2\n");*/ insert_offset(&parser_asm_line, $2, 1); } CLOSING_BRACKET 
     | expr
 
-param_3 : NUMERIC OPENING_BRACKET expr { printf("OFFSET 3\n"); insert_offset(&parser_asm_line, $2, 2); } CLOSING_BRACKET 
+param_3 : NUMERIC OPENING_BRACKET expr { /*printf("OFFSET 3\n");*/ insert_offset(&parser_asm_line, $2, 2); } CLOSING_BRACKET 
     | expr
 
 label : IDENTIFIER COLON
 
-mnemonic : ADD { printf("Parser-ADD: %d\n", I_ADD); parser_asm_line.instruction = I_ADD; }
-    | ADDI { printf("Parser-ADDI: %d\n", I_ADDI); parser_asm_line.instruction = I_ADDI; }
-    | JALR { printf("Parser-JALR: %d\n", I_JALR); parser_asm_line.instruction = I_JALR; } 
-    | LB { printf("Parser-LB: %d\n", I_LB); parser_asm_line.instruction = I_LB; }
-    | LI { printf("Parser-LI: %d\n", I_LI); parser_asm_line.instruction = I_LI; }
+mnemonic : ADD { /*printf("Parser-ADD: %d\n", I_ADD);*/ parser_asm_line.instruction = I_ADD; }
+    | ADDI { /*printf("Parser-ADDI: %d\n", I_ADDI);*/ parser_asm_line.instruction = I_ADDI; }
+    | JALR { /*printf("Parser-JALR: %d\n", I_JALR);*/ parser_asm_line.instruction = I_JALR; } 
+    | LB { /*printf("Parser-LB: %d\n", I_LB);*/ parser_asm_line.instruction = I_LB; }
+    | LI { /*printf("Parser-LI: %d\n", I_LI);*/ parser_asm_line.instruction = I_LI; }
+    | SRLI { /*printf("Parser-SRLI: %d\n", I_SRLI);*/ parser_asm_line.instruction = I_SRLI; }
 
-register : REG_ZERO { printf("REG_ZERO\n"); insert_register(&parser_asm_line, R_ZERO); }
-    | REG_RA { printf("REG_RA\n"); insert_register(&parser_asm_line, R_RA); }
-    | REG_SP { printf("REG_SP\n"); insert_register(&parser_asm_line, R_SP); }
-    | REG_GP { printf("REG_GP\n"); insert_register(&parser_asm_line, R_GP); }
-    | REG_TP { printf("REG_TP\n"); insert_register(&parser_asm_line, R_TP); }
-    | REG_T0 { printf("REG_T0\n"); insert_register(&parser_asm_line, R_T0); }
-    | REG_T1 { printf("REG_T1\n"); insert_register(&parser_asm_line, R_T1); }
-    | REG_T2 { printf("REG_T2\n"); insert_register(&parser_asm_line, R_T2); }
-    | REG_T3 { printf("REG_T3\n"); insert_register(&parser_asm_line, R_T3); }
-    | REG_T4 { printf("REG_T4\n"); insert_register(&parser_asm_line, R_T4); }
-    | REG_T5 { printf("REG_T5\n"); insert_register(&parser_asm_line, R_T5); }
-    | REG_T6 { printf("REG_T6\n"); insert_register(&parser_asm_line, R_T6); }
-    | REG_FP { printf("REG_FP\n"); insert_register(&parser_asm_line, R_S0); }
-    | REG_A0 { printf("REG_A0\n"); insert_register(&parser_asm_line, R_A0); }
-    | REG_A1 { printf("REG_A1\n"); insert_register(&parser_asm_line, R_A1); }
-    | REG_A2 { printf("REG_A2\n"); insert_register(&parser_asm_line, R_A2); }
-    | REG_A3 { printf("REG_A3\n"); insert_register(&parser_asm_line, R_A3); }
-    | REG_A4 { printf("REG_A4\n"); insert_register(&parser_asm_line, R_A4); }
-    | REG_A5 { printf("REG_A5\n"); insert_register(&parser_asm_line, R_A5); }
-    | REG_A6 { printf("REG_A6\n"); insert_register(&parser_asm_line, R_A6); }
-    | REG_A7 { printf("REG_A7\n"); insert_register(&parser_asm_line, R_A7); }
-    | REG_S0 { printf("REG_S0\n"); insert_register(&parser_asm_line, R_S0); }
-    | REG_S1 { printf("REG_S1\n"); insert_register(&parser_asm_line, R_S1); }
-    | REG_S2 { printf("REG_S2\n"); insert_register(&parser_asm_line, R_S2); }
-    | REG_S3 { printf("REG_S3\n"); insert_register(&parser_asm_line, R_S3); }
-    | REG_S4 { printf("REG_S4\n"); insert_register(&parser_asm_line, R_S4); }
-    | REG_S5 { printf("REG_S5\n"); insert_register(&parser_asm_line, R_S5); }
-    | REG_S6 { printf("REG_S6\n"); insert_register(&parser_asm_line, R_S6); }
-    | REG_S7 { printf("REG_S7\n"); insert_register(&parser_asm_line, R_S7); }
-    | REG_S8 { printf("REG_S8\n"); insert_register(&parser_asm_line, R_S8); }
-    | REG_S9 { printf("REG_S9\n"); insert_register(&parser_asm_line, R_S9); }
-    | REG_S10 { printf("REG_S10\n"); insert_register(&parser_asm_line, R_S10); }
-    | REG_S11 { printf("REG_S11\n"); insert_register(&parser_asm_line, R_S11); }
+register : REG_ZERO { /*printf("REG_ZERO\n"); insert_register(&parser_asm_line, R_ZERO); }
+    | REG_RA { /*printf("REG_RA\n");*/ insert_register(&parser_asm_line, R_RA); }
+    | REG_SP { /*printf("REG_SP\n");*/ insert_register(&parser_asm_line, R_SP); }
+    | REG_GP { /*printf("REG_GP\n");*/ insert_register(&parser_asm_line, R_GP); }
+    | REG_TP { /*printf("REG_TP\n");*/ insert_register(&parser_asm_line, R_TP); }
+    | REG_T0 { /*printf("REG_T0\n");*/ insert_register(&parser_asm_line, R_T0); }
+    | REG_T1 { /*printf("REG_T1\n");*/ insert_register(&parser_asm_line, R_T1); }
+    | REG_T2 { /*printf("REG_T2\n");*/ insert_register(&parser_asm_line, R_T2); }
+    | REG_T3 { /*printf("REG_T3\n");*/ insert_register(&parser_asm_line, R_T3); }
+    | REG_T4 { /*printf("REG_T4\n");*/ insert_register(&parser_asm_line, R_T4); }
+    | REG_T5 { /*printf("REG_T5\n");*/ insert_register(&parser_asm_line, R_T5); }
+    | REG_T6 { /*printf("REG_T6\n");*/ insert_register(&parser_asm_line, R_T6); }
+    | REG_FP { /*printf("REG_FP\n");*/ insert_register(&parser_asm_line, R_S0); }
+    | REG_A0 { /*printf("REG_A0\n");*/ insert_register(&parser_asm_line, R_A0); }
+    | REG_A1 { /*printf("REG_A1\n");*/ insert_register(&parser_asm_line, R_A1); }
+    | REG_A2 { /*printf("REG_A2\n");*/ insert_register(&parser_asm_line, R_A2); }
+    | REG_A3 { /*printf("REG_A3\n");*/ insert_register(&parser_asm_line, R_A3); }
+    | REG_A4 { /*printf("REG_A4\n");*/ insert_register(&parser_asm_line, R_A4); }
+    | REG_A5 { /*printf("REG_A5\n");*/ insert_register(&parser_asm_line, R_A5); }
+    | REG_A6 { /*printf("REG_A6\n");*/ insert_register(&parser_asm_line, R_A6); }
+    | REG_A7 { /*printf("REG_A7\n");*/ insert_register(&parser_asm_line, R_A7); }
+    | REG_S0 { /*printf("REG_S0\n");*/ insert_register(&parser_asm_line, R_S0); }
+    | REG_S1 { /*printf("REG_S1\n");*/ insert_register(&parser_asm_line, R_S1); }
+    | REG_S2 { /*printf("REG_S2\n");*/ insert_register(&parser_asm_line, R_S2); }
+    | REG_S3 { /*printf("REG_S3\n");*/ insert_register(&parser_asm_line, R_S3); }
+    | REG_S4 { /*printf("REG_S4\n");*/ insert_register(&parser_asm_line, R_S4); }
+    | REG_S5 { /*printf("REG_S5\n");*/ insert_register(&parser_asm_line, R_S5); }
+    | REG_S6 { /*printf("REG_S6\n");*/ insert_register(&parser_asm_line, R_S6); }
+    | REG_S7 { /*printf("REG_S7\n");*/ insert_register(&parser_asm_line, R_S7); }
+    | REG_S8 { /*printf("REG_S8\n");*/ insert_register(&parser_asm_line, R_S8); }
+    | REG_S9 { /*printf("REG_S9\n");*/ insert_register(&parser_asm_line, R_S9); }
+    | REG_S10 { /*printf("REG_S10\n");*/ insert_register(&parser_asm_line, R_S10); }
+    | REG_S11 { /*printf("REG_S11\n");*/ insert_register(&parser_asm_line, R_S11); }
 
 // https://www.gnu.org/software/bison/manual/bison.html
-expr : NUMERIC { printf("PARSER-NUMERIC: %d\n", $1); insert_integer_immediate(&parser_asm_line, $1); }
+expr : NUMERIC { /*printf("PARSER-NUMERIC: %d\n", $1);*/ insert_integer_immediate(&parser_asm_line, $1); }
     | 
     register
 

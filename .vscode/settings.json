@@ -6,6 +6,8 @@
         "xutility": "c",
         "stdarg.h": "c",
         "xiosbase": "cpp",
-        "lb_with_offset_test.h": "c"
+        "lb_with_offset_test.h": "c",
+        "srli_decode_test.h": "c",
+        "asm_line.h": "c"
     }
 }
