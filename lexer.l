@@ -15,12 +15,15 @@
 "add"	{ /*printf("ADD\n");*/ return ADD; }
 "addi"	{ /*printf("ADDI\n");*/ return ADDI; }
 
+"beq"   { /*printf("BEQ\n");*/ return BEQ; }
+
 "jalr"  { /*printf("JALR\n");*/ return JALR; }
 
 "lb"	{ /*printf("LB\n");*/ return LB; }
 "li"    { /*printf("LI\n");*/ return LI; }
 
 "srli"  { /*printf("SRLI\n");*/ return SRLI; }
+"slli"  { /*printf("SRLI\n");*/ return SLLI; }
 
 "zero"  { /*printf("zero\n");*/ return REG_ZERO; } 
 "ra"    { /*printf("ra\n");*/ return REG_RA; } 
@@ -72,6 +75,7 @@
 [a-zA-Z_][a-zA-Z_0-9]*   { /*printf("identifier\n");*/ return IDENTIFIER; }
 
 [0-9]+  { yylval.int_val = atoi(yytext); return NUMERIC; }
+"-"?"0"[xX][0-9A-F]+  { yylval.int_val = strtol(yytext, NULL, 0); return NUMERIC; }
 
 "."     { return DOT; }
 ":"     { return COLON; }

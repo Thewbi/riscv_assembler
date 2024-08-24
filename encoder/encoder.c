@@ -18,6 +18,10 @@ void encoder_callback(asm_line_t* asm_line) {
             encoded_asm_line = encode_srli(asm_line);
             break;
 
+        case I_SLLI:
+            encoded_asm_line = encode_slli(asm_line);
+            break;
+
         default:
             printf("Unknown instruction!\n");
             return;
@@ -51,11 +55,37 @@ uint32_t encode_addi(asm_line_t* asm_line) {
     return encode_i_type(imm, rs1, funct3, rd, opcode);
 }
 
+uint32_t encode_beq(asm_line_t* asm_line) {
+
+    uint8_t funct3 = 0b000;
+    uint8_t opcode = 0b1100011;
+
+    uint8_t rs1 = encode_register(asm_line->reg_rs1);
+    uint8_t rs2 = encode_register(asm_line->reg_rs2);
+    uint16_t imm = asm_line->imm;
+
+    return encode_b_type(imm, rs2, rs1, funct3, opcode);
+}
+
 uint32_t encode_srli(asm_line_t* asm_line) {
 
-    printf("encode_srli\n");
+    //printf("encode_srli\n");
 
     uint8_t funct3 = 0b101;
+    uint8_t opcode = 0b0010011;
+
+    uint8_t rd = encode_register(asm_line->reg_rd);
+    uint8_t rs1 = encode_register(asm_line->reg_rs1);
+    uint16_t imm = asm_line->imm;
+
+    return encode_i_type(imm, rs1, funct3, rd, opcode);
+}
+
+uint32_t encode_slli(asm_line_t* asm_line) {
+
+    //printf("encode_slli\n");
+
+    uint8_t funct3 = 0b001;
     uint8_t opcode = 0b0010011;
 
     uint8_t rd = encode_register(asm_line->reg_rd);
@@ -97,13 +127,28 @@ uint32_t encode_i_type(uint16_t imm, uint8_t rs1, uint8_t funct3, uint8_t rd, ui
            ((imm & 0b111111111111) << (7+5+3+5));
 }
 
+uint32_t encode_b_type(uint16_t imm, uint8_t rs2, uint8_t rs1, uint8_t funct3, uint8_t opcode) {
+
+    // printf("encode_b_type imm: %d \n", imm);
+    // printf("encode_b_type rs1: %d \n", rs1);
+    // printf("encode_b_type funct3: %d \n", funct3);
+    // printf("encode_b_type rd: %d \n", rd);
+    // printf("encode_b_type opcode: %d \n", opcode);
+
+    return ((opcode & 0b1111111) << 0) |
+           ((imm & 0b11111) << 7) |
+           ((funct3 & 0b111) << (7+5)) |
+           ((rs1 & 0b11111) << (7+5+3)) |
+           ((rs2 & 0b11111) << (7+5+3+5)) |
+           ((imm & 0b111111100000) << (7+5+3+5+5));
+}
+
 uint8_t encode_register(enum register_ data) {
 
     switch (data) {
 
         // 0, Hard-wired zero
         case R_ZERO:
-            //printf("R_ZERO\n");
             return 0b00000;
 
         case R_RA: // 1, Return address
@@ -120,7 +165,6 @@ uint8_t encode_register(enum register_ data) {
 
         // ABI Name: t0, Register: x5 - encoded: 0101 (= 5 decimal) 
         case R_T0: // 5, Temporary/alternate link register
-            //printf("R_T0\n");
             return 0b00101;
 
         case R_T1: // 6, Temporary

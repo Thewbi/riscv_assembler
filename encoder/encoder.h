@@ -23,12 +23,18 @@ uint32_t encode_add(asm_line_t* asm_line);
 
 uint32_t encode_addi(asm_line_t* asm_line);
 
+uint32_t encode_beq(asm_line_t* asm_line);
+
 uint32_t encode_srli(asm_line_t* asm_line);
+
+uint32_t encode_slli(asm_line_t* asm_line);
 
 uint8_t encode_register(enum register_ data);
 
 uint32_t encode_r_type(uint8_t funct7, uint8_t rs2, uint8_t rs1, uint8_t funct3, uint8_t rd, uint8_t opcode);
 
 uint32_t encode_i_type(uint16_t imm, uint8_t rs1, uint8_t funct3, uint8_t rd, uint8_t opcode);
+
+uint32_t encode_b_type(uint16_t imm, uint8_t rs2, uint8_t rs1, uint8_t funct3, uint8_t opcode);
 
 #endif

@@ -19,11 +19,23 @@
 enum instruction {
     I_ADD,
     I_ADDI,
+    I_BEQ,
     I_LB,
     I_LI,
     I_JALR,
     I_SRLI,
+    I_SLLI,
     I_UNDEFINED_INSTRUCTION
+};
+
+enum instruction_type {
+    IT_R,
+    IT_I,
+    IT_S,
+    IT_B,
+    IT_U,
+    IT_J,
+    IT_UNDEFINED_INSTRUCTION
 };
 
 // cannot use name register since it is a reserved keyword in C
@@ -70,6 +82,8 @@ enum register_ {
 typedef struct asm_line {
 
     enum instruction instruction;
+
+    enum instruction_type instruction_type;
 
     enum register_ reg_rd;
     enum register_ reg_rs1;

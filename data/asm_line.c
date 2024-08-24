@@ -3,6 +3,7 @@
 void reset_asm_line(asm_line_t *data) {
 
     data->instruction = I_UNDEFINED_INSTRUCTION;
+    data->instruction_type = IT_UNDEFINED_INSTRUCTION;
 
     data->reg_rd = R_UNDEFINED_REGISTER;
     data->reg_rs1 = R_UNDEFINED_REGISTER;
@@ -19,20 +20,32 @@ void reset_asm_line(asm_line_t *data) {
 
 void insert_register(asm_line_t *data, enum register_ reg) {
 
-    // add  rd, rs1, rs2
-    // addi  rd, rs1, imm
+    if (data->instruction_type == IT_B) {
 
-    if (R_UNDEFINED_REGISTER == data->reg_rd) {
-        data->reg_rd = reg;
-        return;
-    }
-    if (R_UNDEFINED_REGISTER == data->reg_rs1) {
-        data->reg_rs1 = reg;
-        return;
-    }
-    if (R_UNDEFINED_REGISTER == data->reg_rs2) {
-        data->reg_rs2 = reg;
-        return;
+        if (R_UNDEFINED_REGISTER == data->reg_rs1) {
+            data->reg_rs1 = reg;
+            return;
+        }
+        if (R_UNDEFINED_REGISTER == data->reg_rs2) {
+            data->reg_rs2 = reg;
+            return;
+        }
+
+    } else {
+
+        if (R_UNDEFINED_REGISTER == data->reg_rd) {
+            data->reg_rd = reg;
+            return;
+        }
+        if (R_UNDEFINED_REGISTER == data->reg_rs1) {
+            data->reg_rs1 = reg;
+            return;
+        }
+        if (R_UNDEFINED_REGISTER == data->reg_rs2) {
+            data->reg_rs2 = reg;
+            return;
+        }
+
     }
 }
 
@@ -48,7 +61,7 @@ void insert_offset(asm_line_t *data, uint32_t offset, uint8_t index) {
 }
 
 void insert_integer_immediate(asm_line_t *data, uint16_t imm) {
-    //printf("ASM_LINE: insert_integer_immediate: %d\n", imm);
+    printf("ASM_LINE: insert_integer_immediate: %d\n", imm);
     data->imm = imm;
 }
 
@@ -65,10 +78,12 @@ const char* instruction_to_string(enum instruction data) {
     switch(data) {
         case I_ADD: return "ADD";
         case I_ADDI: return "ADDI";
+        case I_BEQ: return "BEQ";
         case I_LB: return "LB";
         case I_LI: return "LI";
         case I_JALR: return "JALR";
         case I_SRLI: return "SRLI";
+        case I_SLLI: return "SLLI";
         
         default: return "UNKNOWN";
     }

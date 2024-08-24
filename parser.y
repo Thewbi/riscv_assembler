@@ -42,7 +42,7 @@ void (*fp_emit)(asm_line_t*);
   char sym;
 };
 
-%token <sym> ADD ADDI JALR LB LI SRLI
+%token <sym> ADD ADDI BEQ JALR LB LI SRLI SLLI
 %token <sym> NEW_LINE
 %token <int_val> NUMERIC
 %token <sym> IDENTIFIER
@@ -91,14 +91,16 @@ param_3 : NUMERIC OPENING_BRACKET expr { /*printf("OFFSET 3\n");*/ insert_offset
 
 label : IDENTIFIER COLON
 
-mnemonic : ADD { /*printf("Parser-ADD: %d\n", I_ADD);*/ parser_asm_line.instruction = I_ADD; }
-    | ADDI { /*printf("Parser-ADDI: %d\n", I_ADDI);*/ parser_asm_line.instruction = I_ADDI; }
-    | JALR { /*printf("Parser-JALR: %d\n", I_JALR);*/ parser_asm_line.instruction = I_JALR; } 
-    | LB { /*printf("Parser-LB: %d\n", I_LB);*/ parser_asm_line.instruction = I_LB; }
-    | LI { /*printf("Parser-LI: %d\n", I_LI);*/ parser_asm_line.instruction = I_LI; }
-    | SRLI { /*printf("Parser-SRLI: %d\n", I_SRLI);*/ parser_asm_line.instruction = I_SRLI; }
+mnemonic : ADD { /*printf("Parser-ADD: %d\n", I_ADD);*/ parser_asm_line.instruction = I_ADD; parser_asm_line.instruction_type = IT_R; }
+    | ADDI { /*printf("Parser-ADDI: %d\n", I_ADDI);*/ parser_asm_line.instruction = I_ADDI; parser_asm_line.instruction_type = IT_R; }
+    | BEQ { /*printf("Parser-BEQ: %d\n", I_BEQ);*/ parser_asm_line.instruction = I_BEQ; parser_asm_line.instruction_type = IT_B; }
+    | JALR { /*printf("Parser-JALR: %d\n", I_JALR);*/ parser_asm_line.instruction = I_JALR; parser_asm_line.instruction_type = IT_J; } 
+    | LB { /*printf("Parser-LB: %d\n", I_LB);*/ parser_asm_line.instruction = I_LB; parser_asm_line.instruction_type = IT_I; }
+    | LI { /*printf("Parser-LI: %d\n", I_LI);*/ parser_asm_line.instruction = I_LI; parser_asm_line.instruction_type = IT_I; }
+    | SRLI { /*printf("Parser-SRLI: %d\n", I_SRLI);*/ parser_asm_line.instruction = I_SRLI; parser_asm_line.instruction_type = IT_I; }
+    | SLLI { /*printf("Parser-SLLI: %d\n", I_SLLI);*/ parser_asm_line.instruction = I_SLLI; parser_asm_line.instruction_type = IT_I; }
 
-register : REG_ZERO { /*printf("REG_ZERO\n"); insert_register(&parser_asm_line, R_ZERO); }
+register : REG_ZERO { /*printf("REG_ZERO\n");*/ insert_register(&parser_asm_line, R_ZERO); }
     | REG_RA { /*printf("REG_RA\n");*/ insert_register(&parser_asm_line, R_RA); }
     | REG_SP { /*printf("REG_SP\n");*/ insert_register(&parser_asm_line, R_SP); }
     | REG_GP { /*printf("REG_GP\n");*/ insert_register(&parser_asm_line, R_GP); }

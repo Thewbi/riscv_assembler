@@ -2,20 +2,25 @@
 
 void decode(uint32_t data, asm_line_t* asm_line) {
 
-    printf("decode\n");
+    //printf("decode\n");
 
     uint8_t instruction = data & 0b1111111;
 
     switch (instruction) {
 
         case 0b0110011: // ADD
-            printf("decode - 0b0110011\n");
+            //printf("decode - 0b0110011\n");
             decode_r_type(data, asm_line);
             break;
 
         case 0b0010011: // ADDI, SRLI
-            printf("decode - 0b0010011\n");
+            //printf("decode - 0b0010011\n");
             decode_i_type(data, asm_line);
+            break;
+
+        case 0b1100011: // BEQ
+            //printf("decode - 0b1100011\n");
+            decode_b_type(data, asm_line);
             break;
 
         default:
@@ -28,7 +33,7 @@ void decode(uint32_t data, asm_line_t* asm_line) {
 
 void decode_r_type(uint32_t data, asm_line_t* asm_line) {
 
-    printf("decode_r_type\n");
+    //printf("decode_r_type\n");
 
     uint8_t rd = (data >> 7) & 0b11111;
     uint8_t funct3 = (data >> (7+5)) & 0b111;
@@ -64,7 +69,7 @@ void decode_r_type(uint32_t data, asm_line_t* asm_line) {
 
 void decode_i_type(uint32_t data, asm_line_t* asm_line) {
 
-    printf("decode_i_type\n");
+    //printf("decode_i_type\n");
 
     uint8_t rd = (data >> 7) & 0b11111;
     uint8_t funct3 = (data >> (7+5)) & 0b111;
@@ -82,9 +87,40 @@ void decode_i_type(uint32_t data, asm_line_t* asm_line) {
             break;
 
         case 0b101: // SRLI
-            printf("decode_i_type SRLI\n");
+            //printf("decode_i_type SRLI\n");
             asm_line->instruction = I_SRLI;
             break;
+
+        case 0b001: // SLLI
+            //printf("decode_i_type SLLI\n");
+            asm_line->instruction = I_SLLI;
+            break;
+    }
+}
+
+void decode_b_type(uint32_t data, asm_line_t* asm_line) {
+
+    //printf("decode_b_type\n");
+
+    uint8_t funct3 = (data >> (7+5)) & 0b111;
+    uint8_t rs1 = (data >> (7+5+3)) & 0b11111;
+    uint8_t rs2 = (data >> (7+5+3+5)) & 0b11111;
+    uint16_t imm11 = (data >> (7)) & 0b1;
+    uint16_t imm4_1 = (data >> (8)) & 0b1111;
+    uint16_t imm10_5 = (data >> (25)) & 0b111111;
+    uint16_t imm12 = (data >> (31)) & 0b1;
+
+    asm_line->reg_rs1 = decode_register(rs1);
+    asm_line->reg_rs2 = decode_register(rs2);
+    asm_line->imm = (imm12 << 11) | (imm11 << 0) | (imm10_5 << 5) | (imm4_1 << 1);
+
+    switch (funct3) {
+
+        case 0b000: // BEQ
+            //printf("decode_i_type BEQ\n");
+            asm_line->instruction = I_BEQ;
+            break;
+
     }
 }
 
@@ -94,7 +130,6 @@ enum register_ decode_register(uint8_t data) {
 
         // 0, Hard-wired zero
         case 0b00000:
-            //printf("R_ZERO\n");
             return R_ZERO;
 
         case 0b00001: // 1, Return address
@@ -111,7 +146,6 @@ enum register_ decode_register(uint8_t data) {
 
         // ABI Name: t0, Register: x5 - encoded: 0101 (= 5 decimal) 
         case 0b00101: // 5, Temporary/alternate link register
-            //printf("R_T0\n");
             return R_T0;
 
         case 0b00110: // 6, Temporary

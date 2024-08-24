@@ -8,6 +8,7 @@
         "xiosbase": "cpp",
         "lb_with_offset_test.h": "c",
         "srli_decode_test.h": "c",
-        "asm_line.h": "c"
+        "asm_line.h": "c",
+        "slli_encode_test.h": "c"
     }
 }
