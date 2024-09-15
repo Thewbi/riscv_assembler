@@ -77,7 +77,7 @@
 
 #define YYDEBUG 1
 
-// defining this symbol makes the generated riscv.exe a self sustained
+// defining this symbol makes the generated riscv emulator or assembler a self sustained
 // application that works without an external driver. It defines all
 // symbols to become self-sustained. 
 //

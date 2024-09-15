@@ -6,6 +6,7 @@ CMOCKA_OUT_DIR=$(CMOCKA_BUILD_DIR)/output
 
 all: test
 
+# compile executable that runs all tests
 test: unit_tests/main.c \
 	../decoder/decoder.h \
 	../decoder/decoder.c \
@@ -54,12 +55,13 @@ test: unit_tests/main.c \
 	-L./lib -I./ -I./include -I./unit_tests -I../data -I../encoder -I../decoder -I../ -lcmocka \
 	-o cmockatest
 
+# compile mocka libraries
 install:
 	mkdir -p $(CMOCKA_OUT_DIR)
 	cd $(CMOCKA_BUILD_DIR) && \
-		 cmake -DWITH_STATIC_LIB=1 -DCMAKE_INSTALL_PREFIX=$(CMOCKA_OUT_DIR) .. && \
+		 cmake -DWITH_STATIC_LIB=true -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=$(CMOCKA_OUT_DIR) .. && \
 		 make && \
 		 make install
 	mkdir -p lib include
-	cp $(CMOCKA_OUT_DIR)/lib/libcmocka.a lib
-	cp $(CMOCKA_OUT_DIR)/include/*.h include
+	cp $(CMOCKA_BUILD_DIR)/$(CMOCKA_DIR)/build/output/lib/libcmocka.a lib
+	cp $(CMOCKA_BUILD_DIR)/$(CMOCKA_DIR)/build/output/include/*.h include

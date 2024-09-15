@@ -2,6 +2,8 @@
 
 void encoder_callback(asm_line_t* asm_line) {
 
+    printf("encoder_callback\n");
+
     uint32_t encoded_asm_line = 0;
 
     switch (asm_line->instruction) {
@@ -26,6 +28,8 @@ void encoder_callback(asm_line_t* asm_line) {
             printf("Unknown instruction!\n");
             return;
     }
+
+    printf("encoder_callback 0x%08x\n", encoded_asm_line);
 
     reset_asm_line(asm_line);
 }
