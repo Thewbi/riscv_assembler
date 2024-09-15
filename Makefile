@@ -13,8 +13,29 @@ assembler: assembler.c parser.h parser.c lex.yy.c data/asm_line.h data/asm_line.
 # Build the emulator. 
 # The emulator does not use the parser as it does not execute from .s files but only from assembled machine code.
 # Use the assembler application to produce machine code from .s files first.
-emulator: emulator.c parser.h parser.c lex.yy.c data/asm_line.h data/asm_line.c encoder/encoder.h encoder/encoder.c decoder/decoder.h decoder/decoder.c cpu/cpu.h cpu/cpu.c
-	g++ -o emulator emulator.c parser.c lex.yy.c data/asm_line.c encoder/encoder.c decoder/decoder.c cpu/cpu.c -I data -I encoder -I decoder -I cpu
+emulator: emulator.c \
+	parser.h \
+	parser.c \
+	lex.yy.c \
+	data/asm_line.h \
+	data/asm_line.c \
+	encoder/encoder.h \
+	encoder/encoder.c \
+	decoder/decoder.h \
+	decoder/decoder.c \
+	ihex_loader/ihex_loader.h \
+	ihex_loader/ihex_loader.cpp \
+	cpu/cpu.h \
+	cpu/cpu.c
+	g++ -g -o emulator \
+	emulator.c \
+	parser.c \
+	lex.yy.c \
+	data/asm_line.c \
+	encoder/encoder.c \
+	decoder/decoder.c \
+	ihex_loader/ihex_loader.cpp \
+	cpu/cpu.c -I data -I encoder -I decoder -I cpu -I ihex_loader
 
 lex.yy.c: lexer.l
 	flex -d lexer.l
@@ -25,4 +46,4 @@ parser.h: parser.y
 .PHONY: clean
 
 clean:
-	rm -f riscv.exe parser.h parser.c lex.yy.c parser.output
+	rm -f emulator assembler emulator.exe riscv.exe parser.h parser.c lex.yy.c parser.output

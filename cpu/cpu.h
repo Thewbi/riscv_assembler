@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <inttypes.h>
+#include <map>
+#include <vector>
 
 #include <asm_line.h>
 #include <decoder.h>
@@ -21,9 +23,12 @@ typedef struct cpu {
 
     uint32_t reg[32];
 
-    uint16_t pc;
+    //uint16_t pc;
+    uint32_t pc;
 
-    uint8_t* memory;
+    //uint8_t* memory;
+
+    std::map<uint32_t, uint32_t*>* segments;
 
 } cpu_t;
 
