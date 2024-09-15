@@ -51,7 +51,9 @@ int main(int argc, char **argv)
     // cpu.reg[R_T0] = 2;
     // cpu.reg[R_A0] = 3;
 
-    cpu_step(&cpu);
+    for (int i = 0; i < 100; i++) {
+        cpu_step(&cpu);
+    }
 
     //printf("REG R_T0: %d\n", cpu.reg[R_T0]);
     //printf("REG R_T1: %d\n", cpu.reg[R_T1]);

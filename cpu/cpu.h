@@ -36,4 +36,6 @@ void cpu_init(cpu_t* cpu);
 
 void cpu_step(cpu_t* cpu);
 
+uint32_t sign_extend_12_bit_to_uint32_t(const uint16_t data);
+
 #endif

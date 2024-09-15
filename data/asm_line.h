@@ -17,14 +17,37 @@
 // 1. Add test to test\unit_tests\main.c
 // 1. Add the test files .c/.h to test\Makefile so that they get compiled
 enum instruction {
-    I_ADD,
+
+    // I-Type
     I_ADDI,
-    I_BEQ,
-    I_LB,
-    I_LI,
-    I_JALR,
     I_SRLI,
     I_SLLI,
+    I_SLTI,
+    I_SLTIU,
+    I_XORI,
+    I_ORI,
+    I_ANDI,
+
+    I_LB,
+    I_LH,
+    I_LW,
+    I_LBU,
+    I_LHU,
+
+    // B-Type
+    I_BEQ,
+
+    
+    I_LI,
+    I_JALR,
+    
+    // R-Type
+    I_ADD,
+
+    // S-Type
+    I_SW,
+
+    // undefined
     I_UNDEFINED_INSTRUCTION
 };
 

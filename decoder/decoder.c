@@ -2,33 +2,38 @@
 
 void decode(uint32_t data, asm_line_t* asm_line) {
 
-    //printf("decode\n");
+    printf("decode 0x%08x\n", data);
 
-    uint8_t instruction = data & 0b1111111;
+    uint8_t funct7 = data & 0b1111111;
+    uint8_t funct3 = (data >> (7+5)) & 0b111;
 
-    switch (instruction) {
+    switch (funct7) {
 
         case 0b0110011: // ADD
-            //printf("decode - 0b0110011\n");
             decode_r_type(data, asm_line);
             break;
 
-        case 0b0010011: // ADDI, SRLI
-            //printf("decode - 0b0010011\n");
-            decode_i_type(data, asm_line);
+        case 0b0000011: // LW fe442783 I_TYPE
+        case 0b0010011: // ADDI 0x02010113 I_TYPE
+            if ((funct3 != 0b001) & (funct3 != 0b101)) {
+                decode_i_type(data, asm_line, funct7, funct3);
+            }
+        case 0b1100111: // JALR x0, 0(x1) aka. RET, 0x00008067, I-Type
+            decode_i_type(data, asm_line, funct7, funct3);
             break;
 
         case 0b1100011: // BEQ
-            //printf("decode - 0b1100011\n");
             decode_b_type(data, asm_line);
             break;
 
-        default:
-            printf("Unknown instruction!\n");
+        case 0b0100011: // SW
+            decode_s_type(data, asm_line);
             break;
 
+        default:
+            printf("decode() - Unknown instruction!\n");
+            break;
     }
-
 }
 
 void decode_r_type(uint32_t data, asm_line_t* asm_line) {
@@ -47,32 +52,42 @@ void decode_r_type(uint32_t data, asm_line_t* asm_line) {
 
     switch (funct7) {
 
-        case 0b0000000:
-            switch (funct3) {
-                case 0b000:
-                    asm_line->instruction = I_ADD;
-                    break;
-            }
+        //case 0b0110011:
+        case 0b0000000: // 0x00f707b3
 
-        case 0b0010011:
             switch (funct3) {
 
                 case 0b000:
                     asm_line->instruction = I_ADD;
                     break;
 
-                
+                default:
+                    printf("Unknown funct3 %d\n", data); 
+                    return;
             }
-        break;
+            break;
+
+        // case 0b0010011:
+        //     switch (funct3) {
+        //         case 0b000:
+        //             asm_line->instruction = I_ADD;
+        //             break;
+        //     }
+        // break;
+
+        default:
+            printf("Unknown funct7 %d\n", data); 
+            return;
     }
 }
 
-void decode_i_type(uint32_t data, asm_line_t* asm_line) {
+void decode_i_type(uint32_t data, asm_line_t* asm_line, uint8_t funct7, uint8_t funct3) {
 
     //printf("decode_i_type\n");
+    //printf("0x%08x\n", data);
 
     uint8_t rd = (data >> 7) & 0b11111;
-    uint8_t funct3 = (data >> (7+5)) & 0b111;
+    // uint8_t funct3 = (data >> (7+5)) & 0b111;
     uint8_t rs1 = (data >> (7+5+3)) & 0b11111;
     uint16_t imm = (data >> (7+5+3+5)) & 0b111111111111;
 
@@ -80,22 +95,99 @@ void decode_i_type(uint32_t data, asm_line_t* asm_line) {
     asm_line->reg_rs1 = decode_register(rs1);
     asm_line->imm = imm;
 
-    switch (funct3) {
+    switch (funct7) {
 
-        case 0b000: // I_ADDI
-            asm_line->instruction = I_ADDI;
-            break;
+        case 0b0000011: // LW fe442783 I_TYPE
 
-        case 0b101: // SRLI
-            //printf("decode_i_type SRLI\n");
-            asm_line->instruction = I_SRLI;
-            break;
+            switch (funct3) {
 
-        case 0b001: // SLLI
-            //printf("decode_i_type SLLI\n");
-            asm_line->instruction = I_SLLI;
-            break;
+                case 0b000:
+                    asm_line->instruction = I_LB;
+                    break;
+
+                case 0b001:
+                    asm_line->instruction = I_LH;
+                    break;
+
+                case 0b010:
+                    asm_line->instruction = I_LW;
+                    break;
+
+                case 0b100:
+                    asm_line->instruction = I_LBU;
+                    break;
+                    
+                case 0b101:
+                    asm_line->instruction = I_LHU;
+                    break;
+            }
+        break;
+
+        case 0b0010011: // ADDI 0x02010113 I_TYPE
+            switch (funct3) {
+
+                case 0b000:
+                    asm_line->instruction = I_ADDI;
+                    break;
+
+                case 0b010:
+                    asm_line->instruction = I_SLTI;
+                    break;
+
+                case 0b011:
+                    asm_line->instruction = I_SLTIU;
+                    break;
+
+                case 0b100:
+                    asm_line->instruction = I_XORI;
+                    break;
+                    
+                case 0b110:
+                    asm_line->instruction = I_ORI;
+                    break;
+
+                case 0b111:
+                    asm_line->instruction = I_ANDI;
+                    break;
+            }
+        break;
+
+        case 0b1100111: // JALR x0, 0(x1) aka. RET, 0x00008067, I-Type
+            switch (funct3) {
+
+                case 0b000:
+                    asm_line->instruction = I_JALR;
+                    break;
+            }
+        break;
+
     }
+
+    // switch (funct3) {
+
+    //     case 0b000: // I_ADDI
+    //         asm_line->instruction = instruction;
+    //         break;
+
+    //     case 0b001: // SLLI
+    //         //printf("decode_i_type SLLI\n");
+    //         asm_line->instruction = instruction;
+    //         break;
+
+    //     case 0b010: // LW
+    //         //printf("decode_i_type LW\n");
+    //         asm_line->instruction = instruction;
+    //         break;
+
+    //     case 0b101: // SRLI
+    //         //printf("decode_i_type SRLI\n");
+    //         asm_line->instruction = instruction;
+    //         break;
+
+    //     default:
+    //         printf("unknown instruction %d\n", data); 
+    //         return;
+    // }
 }
 
 void decode_b_type(uint32_t data, asm_line_t* asm_line) {
@@ -121,6 +213,36 @@ void decode_b_type(uint32_t data, asm_line_t* asm_line) {
             asm_line->instruction = I_BEQ;
             break;
 
+        default:
+            printf("unknown instruction %d\n", data); 
+            return;
+    }
+}
+
+void decode_s_type(uint32_t data, asm_line_t* asm_line) {
+
+    //printf("decode_s_type\n");
+
+    uint8_t funct3 = (data >> (7+5)) & 0b111;
+    uint8_t rs1 = (data >> (7+5+3)) & 0b11111;
+    uint8_t rs2 = (data >> (7+5+3+5)) & 0b11111;
+    uint16_t imm4_0 = (data >> (7)) & 0b11111;
+    uint16_t imm11_5 = (data >> (25)) & 0b1111111;
+
+    asm_line->reg_rs1 = decode_register(rs1);
+    asm_line->reg_rs2 = decode_register(rs2);
+    asm_line->imm = (imm11_5 << 5) | (imm4_0 << 0);
+
+    switch (funct3) {
+
+        case 0b010: // SW
+            //printf("decode_s_type SW\n");
+            asm_line->instruction = I_SW;
+            break;
+
+        default:
+            printf("unknown instruction %d\n", data); 
+            return;
     }
 }
 
