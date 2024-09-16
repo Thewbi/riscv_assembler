@@ -22,7 +22,7 @@ void decode(uint32_t data, asm_line_t* asm_line) {
             decode_i_type(data, asm_line, funct7, funct3);
             break;
 
-        case 0b1100011: // BEQ
+        case 0b1100011: // BEQ, BGE
             decode_b_type(data, asm_line);
             break;
 
@@ -30,13 +30,15 @@ void decode(uint32_t data, asm_line_t* asm_line) {
             decode_s_type(data, asm_line);
             break;
 
+        case 0b1101111:
+            decode_j_type(data, asm_line);
+            break;
+
         default:
             printf("decode() - Unknown instruction!\n");
             break;
     }
 }
-
-
 
 void decode_r_type(uint32_t data, asm_line_t* asm_line) {
 
@@ -206,13 +208,18 @@ void decode_b_type(uint32_t data, asm_line_t* asm_line) {
 
     asm_line->reg_rs1 = decode_register(rs1);
     asm_line->reg_rs2 = decode_register(rs2);
-    asm_line->imm = (imm12 << 11) | (imm11 << 0) | (imm10_5 << 5) | (imm4_1 << 1);
+    asm_line->imm = (imm12 << 12) | (imm11 << 11) | (imm10_5 << 5) | (imm4_1 << 1);
 
     switch (funct3) {
 
         case 0b000: // BEQ
             //printf("decode_i_type BEQ\n");
             asm_line->instruction = I_BEQ;
+            break;
+
+        case 0b101: // BGE
+            //printf("decode_i_type BGE\n");
+            asm_line->instruction = I_BGE;
             break;
 
         default:
@@ -246,6 +253,20 @@ void decode_s_type(uint32_t data, asm_line_t* asm_line) {
             printf("unknown instruction %d\n", data); 
             return;
     }
+}
+
+void decode_j_type(uint32_t data, asm_line_t* asm_line) {
+
+    uint16_t rd = (data >> (7)) & 0b11111;
+    uint16_t imm19_12 = (data >> (12)) & 0b11111111;
+    uint16_t imm11 = (data >> (20)) & 0b1;
+    uint16_t imm10_1 = (data >> (21)) & 0b1111111111;
+    uint16_t imm20 = (data >> (31)) & 0b1;
+
+    asm_line->reg_rd = decode_register(rd);
+    asm_line->imm = (imm20 << 20) | (imm19_12 << 12) | (imm11 << 11) | (imm10_1 << 1);
+
+    asm_line->instruction = I_JAL;
 }
 
 enum register_ decode_register(uint8_t data) {

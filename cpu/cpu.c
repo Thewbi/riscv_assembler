@@ -16,6 +16,8 @@ void cpu_init(cpu_t* cpu) {
 
 uint32_t cpu_step(cpu_t* cpu) {
 
+    printf("[cpu_step()] pc: 0x%08x\n", cpu->pc);
+
     uint32_t encoded_instruction = fetch_instruction_at_pc(cpu);
 
     asm_line_t asm_line;
@@ -27,7 +29,7 @@ uint32_t cpu_step(cpu_t* cpu) {
     }
 
     //cpu->pc += 0x04;
-    cpu->pc += 0x01;
+    //cpu->pc += 0x01;
 
     return 0;
 }
@@ -41,13 +43,19 @@ uint32_t execute_instruction(cpu_t* cpu, const asm_line_t* asm_line) {
             printf("CPU ADD rd: %s (%d), rs1: %s (%d), rs2: %s (%d)\n", register_to_string(asm_line->reg_rd), cpu->reg[asm_line->reg_rd], 
                 register_to_string(asm_line->reg_rs1), cpu->reg[asm_line->reg_rs1], 
                 register_to_string(asm_line->reg_rs2), cpu->reg[asm_line->reg_rs2]);
+
             cpu->reg[asm_line->reg_rd] = cpu->reg[asm_line->reg_rs1] + cpu->reg[asm_line->reg_rs2];
+
+            cpu->pc += PC_INCREMENT;
             break;
 
         case I_ADDI:
             //printf("CPU ADDI detected\n");
             printf("CPU ADDI rd: %s (%d), rs1: %s (%d), imm: %d\n", register_to_string(asm_line->reg_rd), cpu->reg[asm_line->reg_rd], register_to_string(asm_line->reg_rs1), cpu->reg[asm_line->reg_rs1], sign_extend_12_bit_to_uint32_t(asm_line->imm));
+            
             cpu->reg[asm_line->reg_rd] = cpu->reg[asm_line->reg_rs1] + sign_extend_12_bit_to_uint32_t(asm_line->imm);
+
+            cpu->pc += PC_INCREMENT;
             break;
 
         // SW = Store Word
@@ -95,6 +103,8 @@ uint32_t execute_instruction(cpu_t* cpu, const asm_line_t* asm_line) {
 
             // store the source register into memory onto the stack
             cpu->segments->at(segment_address)[instr_address/4] = cpu->reg[asm_line->reg_rs2];
+
+            cpu->pc += PC_INCREMENT;
         }
         break;
 
@@ -133,11 +143,49 @@ uint32_t execute_instruction(cpu_t* cpu, const asm_line_t* asm_line) {
             printf("[LOAD_WORD] value: %d <- address: 0x%08x\n", temp_value, address);
 
             cpu->reg[asm_line->reg_rd] = temp_value;
+
+            cpu->pc += PC_INCREMENT;
         }
         break;
 
         case I_JALR:
-            printf("CPU JALR rd: %s (%d), rs1: %s (%d), imm: %d\n", register_to_string(asm_line->reg_rd), cpu->reg[asm_line->reg_rd], register_to_string(asm_line->reg_rs1), cpu->reg[asm_line->reg_rs1], sign_extend_12_bit_to_uint32_t(asm_line->imm));
+            printf("CPU JALR rd: %s (%d), rs1: %s (%d), imm: %d\n", register_to_string(asm_line->reg_rd), cpu->reg[asm_line->reg_rd], 
+                register_to_string(asm_line->reg_rs1), cpu->reg[asm_line->reg_rs1], 
+                sign_extend_12_bit_to_uint32_t(asm_line->imm));
+            break;
+
+        // Description:
+        // The jump and link (JAL) instruction uses the J-type format, where the J-immediate encodes a
+        // signed offset in multiples of 2 bytes. The offset is sign-extended and added to the pc to form the
+        // jump target address.
+        //
+        // Examples:
+        // j 40000030
+        // jal x0, 28
+        case I_JAL:
+            printf("CPU JAL rd: %s (%d), imm: %d\n", register_to_string(asm_line->reg_rd), cpu->reg[asm_line->reg_rd], 
+                sign_extend_12_bit_to_uint32_t(asm_line->imm));
+
+            //cpu->pc += (asm_line->imm/4);
+            cpu->pc += (asm_line->imm);
+
+            //cpu->pc += PC_INCREMENT;
+            break;
+
+        case I_BGE:
+            // printf("CPU JAL rd: %s (%d), imm: %d\n", register_to_string(asm_line->reg_rd), cpu->reg[asm_line->reg_rd], 
+            //     sign_extend_12_bit_to_uint32_t(asm_line->imm));
+
+            if (cpu->reg[asm_line->reg_rs1] >= cpu->reg[asm_line->reg_rs2]) {
+                //cpu->pc += (sign_extend_12_bit_to_uint32_t(asm_line->imm)/4);
+
+                int32_t imm_temp = sign_extend_12_bit_to_uint32_t(asm_line->imm);
+                cpu->pc += imm_temp;
+            } else {
+                cpu->pc += PC_INCREMENT;
+            }
+
+            //
             break;
 
         default:
@@ -178,7 +226,7 @@ uint32_t fetch_instruction_at_pc(cpu_t* cpu) {
     }
     uint32_t* text_segment = it->second;
 
-    uint32_t encoded_instruction = text_segment[instr_address];
+    uint32_t encoded_instruction = text_segment[instr_address/4];
 
     encoded_instruction = (((encoded_instruction >> 24) & 0xFF) << 0) | 
         (((encoded_instruction >> 16) & 0xFF) << 8) |

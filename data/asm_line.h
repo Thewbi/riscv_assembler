@@ -36,7 +36,7 @@ enum instruction {
 
     // B-Type
     I_BEQ,
-
+    I_BGE,
     
     I_LI,
     I_JALR,
@@ -46,6 +46,9 @@ enum instruction {
 
     // S-Type
     I_SW,
+
+    // J-Type
+    I_JAL,
 
     // undefined
     I_UNDEFINED_INSTRUCTION

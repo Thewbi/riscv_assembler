@@ -10,6 +10,8 @@
 #include <asm_line.h>
 #include <decoder.h>
 
+#define PC_INCREMENT 0x04
+
 // https://riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf - page 9
 //
 // Figure 2.1 shows the user-visible state for the base integer subset. There are 31 general-purpose
