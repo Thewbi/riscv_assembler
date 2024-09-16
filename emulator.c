@@ -41,18 +41,18 @@ int main(int argc, char **argv)
     cpu_t cpu;
     cpu_init(&cpu);
     cpu.pc = ihex_loader.start_address;
-
     
     //cpu.memory = memory;
     cpu.segments = &(ihex_loader.segments);
-    
 
     // // DEBUG
     // cpu.reg[R_T0] = 2;
     // cpu.reg[R_A0] = 3;
 
     for (int i = 0; i < 100; i++) {
-        cpu_step(&cpu);
+        if (cpu_step(&cpu)) {
+            break;
+        }
     }
 
     //printf("REG R_T0: %d\n", cpu.reg[R_T0]);

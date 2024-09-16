@@ -9,10 +9,148 @@ void cpu_init(cpu_t* cpu) {
 
     // set pc to zero
     cpu->pc = 0x0000;
+
+    // set the stackpointer to 0x880000
+    cpu->reg[2] = 0x880000;
 }
 
-void cpu_step(cpu_t* cpu) {
-    
+uint32_t cpu_step(cpu_t* cpu) {
+
+    uint32_t encoded_instruction = fetch_instruction_at_pc(cpu);
+
+    asm_line_t asm_line;
+    reset_asm_line(&asm_line);
+    decode(encoded_instruction, &asm_line);
+
+    if (execute_instruction(cpu, &asm_line)) {
+        return -1;
+    }
+
+    //cpu->pc += 0x04;
+    cpu->pc += 0x01;
+
+    return 0;
+}
+
+uint32_t execute_instruction(cpu_t* cpu, const asm_line_t* asm_line) {
+
+    switch (asm_line->instruction) {
+
+        case I_ADD:
+            //printf("CPU ADD detected\n");
+            printf("CPU ADD rd: %s (%d), rs1: %s (%d), rs2: %s (%d)\n", register_to_string(asm_line->reg_rd), cpu->reg[asm_line->reg_rd], 
+                register_to_string(asm_line->reg_rs1), cpu->reg[asm_line->reg_rs1], 
+                register_to_string(asm_line->reg_rs2), cpu->reg[asm_line->reg_rs2]);
+            cpu->reg[asm_line->reg_rd] = cpu->reg[asm_line->reg_rs1] + cpu->reg[asm_line->reg_rs2];
+            break;
+
+        case I_ADDI:
+            //printf("CPU ADDI detected\n");
+            printf("CPU ADDI rd: %s (%d), rs1: %s (%d), imm: %d\n", register_to_string(asm_line->reg_rd), cpu->reg[asm_line->reg_rd], register_to_string(asm_line->reg_rs1), cpu->reg[asm_line->reg_rs1], sign_extend_12_bit_to_uint32_t(asm_line->imm));
+            cpu->reg[asm_line->reg_rd] = cpu->reg[asm_line->reg_rs1] + sign_extend_12_bit_to_uint32_t(asm_line->imm);
+            break;
+
+        // SW = Store Word
+        //
+        // Description:
+        // Store 32-bit value located in rs2 into the memory location at base+offset where
+        // base is rs1 and offset is the immediate value
+        //
+        // Documentation: 
+        // https://riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf - page 19
+        //
+        // Format: 
+        // SW rs2, imm(rs1)
+        // @param rs1 - base
+        // @param rs2 - source
+        // @param imm - offset from base
+        //
+        // Examples:
+        // fef42423, sw a5, -24(s0)
+        // 00812e23, sw s0, 28(sp)
+        case I_SW:
+        {
+            // DEBUG
+            printf("CPU SW rs1: Idx:%d, ABI-Name:%s (%d), rs2: Idx:%d, ABI-Name:%s (%d), imm: %d\n", 
+                asm_line->reg_rs1, register_to_string(asm_line->reg_rs1), sign_extend_12_bit_to_uint32_t(cpu->reg[asm_line->reg_rs1]), 
+                asm_line->reg_rs2, register_to_string(asm_line->reg_rs2), sign_extend_12_bit_to_uint32_t(cpu->reg[asm_line->reg_rs2]), 
+                sign_extend_12_bit_to_uint32_t(asm_line->imm));
+
+            uint32_t address = cpu->reg[asm_line->reg_rs1] + asm_line->imm;
+
+            // DEBUG
+            printf("address: 0x%08x\n", address);
+
+            uint32_t segment_address = address & 0xFFFF0000;
+            uint32_t instr_address = address & 0x0000FFFF;
+
+            // check if the segment is created already otherwise create it
+            std::map<uint32_t, uint32_t *>::iterator it = cpu->segments->find(segment_address);
+            if (it == cpu->segments->end()) {
+                uint32_t* segment_ptr = new uint32_t[16384];
+                cpu->segments->insert(std::pair<uint32_t, uint32_t*>(segment_address, segment_ptr));
+            }
+
+            printf("[STORE_WORD] value: %d -> address: 0x%08x\n", cpu->reg[asm_line->reg_rs2], address);
+
+            // store the source register into memory onto the stack
+            cpu->segments->at(segment_address)[instr_address/4] = cpu->reg[asm_line->reg_rs2];
+        }
+        break;
+
+        // LW = Load Word
+        //
+        // Description:
+        // The LW instruction loads a 32-bit value from memory into rd.
+        //
+        // Documentation: 
+        // https://riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf - page 19
+        //
+        // Format: 
+        // LW rd, imm(rs1)
+        // @param rd  - dest
+        // @param rs1 - base
+        // @param imm - offset from base
+        //
+        // Examples:
+        // fec42703, lw a4, -20(s0)
+        // 01c12403, lw s0, 28(sp)
+        case I_LW:
+        {
+            //printf("CPU LW detected\n");
+            printf("CPU LW rd: %s (%d), rs1: %s (%d), imm: %d\n", register_to_string(asm_line->reg_rd), cpu->reg[asm_line->reg_rd], register_to_string(asm_line->reg_rs1), cpu->reg[asm_line->reg_rs1], sign_extend_12_bit_to_uint32_t(asm_line->imm));
+
+            uint32_t address = cpu->reg[asm_line->reg_rs1] + asm_line->imm;
+
+            // DEBUG
+            printf("address: 0x%08x\n", address);
+
+            uint32_t segment_address = address & 0xFFFF0000;
+            uint32_t instr_address = address & 0x0000FFFF;
+
+            uint32_t temp_value = cpu->segments->at(segment_address)[instr_address/4];
+
+            printf("[LOAD_WORD] value: %d <- address: 0x%08x\n", temp_value, address);
+
+            cpu->reg[asm_line->reg_rd] = temp_value;
+        }
+        break;
+
+        case I_JALR:
+            printf("CPU JALR rd: %s (%d), rs1: %s (%d), imm: %d\n", register_to_string(asm_line->reg_rd), cpu->reg[asm_line->reg_rd], register_to_string(asm_line->reg_rs1), cpu->reg[asm_line->reg_rs1], sign_extend_12_bit_to_uint32_t(asm_line->imm));
+            break;
+
+        default:
+            printf("cpu::cpu_step() - Unknown instruction!\n");
+            return -1;
+
+    }
+
+    return 0;
+}
+
+uint32_t fetch_instruction_at_pc(cpu_t* cpu) {
+
     // printf("0: %d\n", (cpu->pc + 0));
     // printf("1: %d\n", (cpu->pc + 1));
     // printf("2: %d\n", (cpu->pc + 2));
@@ -36,7 +174,7 @@ void cpu_step(cpu_t* cpu) {
 
     std::map<uint32_t, uint32_t *>::iterator it = cpu->segments->find(segment_address);
     if (it == cpu->segments->end()) {
-        return;
+        return 0x00;
     }
     uint32_t* text_segment = it->second;
 
@@ -47,44 +185,7 @@ void cpu_step(cpu_t* cpu) {
         (((encoded_instruction >> 8) & 0xFF) << 16) |
         (((encoded_instruction >> 0) & 0xFF) << 24);
 
-    asm_line_t asm_line;
-    reset_asm_line(&asm_line);
-    decode(encoded_instruction, &asm_line);
-
-    switch (asm_line.instruction) {
-
-        case I_ADD:
-            //printf("CPU ADD detected\n");
-            printf("CPU ADD rd: %s (%d), rs1: %s (%d), rs2: %s (%d)\n", register_to_string(asm_line.reg_rd), cpu->reg[asm_line.reg_rd], register_to_string(asm_line.reg_rs1), cpu->reg[asm_line.reg_rs1], register_to_string(asm_line.reg_rs2), cpu->reg[asm_line.reg_rs2]);
-            cpu->reg[asm_line.reg_rd] = cpu->reg[asm_line.reg_rs1] + cpu->reg[asm_line.reg_rs2];
-            break;
-
-        case I_ADDI:
-            //printf("CPU ADDI detected\n");
-            printf("CPU ADDI rd: %s (%d), rs1: %s (%d), imm: %d\n", register_to_string(asm_line.reg_rd), cpu->reg[asm_line.reg_rd], register_to_string(asm_line.reg_rs1), cpu->reg[asm_line.reg_rs1], sign_extend_12_bit_to_uint32_t(asm_line.imm));
-            cpu->reg[asm_line.reg_rd] = cpu->reg[asm_line.reg_rs1] + asm_line.imm;
-            break;
-
-        case I_SW:
-            printf("CPU SW detected\n");
-            break;
-
-        case I_LW:
-            //printf("CPU LW detected\n");
-            printf("CPU LW rd: %s (%d), rs1: %s (%d), imm: %d\n", register_to_string(asm_line.reg_rd), cpu->reg[asm_line.reg_rd], register_to_string(asm_line.reg_rs1), cpu->reg[asm_line.reg_rs1], sign_extend_12_bit_to_uint32_t(asm_line.imm));
-            break;
-
-        case I_JALR:
-            printf("CPU JALR rd: %s (%d), rs1: %s (%d), imm: %d\n", register_to_string(asm_line.reg_rd), cpu->reg[asm_line.reg_rd], register_to_string(asm_line.reg_rs1), cpu->reg[asm_line.reg_rs1], sign_extend_12_bit_to_uint32_t(asm_line.imm));
-            break;
-
-        default:
-            printf("cpu::cpu_step() - Unknown instruction!\n");
-
-    }
-
-    //cpu->pc += 0x04;
-    cpu->pc += 0x01;
+    return encoded_instruction;
 }
 
 uint32_t sign_extend_12_bit_to_uint32_t(const uint16_t data) {

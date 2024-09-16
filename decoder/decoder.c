@@ -2,7 +2,7 @@
 
 void decode(uint32_t data, asm_line_t* asm_line) {
 
-    printf("decode 0x%08x\n", data);
+    //printf("decode 0x%08x\n", data);
 
     uint8_t funct7 = data & 0b1111111;
     uint8_t funct3 = (data >> (7+5)) & 0b111;
@@ -35,6 +35,8 @@ void decode(uint32_t data, asm_line_t* asm_line) {
             break;
     }
 }
+
+
 
 void decode_r_type(uint32_t data, asm_line_t* asm_line) {
 

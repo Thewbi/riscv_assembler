@@ -120,8 +120,9 @@ uint8_t IHexLoader::process_hex_line(const std::string& line) {
                 
                 if (word_read == 4) {
 
-                    uint32_t absolute_address = current_address | address;
-                    std::cout << std::setfill('0') << std::setw(8) << std::hex << +word << " -> " << absolute_address << std::endl;
+                    // // DEBUG
+                    // uint32_t absolute_address = current_address | address;
+                    // std::cout << std::setfill('0') << std::setw(8) << std::hex << +word << " -> " << absolute_address << std::endl;
 
                     segments.at(current_address)[address/4] = word;
 
@@ -134,8 +135,9 @@ uint8_t IHexLoader::process_hex_line(const std::string& line) {
 
             if (word_read > 0) {
 
-                uint32_t absolute_address = current_address | address;
-                std::cout << std::setfill('0') << std::setw(8) << std::hex << +word << " -> " << absolute_address << std::endl;
+                // // DEBUG
+                // uint32_t absolute_address = current_address | address;
+                // std::cout << std::setfill('0') << std::setw(8) << std::hex << +word << " -> " << absolute_address << std::endl;
 
                 segments.at(current_address)[address/4] = word;
             }
@@ -213,6 +215,7 @@ void IHexLoader::debug_output(uint16_t print_amount_per_segment) {
     std::map<uint32_t, uint32_t*>::iterator it;
     for (it = segments.begin(); it != segments.end(); it++)
     {
+
         std::cout << "\n" << std::setfill('0') << std::setw(8) << std::hex << it->first << std::endl;
 
         uint8_t column = 0;
