@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 
-#include "asm_line.h"
+#include "../data/asm_line.h"
 
 void decode(uint32_t data, asm_line_t* asm_line);
 

@@ -7,8 +7,8 @@
 #include <map>
 #include <vector>
 
-#include <asm_line.h>
-#include <decoder.h>
+#include "../data/asm_line.h"
+#include "../decoder/decoder.h"
 
 #define PC_INCREMENT 0x04
 
