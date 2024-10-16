@@ -8,8 +8,9 @@ void srli_decode_valid_input_test(void **state) {
 
     // Arrange
 
-    // https://www.eg.bucknell.edu/~csci206/riscv-converter/index.html
-    // add    t1, t0, a0  == 0x00A28333 = 0000000 01010 00101 000 00110 0110011
+    // https://luplab.gitlab.io/rvcodecjs/#q=0x011ad493&abi=false&isa=AUTO
+    // srli x9, x21, 17
+    // srli s1, s5, 17
     uint32_t data = 0x011ad493;
     asm_line_t asm_line;
 

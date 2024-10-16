@@ -19,6 +19,7 @@
 
 #include <slli_decode_test.h>
 #include <slli_encode_test.h>
+#include <sw_encode_test.h>
 
 #include <lb_with_offset_test.h>
 
@@ -44,7 +45,8 @@ int main(void)
         cmocka_unit_test(srli_decode_valid_input_test),
 
         cmocka_unit_test(slli_encode_valid_input_test),
-        cmocka_unit_test(slli_decode_valid_input_test)
+        cmocka_unit_test(slli_decode_valid_input_test),
+        cmocka_unit_test(sw_encode_valid_input_test)
 
     };
 
