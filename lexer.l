@@ -24,6 +24,7 @@
 
 "srli"  { /*printf("SRLI\n");*/ return SRLI; }
 "slli"  { /*printf("SRLI\n");*/ return SLLI; }
+"sw"    { /*printf("SRLI\n");*/ return SW; }
 
 "zero"  { /*printf("zero\n");*/ return REG_ZERO; } 
 "ra"    { /*printf("ra\n");*/ return REG_RA; } 
@@ -31,8 +32,8 @@
 "gp"    { /*printf("gp\n");*/ return REG_GP; } 
 "tp"    { /*printf("tp\n");*/ return REG_TP; } 
 
-"t0"    { /*printf("t0\n");*/ return REG_T0; } 
-"t1"    { /*printf("t1\n");*/ return REG_T1; }  
+"t0"    { /*printf("lexer t0\n");*/ return REG_T0; } 
+"t1"    { /*printf("lexer t1\n");*/ return REG_T1; }  
 "t2"    { /*printf("t2\n");*/ return REG_T2; } 
 "t3"    { /*printf("t3\n");*/ return REG_T3; } 
 "t4"    { /*printf("t4\n");*/ return REG_T4; } 
@@ -41,7 +42,7 @@
 
 "fp"    { /*printf("fp\n");*/ return REG_FP; } 
 
-"a0"    { /*printf("a0\n");*/ return REG_A0; }
+"a0"    { /*printf("lexer a0\n");*/ return REG_A0; }
 "a1"    { /*printf("a1\n");*/ return REG_A1; }
 "a2"    { /*printf("a2\n");*/ return REG_A2; }
 "a3"    { /*printf("a3\n");*/ return REG_A3; }

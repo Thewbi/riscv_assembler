@@ -33,7 +33,8 @@ int main(int argc, char **argv)
     // memory[3] = 0x93;
 
     //std::string ihex_file = "test/resources/add_example.hex";
-    std::string ihex_file = "test/resources/loop_example.hex";
+    //std::string ihex_file = "test/resources/loop_example.hex";
+    std::string ihex_file = "test/resources/loop_example_2.hex";
 
     IHexLoader ihex_loader;
     ihex_loader.load_ihex_file(ihex_file);

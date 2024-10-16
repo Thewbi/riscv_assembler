@@ -6,6 +6,7 @@
 #include <inttypes.h>
 
 // Adding new instruction
+//
 // 1. Update the lexer lexer.l (add a token that matches the instruction exactly. Add that rule before the identifier rule.)
 // 1. Update the parser parser.y (add a new <sym> tokena and add the instruction to the mnemonic rule)
 // 1. Update instruction_to_string() in asm_line.c
@@ -45,10 +46,10 @@ enum instruction {
     I_ADD,
 
     // S-Type
-    I_SW,
+    I_SW, // store word
 
     // J-Type
-    I_JAL,
+    I_JAL, // jump and link
 
     // undefined
     I_UNDEFINED_INSTRUCTION

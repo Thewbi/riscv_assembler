@@ -24,6 +24,10 @@ void encoder_callback(asm_line_t* asm_line) {
             encoded_asm_line = encode_slli(asm_line);
             break;
 
+        case I_SW:
+            encoded_asm_line = encode_sw(asm_line);
+            break;
+
         default:
             printf("Unknown instruction!\n");
             return;
@@ -36,6 +40,12 @@ void encoder_callback(asm_line_t* asm_line) {
 
 uint32_t encode_add(asm_line_t* asm_line) {
 
+    printf("encode_add\n");
+
+    printf("asm_line->reg_rd %d\n", asm_line->reg_rd);
+    printf("asm_line->reg_rs1 %d\n", asm_line->reg_rs1);
+    printf("asm_line->reg_rs2 %d\n", asm_line->reg_rs2);
+
     uint8_t funct7 = 0b0000000;
     uint8_t funct3 = 0b000;
     uint8_t opcode = 0b0110011;
@@ -44,10 +54,16 @@ uint32_t encode_add(asm_line_t* asm_line) {
     uint8_t rs1 = encode_register(asm_line->reg_rs1);
     uint8_t rs2 = encode_register(asm_line->reg_rs2);
 
+    printf("rd %d\n", rd);
+    printf("rs1 %d\n", rs1);
+    printf("rs2 %d\n", rs2);
+
     return encode_r_type(funct7, rs2, rs1, funct3, rd, opcode);
 }
 
 uint32_t encode_addi(asm_line_t* asm_line) {
+
+    printf("encode_addi\n");
 
     uint8_t funct3 = 0b000;
     uint8_t opcode = 0b0010011;
@@ -99,6 +115,35 @@ uint32_t encode_slli(asm_line_t* asm_line) {
     return encode_i_type(imm, rs1, funct3, rd, opcode);
 }
 
+// https://luplab.gitlab.io/rvcodecjs/#q=sw++++++ra,28(sp)&abi=false&isa=AUTO
+uint32_t encode_sw(asm_line_t* asm_line) {
+
+    printf("encode_sw\n");
+
+    printf("asm_line->reg_rd %d\n", asm_line->reg_rd);
+    printf("asm_line->reg_rs1 %d\n", asm_line->reg_rs1);
+    printf("asm_line->imm %d\n", asm_line->imm);
+
+    printf("asm_line->offset_0_used %d\n", asm_line->offset_0_used);
+    printf("asm_line->offset_0 %d\n", asm_line->offset_0);
+    
+    printf("asm_line->offset_1_used %d\n", asm_line->offset_1_used);
+    printf("asm_line->offset_1 %d\n", asm_line->offset_1);
+
+    printf("asm_line->offset_2_used %d\n", asm_line->offset_2_used);
+    printf("asm_line->offset_2 %d\n", asm_line->offset_2);
+
+    uint8_t funct3 = 0b010;
+    uint8_t opcode = 0b0100011;
+
+    uint8_t rd = encode_register(asm_line->reg_rd);
+    uint8_t rs1 = encode_register(asm_line->reg_rs1);
+    //uint16_t imm = asm_line->imm;
+    uint16_t imm = asm_line->offset_1;
+
+    return encode_s_type(imm, rd, rs1, funct3, opcode);
+}
+
 uint32_t encode_r_type(uint8_t funct7, uint8_t rs2, uint8_t rs1, uint8_t funct3, uint8_t rd, uint8_t opcode) {
 
     // printf("encode_r_type funct7: %d \n", funct7);
@@ -133,11 +178,11 @@ uint32_t encode_i_type(uint16_t imm, uint8_t rs1, uint8_t funct3, uint8_t rd, ui
 
 uint32_t encode_b_type(uint16_t imm, uint8_t rs2, uint8_t rs1, uint8_t funct3, uint8_t opcode) {
 
-    // printf("encode_b_type imm: %d \n", imm);
-    // printf("encode_b_type rs1: %d \n", rs1);
-    // printf("encode_b_type funct3: %d \n", funct3);
-    // printf("encode_b_type rd: %d \n", rd);
-    // printf("encode_b_type opcode: %d \n", opcode);
+    printf("encode_b_type imm: %d \n", imm);
+    printf("encode_b_type rs1: %d \n", rs1);
+    printf("encode_b_type funct3: %d \n", funct3);
+    printf("encode_b_type rs2: %d \n", rs2);
+    printf("encode_b_type opcode: %d \n", opcode);
 
     return ((opcode & 0b1111111) << 0) |
            ((imm & 0b11111) << 7) |
@@ -145,6 +190,10 @@ uint32_t encode_b_type(uint16_t imm, uint8_t rs2, uint8_t rs1, uint8_t funct3, u
            ((rs1 & 0b11111) << (7+5+3)) |
            ((rs2 & 0b11111) << (7+5+3+5)) |
            ((imm & 0b111111100000) << (7+5+3+5+5));
+}
+
+uint32_t encode_s_type(uint16_t imm, uint8_t rs2, uint8_t rs1, uint8_t funct3, uint8_t opcode) {
+    return encode_b_type(imm, rs2, rs1, funct3, opcode);
 }
 
 uint8_t encode_register(enum register_ data) {

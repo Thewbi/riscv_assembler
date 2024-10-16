@@ -82,14 +82,32 @@ At the very end of the output, theres should be a message that all tests has pas
 
 ## Adding new instruction
 
+*Pro Tip:* Before you make any changes to the application, start by
+compiling and running the unit tests to see if the application currently
+is in a good state or if anything is broken already before you change the code.
+
 1. Update the lexer lexer.l (add a token that matches the instruction exactly. Add that rule before the identifier rule.)
-1. Update the parser parser.y (add a new <sym> tokena and add the instruction to the mnemonic rule)
+1. Update the parser parser.y (add a new <sym> token and add the instruction to the mnemonic rule)
 1. Update instruction_to_string() in asm_line.c
 1. update the instruction-enum in asm_line.h (this file)
 1. Update encoder/encoder.h
 1. Update decoder/decoder.h
-1. Add test to test\unit_tests\main.c
+1. Add test to test\unit_tests\main.c (this entails creating a new pair of .c/.h for the new test)
 1. Add the test files .c/.h to test\Makefile so that they get compiled
+1. Generate the lexer and the parser (only once as long as you do not change lexer.l and parser.y)
+```
+cd ~/dev/riscv/risc_assembler
+make
+```
+1. Navigate into the test folder and compile the unit tests:
+```
+cd test
+make
+```
+1. Run the unit tests:
+```
+./cmockatest
+```
 
 
 

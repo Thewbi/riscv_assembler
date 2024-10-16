@@ -14,10 +14,12 @@ void decode(uint32_t data, asm_line_t* asm_line) {
             break;
 
         case 0b0000011: // LW fe442783 I_TYPE
-        case 0b0010011: // ADDI 0x02010113 I_TYPE
-            if ((funct3 != 0b001) & (funct3 != 0b101)) {
-                decode_i_type(data, asm_line, funct7, funct3);
-            }
+        case 0b0010011: // SRLI, ADDI 0x02010113 I_TYPE
+            //if ((funct3 != 0b001) & (funct3 != 0b101)) {
+            //if (funct3 != 0b101) {
+            //    decode_i_type(data, asm_line, funct7, funct3);
+            //}
+            //break;
         case 0b1100111: // JALR x0, 0(x1) aka. RET, 0x00008067, I-Type
             decode_i_type(data, asm_line, funct7, funct3);
             break;
@@ -87,7 +89,7 @@ void decode_r_type(uint32_t data, asm_line_t* asm_line) {
 
 void decode_i_type(uint32_t data, asm_line_t* asm_line, uint8_t funct7, uint8_t funct3) {
 
-    //printf("decode_i_type\n");
+    printf("decode_i_type\n");
     //printf("0x%08x\n", data);
 
     uint8_t rd = (data >> 7) & 0b11111;
@@ -134,6 +136,10 @@ void decode_i_type(uint32_t data, asm_line_t* asm_line, uint8_t funct7, uint8_t 
                     asm_line->instruction = I_ADDI;
                     break;
 
+                case 0b001:
+                    asm_line->instruction = I_SLLI;
+                    break;
+
                 case 0b010:
                     asm_line->instruction = I_SLTI;
                     break;
@@ -144,6 +150,10 @@ void decode_i_type(uint32_t data, asm_line_t* asm_line, uint8_t funct7, uint8_t 
 
                 case 0b100:
                     asm_line->instruction = I_XORI;
+                    break;
+
+                case 0b101:
+                    asm_line->instruction = I_SRLI;
                     break;
                     
                 case 0b110:

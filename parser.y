@@ -42,7 +42,7 @@ void (*fp_emit)(asm_line_t*);
   char sym;
 };
 
-%token <sym> ADD ADDI BEQ JALR LB LI SRLI SLLI
+%token <sym> ADD ADDI BEQ JALR LB LI SRLI SLLI SW
 %token <sym> NEW_LINE
 %token <int_val> NUMERIC
 %token <sym> IDENTIFIER
@@ -99,6 +99,7 @@ mnemonic : ADD { /*printf("Parser-ADD: %d\n", I_ADD);*/ parser_asm_line.instruct
     | LI { /*printf("Parser-LI: %d\n", I_LI);*/ parser_asm_line.instruction = I_LI; parser_asm_line.instruction_type = IT_I; }
     | SRLI { /*printf("Parser-SRLI: %d\n", I_SRLI);*/ parser_asm_line.instruction = I_SRLI; parser_asm_line.instruction_type = IT_I; }
     | SLLI { /*printf("Parser-SLLI: %d\n", I_SLLI);*/ parser_asm_line.instruction = I_SLLI; parser_asm_line.instruction_type = IT_I; }
+    | SW { /*printf("Parser-SW: %d\n", I_SW);*/ parser_asm_line.instruction = I_SW; parser_asm_line.instruction_type = IT_S; }
 
 register : REG_ZERO { /*printf("REG_ZERO\n");*/ insert_register(&parser_asm_line, R_ZERO); }
     | REG_RA { /*printf("REG_RA\n");*/ insert_register(&parser_asm_line, R_RA); }
