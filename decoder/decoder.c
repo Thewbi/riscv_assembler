@@ -89,7 +89,7 @@ void decode_r_type(uint32_t data, asm_line_t* asm_line) {
 
 void decode_i_type(uint32_t data, asm_line_t* asm_line, uint8_t funct7, uint8_t funct3) {
 
-    printf("decode_i_type\n");
+    //printf("decode_i_type\n");
     //printf("0x%08x\n", data);
 
     uint8_t rd = (data >> 7) & 0b11111;

@@ -28,6 +28,11 @@ void sw_encode_valid_input_test(void **state)
 
     reset_asm_line(&parser_asm_line);
 
+    // printf("reset parser_asm_line->reg_rd %d\n", parser_asm_line.reg_rd);
+    // printf("reset parser_asm_line->reg_rs1 %d\n", parser_asm_line.reg_rs1);
+    // printf("reset parser_asm_line->reg_rs2 %d\n", parser_asm_line.reg_rs2);
+    // printf("reset parser_asm_line->imm %d\n", parser_asm_line.imm);
+
     //fp_emit = &emit;
 
     yyin = fopen("resources/sw.s", "r");
@@ -44,9 +49,10 @@ void sw_encode_valid_input_test(void **state)
     // The parser will load data into the variable parser_asm_line
     yyparse();
 
-    printf("parser_asm_line->reg_rd %d\n", parser_asm_line.reg_rd);
-    printf("parser_asm_line->reg_rs1 %d\n", parser_asm_line.reg_rs1);
-    printf("parser_asm_line->imm %d\n", parser_asm_line.imm);
+    // printf("parser_asm_line->reg_rd %d\n", parser_asm_line.reg_rd);
+    // printf("parser_asm_line->reg_rs1 %d\n", parser_asm_line.reg_rs1);
+    // printf("parser_asm_line->reg_rs2 %d\n", parser_asm_line.reg_rs2);
+    // printf("parser_asm_line->imm %d\n", parser_asm_line.imm);
     
     uint32_t result = encode_sw(&parser_asm_line);
 

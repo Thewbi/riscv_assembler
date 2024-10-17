@@ -34,6 +34,8 @@ test: unit_tests/main.c \
 	unit_tests/slli_encode_test.h \
 	unit_tests/sw_encode_test.c \
 	unit_tests/sw_encode_test.h \
+	unit_tests/sw_decode_test.c \
+	unit_tests/sw_decode_test.h \
 	../data/asm_line.c \
 	../parser.c \
 	../parser.h
@@ -50,6 +52,7 @@ test: unit_tests/main.c \
 	unit_tests/slli_decode_test.c \
 	unit_tests/slli_encode_test.c \
 	unit_tests/sw_encode_test.c \
+	unit_tests/sw_decode_test.c \
 	../data/asm_line.c \
 	../decoder/decoder.c \
 	../encoder/encoder.c \

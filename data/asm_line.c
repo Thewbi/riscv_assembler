@@ -9,6 +9,8 @@ void reset_asm_line(asm_line_t *data) {
     data->reg_rs1 = R_UNDEFINED_REGISTER;
     data->reg_rs2 = R_UNDEFINED_REGISTER;
 
+    data->imm = 0;
+
     data->offset_0 = 0;
     data->offset_1 = 0;
     data->offset_2 = 0;
@@ -20,7 +22,7 @@ void reset_asm_line(asm_line_t *data) {
 
 void insert_register(asm_line_t *data, enum register_ reg) {
 
-    if (data->instruction_type == IT_B) {
+    if (data->instruction_type == IT_B || data->instruction_type == IT_S) {
 
         if (R_UNDEFINED_REGISTER == data->reg_rs1) {
             data->reg_rs1 = reg;
@@ -50,7 +52,7 @@ void insert_register(asm_line_t *data, enum register_ reg) {
 }
 
 void insert_offset(asm_line_t *data, uint32_t offset, uint8_t index) {
-    printf("ASM_LINE: insert_offset - offset_value: %d offset_index: %d\n", offset, index);
+    //printf("ASM_LINE: insert_offset - offset_value: %d offset_index: %d\n", offset, index);
     switch(index) {
         case 0: data->offset_0 = offset; data->offset_0_used = 1; break;
         case 1: data->offset_1 = offset; data->offset_1_used = 1; break;
@@ -61,7 +63,7 @@ void insert_offset(asm_line_t *data, uint32_t offset, uint8_t index) {
 }
 
 void insert_integer_immediate(asm_line_t *data, uint16_t imm) {
-    printf("ASM_LINE: insert_integer_immediate: %d\n", imm);
+    //printf("ASM_LINE: insert_integer_immediate: %d\n", imm);
     data->imm = imm;
 }
 

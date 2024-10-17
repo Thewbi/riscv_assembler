@@ -22,7 +22,7 @@
 
 //-- Lexer prototype required by bison, aka getNextToken()
 int yylex(); 
-int yyerror(const char *p) { printf("Error!\n"); return 1; }
+int yyerror(const char *p) { printf("yyerror() - Error! '%s'\n", p); return 1; }
 
 #ifdef USE_INTERNAL_DRIVER
     asm_line_t parser_asm_line;
@@ -60,7 +60,14 @@ void (*fp_emit)(asm_line_t*);
 
 /* https://stackoverflow.com/questions/47687247/does-bison-allow-in-its-syntax */
 
-asm_file : line_end asm_file | asm_line line_end asm_file | asm_line line_end
+asm_file : 
+    line_end asm_file 
+    |
+    asm_line line_end asm_file
+    |
+    asm_line line_end
+    |
+    asm_line
 
 line_end : NEW_LINE
 
