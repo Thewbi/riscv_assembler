@@ -127,6 +127,21 @@ uint32_t encode_mul(asm_line_t* asm_line) {
     return encode_r_type(funct7, rs2, rs1, funct3, rd, opcode);
 }
 
+// mv (move) is a pseudoinstruction. It is implemented using: 
+// mv rd, rs --> addi rd, rs, 0
+// mv a0, a5 --> addi a0, a5, 0
+uint32_t encode_mv(asm_line_t* asm_line) {
+
+    uint8_t funct3 = 0b000;
+    uint8_t opcode = 0b0010011;
+    uint16_t imm = 0;
+
+    uint8_t rs1 = encode_register(asm_line->reg_rs1);
+    uint8_t rd = encode_register(asm_line->reg_rd);
+
+    return encode_i_type(imm, rs1, funct3, rd, opcode);
+}
+
 uint32_t encode_srli(asm_line_t* asm_line) {
 
     //printf("encode_srli\n");

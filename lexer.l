@@ -24,6 +24,7 @@
 "lw"    { /*printf("LW\n");*/ return LW; }
 
 "mul"    { /*printf("MUL\n");*/ return MUL; }
+"mv"    { /*printf("MV\n");*/ return MV; }
 
 "srli"  { /*printf("SRLI\n");*/ return SRLI; }
 "slli"  { /*printf("SRLI\n");*/ return SLLI; }

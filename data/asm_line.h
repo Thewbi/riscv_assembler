@@ -52,6 +52,9 @@ enum instruction {
     // J-Type
     I_JAL, // jump and link
 
+    // P-Type (pseudoinstruction)
+    I_MV, // pseudo instruction
+
     // undefined
     I_UNDEFINED_INSTRUCTION
 };
@@ -63,6 +66,7 @@ enum instruction_type {
     IT_B,
     IT_U,
     IT_J,
+    IT_P, // (pseudoinstruction) you will not find P-Type in the RISC V specification!
     IT_UNDEFINED_INSTRUCTION
 };
 

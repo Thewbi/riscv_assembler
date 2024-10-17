@@ -20,6 +20,9 @@
 #include <mul_encode_test.h>
 #include <mul_decode_test.h>
 
+#include <mv_encode_test.h>
+#include <mv_decode_test.h>
+
 #include <srli_decode_test.h>
 #include <srli_encode_test.h>
 
@@ -54,6 +57,9 @@ int main(void)
 
         cmocka_unit_test(mul_encode_valid_input_test),
         cmocka_unit_test(mul_decode_valid_input_test),
+
+        cmocka_unit_test(mv_encode_valid_input_test),
+        cmocka_unit_test(mv_decode_valid_input_test),
 
         cmocka_unit_test(srli_encode_valid_input_test),
         cmocka_unit_test(srli_decode_valid_input_test),
