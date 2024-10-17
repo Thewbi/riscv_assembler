@@ -72,7 +72,21 @@ void insert_offset(asm_line_t *data, uint32_t offset, uint8_t index) {
 }
 
 void insert_integer_immediate(asm_line_t *data, uint32_t imm) {
+
+    if (data->instruction == I_LI) {
+
+        // DEBUG
+        //printf("ASM_LINE LI: insert_integer_immediate: %d\n", imm);
+        //printf("ASM_LINE LI: 0x%" PRIx64 "\n", imm);
+        //printf("ASM_LINE LI: %08" PRIx32 "\n", imm);
+        data->imm = imm;
+
+        return;
+    }
+    
+    // DEBUG
     //printf("ASM_LINE: insert_integer_immediate: %d\n", imm);
+    
     uint32_t sign_extended = sign_extend_20_bit_to_uint32_t(imm);
     data->imm = sign_extended;
 }

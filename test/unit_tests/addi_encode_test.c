@@ -53,5 +53,8 @@ void addi_encode_valid_input_test(void **state)
     // assert_int_equal(R_T0, parser_asm_line.reg_rs1);
 
     assert_int_equal(0x00F28293, result);
+
+    // addi    a0,a0,-273
+    //assert_int_equal(0xeef50513, result);
 }
 

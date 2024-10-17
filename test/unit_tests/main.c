@@ -20,6 +20,9 @@
 #include <lui_encode_test.h>
 #include <lui_decode_test.h>
 
+#include <li_encode_test.h>
+#include <li_decode_test.h>
+
 #include <mul_encode_test.h>
 #include <mul_decode_test.h>
 
@@ -57,6 +60,9 @@ int main(void)
 
         cmocka_unit_test(lui_encode_valid_input_test),
         cmocka_unit_test(lui_decode_valid_input_test),
+
+        cmocka_unit_test(li_encode_valid_input_test),
+        cmocka_unit_test(li_decode_valid_input_test),
 
         cmocka_unit_test(lw_encode_valid_input_test),
         cmocka_unit_test(lw_decode_valid_input_test),

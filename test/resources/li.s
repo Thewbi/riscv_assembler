@@ -3,4 +3,4 @@
 //.equ  CONSTANT, 0xdeadbeef
 //li    a0, CONSTANT
 
-li    a0, 10
+li a0, 0xdeadbeef

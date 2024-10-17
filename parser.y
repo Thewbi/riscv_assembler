@@ -68,6 +68,8 @@ asm_file :
     asm_line line_end
     |
     asm_line
+    |
+    line_end
 
 line_end : NEW_LINE
 

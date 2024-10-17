@@ -29,6 +29,8 @@ uint32_t encode_lw(asm_line_t* asm_line);
 
 uint32_t encode_lui(asm_line_t* asm_line);
 
+void encode_li(asm_line_t* asm_line, uint32_t* output_buffer);
+
 uint32_t encode_mul(asm_line_t* asm_line);
 
 uint32_t encode_mv(asm_line_t* asm_line);
