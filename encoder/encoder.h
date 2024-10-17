@@ -27,6 +27,8 @@ uint32_t encode_beq(asm_line_t* asm_line);
 
 uint32_t encode_lw(asm_line_t* asm_line);
 
+uint32_t encode_lui(asm_line_t* asm_line);
+
 uint32_t encode_mul(asm_line_t* asm_line);
 
 uint32_t encode_mv(asm_line_t* asm_line);
@@ -43,8 +45,10 @@ uint32_t encode_r_type(uint8_t funct7, uint8_t rs2, uint8_t rs1, uint8_t funct3,
 
 uint32_t encode_i_type(uint16_t imm, uint8_t rs1, uint8_t funct3, uint8_t rd, uint8_t opcode);
 
+uint32_t encode_s_type(uint16_t imm, uint8_t rs2, uint8_t rs1, uint8_t funct3, uint8_t opcode);
+
 uint32_t encode_b_type(uint16_t imm, uint8_t rs2, uint8_t rs1, uint8_t funct3, uint8_t opcode);
 
-uint32_t encode_s_type(uint16_t imm, uint8_t rs2, uint8_t rs1, uint8_t funct3, uint8_t opcode);
+uint32_t encode_u_type(uint32_t imm, uint8_t rd, uint8_t opcode);
 
 #endif

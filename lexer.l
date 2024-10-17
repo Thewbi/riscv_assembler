@@ -22,8 +22,9 @@
 "lb"	{ /*printf("LB\n");*/ return LB; }
 "li"    { /*printf("LI\n");*/ return LI; }
 "lw"    { /*printf("LW\n");*/ return LW; }
+"lui"   { /*printf("LUI\n");*/ return LUI; }
 
-"mul"    { /*printf("MUL\n");*/ return MUL; }
+"mul"   { /*printf("MUL\n");*/ return MUL; }
 "mv"    { /*printf("MV\n");*/ return MV; }
 
 "srli"  { /*printf("SRLI\n");*/ return SRLI; }
@@ -81,7 +82,7 @@
 
 "-"?[0-9]+  { yylval.int_val = atoi(yytext); return NUMERIC; }
 
-"-"?"0"[xX][0-9A-F]+  { yylval.int_val = strtol(yytext, NULL, 0); return NUMERIC; }
+"-"?"0"[xX][0-9a-fA-F]+  { yylval.int_val = strtol(yytext, NULL, 0); return NUMERIC; }
 
 "."     { return DOT; }
 ":"     { return COLON; }

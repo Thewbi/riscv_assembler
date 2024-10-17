@@ -1,5 +1,14 @@
 #include "asm_line.h"
 
+uint32_t sign_extend_20_bit_to_uint32_t(const uint32_t data) {
+
+    uint32_t most_significant_bit = data & 0b10000000000000000000;
+    if (most_significant_bit) {
+        return 0xFFF00000 | data;
+    }
+    return data;
+}
+
 void reset_asm_line(asm_line_t *data) {
 
     data->instruction = I_UNDEFINED_INSTRUCTION;
@@ -62,9 +71,10 @@ void insert_offset(asm_line_t *data, uint32_t offset, uint8_t index) {
     }
 }
 
-void insert_integer_immediate(asm_line_t *data, uint16_t imm) {
+void insert_integer_immediate(asm_line_t *data, uint32_t imm) {
     //printf("ASM_LINE: insert_integer_immediate: %d\n", imm);
-    data->imm = imm;
+    uint32_t sign_extended = sign_extend_20_bit_to_uint32_t(imm);
+    data->imm = sign_extended;
 }
 
 void print_asm_line(const asm_line_t *data) {

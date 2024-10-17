@@ -114,6 +114,18 @@ uint32_t encode_lw(asm_line_t* asm_line) {
     return encode_i_type(imm, rs1, funct3, rd, opcode);
 }
 
+uint32_t encode_lui(asm_line_t* asm_line) {
+
+    uint8_t opcode = 0b0110111;
+
+    uint8_t rd = encode_register(asm_line->reg_rd);
+    uint32_t imm = asm_line->imm;
+
+    //printf("encode_lui asm_line->imm: %d\n", imm);
+
+    return encode_u_type(imm, rd, opcode);
+}
+
 uint32_t encode_mul(asm_line_t* asm_line) {
 
     uint8_t funct7 = 0b0000001;
@@ -248,6 +260,17 @@ uint32_t encode_b_type(uint16_t imm, uint8_t rs2, uint8_t rs1, uint8_t funct3, u
 
 uint32_t encode_s_type(uint16_t imm, uint8_t rs2, uint8_t rs1, uint8_t funct3, uint8_t opcode) {
     return encode_b_type(imm, rs2, rs1, funct3, opcode);
+}
+
+uint32_t encode_u_type(uint32_t imm, uint8_t rd, uint8_t opcode) {
+
+    //printf("encode_u_type opcode: %d \n", opcode);
+    //printf("encode_u_type rd: %d \n", rd);
+    //printf("encode_u_type imm: %d \n", imm);
+
+    return ((opcode & 0b1111111) << 0) |
+           ((rd & 0b11111) << 7) |
+           ((imm & 0b11111111111111111111) << (7+5));
 }
 
 uint8_t encode_register(enum register_ data) {

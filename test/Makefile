@@ -28,6 +28,10 @@ test: unit_tests/main.c \
 	unit_tests/lw_encode_test.h \
 	unit_tests/lw_decode_test.c \
 	unit_tests/lw_decode_test.h \
+	unit_tests/lui_encode_test.c \
+	unit_tests/lui_encode_test.h \
+	unit_tests/lui_decode_test.c \
+	unit_tests/lui_decode_test.h \
 	unit_tests/mul_encode_test.c \
 	unit_tests/mul_encode_test.h \
 	unit_tests/mul_decode_test.c \
@@ -61,6 +65,8 @@ test: unit_tests/main.c \
 	unit_tests/lb_with_offset_test.c \
 	unit_tests/lw_encode_test.c \
 	unit_tests/lw_decode_test.c \
+	unit_tests/lui_encode_test.c \
+	unit_tests/lui_decode_test.c \
 	unit_tests/mul_encode_test.c \
 	unit_tests/mul_decode_test.c \
 	unit_tests/mv_encode_test.c \

@@ -49,6 +49,9 @@ enum instruction {
     // S-Type
     I_SW, // store word
 
+    // U-Type
+    I_LUI,
+
     // J-Type
     I_JAL, // jump and link
 
@@ -121,7 +124,7 @@ typedef struct asm_line {
     enum register_ reg_rs1;
     enum register_ reg_rs2;
 
-    uint16_t imm;
+    uint32_t imm;
 
     uint16_t offset_0;
     uint16_t offset_1;
@@ -153,7 +156,7 @@ void insert_offset(asm_line_t *data, uint32_t offset, uint8_t index);
 /**
  * 
  */
-void insert_integer_immediate(asm_line_t *data, uint16_t imm);
+void insert_integer_immediate(asm_line_t *data, uint32_t imm);
 
 /**
  * Prints a asm_line using printf().

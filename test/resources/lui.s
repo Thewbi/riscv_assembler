@@ -1,0 +1,1 @@
+lui a0,0xdeadc

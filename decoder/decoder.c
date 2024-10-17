@@ -39,6 +39,10 @@ void decode(uint32_t data, asm_line_t* asm_line) {
             decode_j_type(data, asm_line);
             break;
 
+        case 0b0110111:
+            decode_u_type(data, asm_line);
+            break;
+
         default:
             printf("decode() - Unknown instruction!\n");
             break;
@@ -255,6 +259,18 @@ void decode_j_type(uint32_t data, asm_line_t* asm_line) {
     asm_line->imm = (imm20 << 20) | (imm19_12 << 12) | (imm11 << 11) | (imm10_1 << 1);
 
     asm_line->instruction = I_JAL;
+}
+
+void decode_u_type(uint32_t data, asm_line_t* asm_line) {
+
+    //printf("decode_u_type\n");
+
+    uint16_t rd = (data >> (7)) & 0b11111;
+    asm_line->reg_rd = decode_register(rd);
+
+    asm_line->imm = (data >> (12)) & 0b11111111111111111111;
+
+    asm_line->instruction = I_LUI;
 }
 
 enum register_ decode_register(uint8_t data) {
