@@ -44,6 +44,7 @@ enum instruction {
     
     // R-Type
     I_ADD,
+    I_MUL,
 
     // S-Type
     I_SW, // store word

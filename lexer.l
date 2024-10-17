@@ -23,6 +23,8 @@
 "li"    { /*printf("LI\n");*/ return LI; }
 "lw"    { /*printf("LW\n");*/ return LW; }
 
+"mul"    { /*printf("MUL\n");*/ return MUL; }
+
 "srli"  { /*printf("SRLI\n");*/ return SRLI; }
 "slli"  { /*printf("SRLI\n");*/ return SLLI; }
 "sw"    { /*printf("SRLI\n");*/ return SW; }
