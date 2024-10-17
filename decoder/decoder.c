@@ -1,5 +1,13 @@
 #include "decoder.h"
 
+uint16_t sign_extend_uint16_t(uint16_t data) {
+    uint16_t sign = data & 0b100000000000;
+    if (sign) {
+        return 0b1111000000000000 | data;
+    }
+    return data;
+}
+
 void decode(uint32_t data, asm_line_t* asm_line) {
 
     //printf("decode 0x%08x\n", data);
@@ -96,6 +104,7 @@ void decode_i_type(uint32_t data, asm_line_t* asm_line, uint8_t funct7, uint8_t 
     // uint8_t funct3 = (data >> (7+5)) & 0b111;
     uint8_t rs1 = (data >> (7+5+3)) & 0b11111;
     uint16_t imm = (data >> (7+5+3+5)) & 0b111111111111;
+    imm = sign_extend_uint16_t(imm);
 
     asm_line->reg_rd = decode_register(rd);
     asm_line->reg_rs1 = decode_register(rs1);

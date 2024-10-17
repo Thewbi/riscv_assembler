@@ -87,6 +87,33 @@ uint32_t encode_beq(asm_line_t* asm_line) {
     return encode_b_type(imm, rs2, rs1, funct3, opcode);
 }
 
+uint32_t encode_lw(asm_line_t* asm_line) {
+
+    // printf("encode_sw\n");
+
+    // printf("asm_line->reg_rs1 %d\n", asm_line->reg_rs1);
+    // printf("asm_line->reg_rs2 %d\n", asm_line->reg_rs2);
+    // printf("asm_line->imm %d\n", asm_line->imm);
+
+    // printf("asm_line->offset_0_used %d\n", asm_line->offset_0_used);
+    // printf("asm_line->offset_0 %d\n", asm_line->offset_0);
+    
+    // printf("asm_line->offset_1_used %d\n", asm_line->offset_1_used);
+    // printf("asm_line->offset_1 %d\n", asm_line->offset_1);
+
+    // printf("asm_line->offset_2_used %d\n", asm_line->offset_2_used);
+    // printf("asm_line->offset_2 %d\n", asm_line->offset_2);
+
+    uint8_t funct3 = 0b010;
+    uint8_t opcode = 0b0000011;
+
+    uint8_t rs1 = encode_register(asm_line->reg_rs1);
+    uint8_t rd = encode_register(asm_line->reg_rd);
+    uint16_t imm = asm_line->offset_1;
+
+    return encode_i_type(imm, rs1, funct3, rd, opcode);
+}
+
 uint32_t encode_srli(asm_line_t* asm_line) {
 
     //printf("encode_srli\n");
