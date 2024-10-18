@@ -64,7 +64,7 @@ void insert_offset(asm_line_t *data, uint32_t offset, uint8_t index) {
 
 void insert_integer_immediate(asm_line_t *data, uint32_t imm) {
 
-    if (data->instruction == I_LI || data->instruction == I_J) {
+    if (data->instruction == I_LI || data->instruction == I_J || data->instruction == I_CALL) {
 
         // DEBUG
         //printf("ASM_LINE LI: insert_integer_immediate: %d\n", imm);
@@ -93,15 +93,40 @@ void print_asm_line(const asm_line_t *data) {
 const char* instruction_to_string(enum instruction data) {
 
     switch(data) {
+
         case I_ADD: return "ADD";
         case I_ADDI: return "ADDI";
+        case I_ANDI: return "ANDI";
+        case I_AUIPC: return "AUIPC";
+
         case I_BEQ: return "BEQ";
-        case I_LB: return "LB";
-        case I_LI: return "LI";
+        case I_BGE: return "BGE";
+
+        case I_CALL: return "CALL"; // pseudo instruction
+
+        case I_J: return "J"; // pseudo instruction
+        case I_JAL: return "JAL";
         case I_JALR: return "JALR";
-        case I_SRLI: return "SRLI";
+
+        case I_LB: return "LB";
+        case I_LH: return "LH";
+        case I_LBU: return "LBU";
+        case I_LHU: return "LHU";
+        case I_LI: return "LI";
+        case I_LUI: return "LUI";
+        case I_LW: return "LW";
+
+        case I_MUL: return "MUL";
+        case I_MV: return "MV"; // pseudo instruction
+
+        case I_ORI: return "ORI";
+
         case I_SLLI: return "SLLI";
+        case I_SRLI: return "SRLI";
+        case I_SLTIU: return "SLTIU";
         case I_SW: return "SW";
+
+        case I_XORI: return "XORI";
         
         default: return "UNKNOWN";
     }

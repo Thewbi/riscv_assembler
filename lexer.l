@@ -17,6 +17,8 @@
 
 "beq"   { /*printf("BEQ\n");*/ return BEQ; }
 
+"call"   { /*printf("CALL\n");*/ return CALL; }
+
 "j"     { /*printf("J\n");*/ return J; }
 "jalr"  { /*printf("JALR\n");*/ return JALR; }
 

@@ -11,6 +11,9 @@
 #include <addi_encode_test.h>
 #include <addi_decode_test.h>
 
+#include <call_encode_test.h>
+#include <call_decode_test.h>
+
 #include <beq_encode_test.h>
 #include <beq_decode_test.h>
 
@@ -55,6 +58,9 @@ int main(void)
 
         cmocka_unit_test(addi_encode_valid_input_test),
         cmocka_unit_test(addi_decode_valid_input_test),
+
+        cmocka_unit_test(call_encode_valid_input_test),
+        cmocka_unit_test(call_decode_valid_input_test),
 
         cmocka_unit_test(beq_encode_valid_input_test),
         cmocka_unit_test(beq_decode_valid_input_test),

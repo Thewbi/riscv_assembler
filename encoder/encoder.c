@@ -87,7 +87,45 @@ uint32_t encode_beq(asm_line_t* asm_line) {
     return encode_b_type(imm, rs2, rs1, funct3, opcode);
 }
 
+void encode_call(asm_line_t* asm_line, uint32_t* output_buffer) {
+
+    // auipc x6, offset[31:12] 
+    // jalr x1, x6, offset[11:0]
+
+    uint32_t data_0 = (asm_line->imm & 0xFFFFF000) >> 12;
+    uint32_t data_1 = (asm_line->imm & 0xFFF);
+
+    enum register_ free_temp_register = R_T1; // x6
+
+    // aupic instruction (auipc x6, 0x0BFFF -> 0x0bfff317)
+    uint8_t opcode = 0b0010111;
+    uint8_t rd = encode_register(free_temp_register);
+    uint32_t imm = data_0;
+    printf("encode_aupic imm: %d\n", imm);
+
+    uint32_t aupic_encoded = encode_u_type(imm, rd, opcode);
+    printf("aupic_encoded: %08" PRIx32 "\n", aupic_encoded);
+
+    output_buffer[0] = aupic_encoded;
+
+    // 8. Take data_2 and create a jalr instruction. Use data_2 as the offset
+    uint8_t funct3 = 0b000;
+    opcode = 0b1100111;
+
+    rd = encode_register(R_ZERO);
+    uint8_t rs1 = encode_register(free_temp_register);
+    imm = data_1;
+
+    uint32_t jalr_encoded = encode_i_type(imm, rs1, funct3, rd, opcode);
+    printf("jalr_encoded: %08" PRIx32 "\n", jalr_encoded);
+
+    output_buffer[1] = jalr_encoded;
+}
+
 void encode_j(asm_line_t* asm_line, uint32_t* output_buffer) {
+
+    // implemented using:
+    // https://www.reddit.com/r/RISCV/comments/129qg6t/can_someone_pls_explain/?tl=de
 
     uint32_t data_0 = asm_line->imm;
     printf("data_0: %08" PRIx32 "\n", data_0);
