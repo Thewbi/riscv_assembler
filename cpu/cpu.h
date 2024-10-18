@@ -38,8 +38,6 @@ void cpu_init(cpu_t* cpu);
 
 uint32_t cpu_step(cpu_t* cpu);
 
-uint32_t sign_extend_12_bit_to_uint32_t(const uint16_t data);
-
 uint32_t fetch_instruction_at_pc(cpu_t* cpu);
 
 uint32_t execute_instruction(cpu_t* cpu, const asm_line_t* asm_line);

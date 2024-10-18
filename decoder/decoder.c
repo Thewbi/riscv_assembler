@@ -1,13 +1,5 @@
 #include "decoder.h"
 
-uint16_t sign_extend_uint16_t(uint16_t data) {
-    uint16_t sign = data & 0b100000000000;
-    if (sign) {
-        return 0b1111000000000000 | data;
-    }
-    return data;
-}
-
 void decode(uint32_t data, asm_line_t* asm_line) {
 
     //printf("decode 0x%08x\n", data);

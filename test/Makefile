@@ -8,6 +8,8 @@ all: test
 
 # compile executable that runs all tests
 test: unit_tests/main.c \
+	../common/common.h \
+	../common/common.c \
 	../decoder/decoder.h \
 	../decoder/decoder.c \
 	../encoder/encoder.h \
@@ -22,6 +24,10 @@ test: unit_tests/main.c \
 	unit_tests/beq_decode_test.h \
 	unit_tests/beq_encode_test.c \
 	unit_tests/beq_encode_test.h \
+	unit_tests/j_encode_test.c \
+	unit_tests/j_encode_test.h \
+	unit_tests/j_decode_test.c \
+	unit_tests/j_decode_test.h \
 	unit_tests/lb_with_offset_test.c \
 	unit_tests/lb_with_offset_test.h \
 	unit_tests/lw_encode_test.c \
@@ -66,6 +72,8 @@ test: unit_tests/main.c \
 	unit_tests/addi_decode_test.c \
 	unit_tests/beq_encode_test.c \
 	unit_tests/beq_decode_test.c \
+	unit_tests/j_encode_test.c \
+	unit_tests/j_decode_test.c \
 	unit_tests/lb_with_offset_test.c \
 	unit_tests/lw_encode_test.c \
 	unit_tests/lw_decode_test.c \
@@ -83,12 +91,13 @@ test: unit_tests/main.c \
 	unit_tests/slli_encode_test.c \
 	unit_tests/sw_encode_test.c \
 	unit_tests/sw_decode_test.c \
+	../common/common.c \
 	../data/asm_line.c \
 	../decoder/decoder.c \
 	../encoder/encoder.c \
 	../parser.c \
 	../lex.yy.c \
-	-L./lib -I./ -I./include -I./unit_tests -I../data -I../encoder -I../decoder -I../ -lcmocka \
+	-L./lib -I./ -I./include -I./unit_tests -I../common -I../data -I../encoder -I../decoder -I../ -lcmocka \
 	-o cmockatest
 
 # compile mocka libraries

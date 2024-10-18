@@ -87,6 +87,64 @@ uint32_t encode_beq(asm_line_t* asm_line) {
     return encode_b_type(imm, rs2, rs1, funct3, opcode);
 }
 
+void encode_j(asm_line_t* asm_line, uint32_t* output_buffer) {
+
+    uint32_t data_0 = asm_line->imm;
+    printf("data_0: %08" PRIx32 "\n", data_0);
+
+    // 1. Take the value 0xBFFF00 and multiply it by 4 because it is the amount of instructions with 4 byte per instruction
+    uint32_t data_1 = data_0 * 4;
+    printf("data_1: %08" PRIx32 "\n", data_1);
+
+    // 2. Take the lower 12 bits of data_1 (0xC00) = data_2
+    uint32_t data_2 = data_1 & 0xFFF;
+    printf("data_2: %08" PRIx32 "\n", data_2);
+
+    // 3. interpret data_2 as a sign extended value:
+    uint32_t data_3 = sign_extend_12_bit_to_uint32_t(data_2);
+    printf("data_3: %08" PRIx32 "\n", data_3);
+
+    uint32_t temp = (-1) * data_3;
+    //uint32_t temp = 1024;
+    printf("temp: %08" PRIx32 "\n", temp);
+
+    // 4. Take this negative value (data_3), invert the sign and add it to the original value (data_1).
+    uint32_t data_4 = data_1 + temp;
+    printf("data_4: %08" PRIx32 "\n", data_4);
+
+    // 5. Take only the upper 20 bits of data_4
+    uint32_t data_5 = data_4 >> 12;
+    printf("data_5: %08" PRIx32 "\n", data_5);
+
+    // 6. Select a free temporary register (here: x5)
+    enum register_ free_temp_register = R_T0; // x5
+    printf("free_temp_register: %08" PRIx32 "\n", free_temp_register);
+
+    // 7. Take data_5 and create an aupic instruction
+    uint8_t opcode = 0b0010111;
+    uint8_t rd = encode_register(free_temp_register);
+    uint32_t imm = data_5;
+    printf("encode_aupic imm: %d\n", imm);
+
+    uint32_t aupic_encoded = encode_u_type(imm, rd, opcode);
+    printf("aupic_encoded: %08" PRIx32 "\n", aupic_encoded);
+
+    output_buffer[0] = aupic_encoded;
+
+    // 8. Take data_2 and create a jalr instruction. Use data_2 as the offset
+    uint8_t funct3 = 0b000;
+    opcode = 0b1100111;
+
+    rd = encode_register(R_ZERO);
+    uint8_t rs1 = encode_register(free_temp_register);
+    imm = data_2;
+
+    uint32_t jalr_encoded = encode_i_type(imm, rs1, funct3, rd, opcode);
+    printf("jalr_encoded: %08" PRIx32 "\n", jalr_encoded);
+
+    output_buffer[1] = jalr_encoded;
+}
+
 uint32_t encode_lw(asm_line_t* asm_line) {
 
     // printf("encode_sw\n");

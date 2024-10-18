@@ -14,6 +14,9 @@
 #include <beq_encode_test.h>
 #include <beq_decode_test.h>
 
+#include <j_encode_test.h>
+#include <j_decode_test.h>
+
 #include <lw_encode_test.h>
 #include <lw_decode_test.h>
 
@@ -63,6 +66,9 @@ int main(void)
 
         cmocka_unit_test(li_encode_valid_input_test),
         cmocka_unit_test(li_decode_valid_input_test),
+
+        cmocka_unit_test(j_encode_valid_input_test),
+        cmocka_unit_test(j_decode_valid_input_test),
 
         cmocka_unit_test(lw_encode_valid_input_test),
         cmocka_unit_test(lw_decode_valid_input_test),

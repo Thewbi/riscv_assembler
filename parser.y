@@ -8,6 +8,7 @@
 
 #include <asm_line.h>
 #include <encoder.h>
+#include <common.h>
 
 #define YYDEBUG 1
 
@@ -42,7 +43,7 @@ void (*fp_emit)(asm_line_t*);
   char sym;
 };
 
-%token <sym> ADD ADDI BEQ JALR LB LI LW LUI MUL MV SRLI SLLI SW
+%token <sym> ADD ADDI BEQ J JALR LB LI LW LUI MUL MV SRLI SLLI SW
 %token <sym> NEW_LINE
 %token <int_val> NUMERIC
 %token <sym> IDENTIFIER
@@ -103,6 +104,7 @@ label : IDENTIFIER COLON
 mnemonic : ADD { /*printf("Parser-ADD: %d\n", I_ADD);*/ parser_asm_line.instruction = I_ADD; parser_asm_line.instruction_type = IT_R; }
     | ADDI { /*printf("Parser-ADDI: %d\n", I_ADDI);*/ parser_asm_line.instruction = I_ADDI; parser_asm_line.instruction_type = IT_R; }
     | BEQ { /*printf("Parser-BEQ: %d\n", I_BEQ);*/ parser_asm_line.instruction = I_BEQ; parser_asm_line.instruction_type = IT_B; }
+    | J { /*printf("Parser-J: %d\n", I_J);*/ parser_asm_line.instruction = I_J; parser_asm_line.instruction_type = IT_P; }
     | JALR { /*printf("Parser-JALR: %d\n", I_JALR);*/ parser_asm_line.instruction = I_JALR; parser_asm_line.instruction_type = IT_J; } 
     | LB { /*printf("Parser-LB: %d\n", I_LB);*/ parser_asm_line.instruction = I_LB; parser_asm_line.instruction_type = IT_I; }
     | LI { /*printf("Parser-LI: %d\n", I_LI);*/ parser_asm_line.instruction = I_LI; parser_asm_line.instruction_type = IT_I; }
@@ -149,7 +151,7 @@ register : REG_ZERO { /*printf("REG_ZERO\n");*/ insert_register(&parser_asm_line
     | REG_S11 { /*printf("REG_S11\n");*/ insert_register(&parser_asm_line, R_S11); }
 
 // https://www.gnu.org/software/bison/manual/bison.html
-expr : NUMERIC { /*printf("PARSER-NUMERIC: %d\n", $1);*/ insert_integer_immediate(&parser_asm_line, $1); }
+expr : NUMERIC { printf("PARSER-NUMERIC: %08" PRIx32 "\n", $1); insert_integer_immediate(&parser_asm_line, $1); }
     | 
     register
 

@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <inttypes.h>
 
+#include "../common/common.h"
+
 // Adding new instruction
 //
 // 1. Update the lexer lexer.l (add a token that matches the instruction exactly. Add that rule before the identifier rule.)
@@ -38,9 +40,7 @@ enum instruction {
     // B-Type
     I_BEQ,
     I_BGE,
-    
     I_LI,
-    I_JALR,
     
     // R-Type
     I_ADD,
@@ -54,8 +54,10 @@ enum instruction {
 
     // J-Type
     I_JAL, // jump and link
+    I_JALR,
 
     // P-Type (pseudoinstruction)
+    I_J, // pseudo instruction
     I_MV, // pseudo instruction
 
     // undefined

@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 
+#include "../common/common.h"
 #include "asm_line.h"
 
 /**
@@ -24,6 +25,8 @@ uint32_t encode_add(asm_line_t* asm_line);
 uint32_t encode_addi(asm_line_t* asm_line);
 
 uint32_t encode_beq(asm_line_t* asm_line);
+
+void encode_j(asm_line_t* asm_line, uint32_t* output_buffer);
 
 uint32_t encode_lw(asm_line_t* asm_line);
 
