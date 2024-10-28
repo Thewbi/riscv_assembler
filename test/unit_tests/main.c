@@ -17,6 +17,12 @@
 #include <beq_encode_test.h>
 #include <beq_decode_test.h>
 
+#include <bne_encode_test.h>
+#include <bne_decode_test.h>
+
+#include <bnez_encode_test.h>
+#include <bnez_decode_test.h>
+
 #include <j_encode_test.h>
 #include <j_decode_test.h>
 
@@ -64,6 +70,12 @@ int main(void)
 
         cmocka_unit_test(beq_encode_valid_input_test),
         cmocka_unit_test(beq_decode_valid_input_test),
+
+        cmocka_unit_test(bne_encode_valid_input_test),
+        cmocka_unit_test(bne_decode_valid_input_test),
+
+        cmocka_unit_test(bnez_encode_valid_input_test),
+        //cmocka_unit_test(bnez_decode_valid_input_test),
 
         cmocka_unit_test(ld_with_offset_valid_input_test),
 

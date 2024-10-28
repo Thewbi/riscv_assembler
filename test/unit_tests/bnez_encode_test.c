@@ -7,7 +7,7 @@
 
 #define YYDEBUG 1
 
-#include "beq_encode_test.h"
+#include "bnez_encode_test.h"
 
 extern asm_line_t parser_asm_line;
 
@@ -20,15 +20,15 @@ extern void (*fp_emit)(asm_line_t*);
  * BEQ rd, rs1, IMM [B-type]
  * beq x8, x9, 16
  */
-void beq_encode_valid_input_test(void **state)
+void bnez_encode_valid_input_test(void **state)
 {
     // Arrange
 
     reset_asm_line(&parser_asm_line);
 
-    yyin = fopen("resources/beq.s", "r");
+    yyin = fopen("resources/bnez.s", "r");
     if (!yyin) {
-        printf("Cannot open '%s'. Aborting.\n", "resources/beq.s");
+        printf("Cannot open '%s'. Aborting.\n", "resources/bnez.s");
     }
 
     yy_flex_debug = 0;
@@ -46,10 +46,10 @@ void beq_encode_valid_input_test(void **state)
     // printf("encode_b_type rd: %d \n", parser_asm_line.reg_rd);
     // printf("encode_b_type imm: %d \n", parser_asm_line.imm);
 
-    uint32_t result = encode_beq(&parser_asm_line);
+    uint32_t result = encode_bnez(&parser_asm_line);
 
     // Assert
 
-    assert_int_equal(0x00940863, result);
+    assert_int_equal(0x06029263, result);
 }
 

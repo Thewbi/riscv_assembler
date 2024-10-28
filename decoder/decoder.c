@@ -206,6 +206,11 @@ void decode_b_type(uint32_t data, asm_line_t* asm_line) {
             asm_line->instruction = I_BGE;
             break;
 
+        case 0b001: // BNE
+            //printf("decode_i_type BNE\n");
+            asm_line->instruction = I_BNE;
+            break;
+
         default:
             printf("unknown instruction %d\n", data); 
             return;

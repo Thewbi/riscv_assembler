@@ -24,6 +24,14 @@ test: unit_tests/main.c \
 	unit_tests/beq_decode_test.h \
 	unit_tests/beq_encode_test.c \
 	unit_tests/beq_encode_test.h \
+	unit_tests/bne_decode_test.c \
+	unit_tests/bne_decode_test.h \
+	unit_tests/bne_encode_test.c \
+	unit_tests/bne_encode_test.h \
+	unit_tests/bnez_decode_test.c \
+	unit_tests/bnez_decode_test.h \
+	unit_tests/bnez_encode_test.c \
+	unit_tests/bnez_encode_test.h \
 	unit_tests/call_encode_test.c \
 	unit_tests/call_encode_test.h \
 	unit_tests/call_decode_test.c \
@@ -76,6 +84,10 @@ test: unit_tests/main.c \
 	unit_tests/addi_decode_test.c \
 	unit_tests/beq_encode_test.c \
 	unit_tests/beq_decode_test.c \
+	unit_tests/bne_encode_test.c \
+	unit_tests/bne_decode_test.c \
+	unit_tests/bnez_encode_test.c \
+	unit_tests/bnez_decode_test.c \
 	unit_tests/call_encode_test.c \
 	unit_tests/call_decode_test.c \
 	unit_tests/j_encode_test.c \

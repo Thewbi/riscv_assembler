@@ -40,6 +40,7 @@ enum instruction {
     // B-Type
     I_BEQ,
     I_BGE,
+    I_BNE,
     I_LI,
     
     // R-Type
@@ -58,6 +59,7 @@ enum instruction {
     I_JALR,
 
     // P-Type (pseudoinstruction)
+    I_BNEZ, // pseudo instruction
     I_CALL, // pseudo instruction
     I_J, // pseudo instruction
     I_MV, // pseudo instruction

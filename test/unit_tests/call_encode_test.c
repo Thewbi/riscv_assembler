@@ -48,11 +48,11 @@ void call_encode_valid_input_test(void **state)
     // The parser will load data into the variable parser_asm_line
     yyparse();
 
-    printf("parser_asm_line->reg_rd %d\n", parser_asm_line.reg_rd);
-    printf("parser_asm_line->reg_rs1 %d\n", parser_asm_line.reg_rs1);
-    printf("parser_asm_line->reg_rs2 %d\n", parser_asm_line.reg_rs2);
-    printf("parser_asm_line->imm %d\n", parser_asm_line.imm);
-    printf("parser_asm_line->imm %08" PRIx32 "\n", parser_asm_line.imm);
+    // printf("parser_asm_line->reg_rd %d\n", parser_asm_line.reg_rd);
+    // printf("parser_asm_line->reg_rs1 %d\n", parser_asm_line.reg_rs1);
+    // printf("parser_asm_line->reg_rs2 %d\n", parser_asm_line.reg_rs2);
+    // printf("parser_asm_line->imm %d\n", parser_asm_line.imm);
+    // printf("parser_asm_line->imm %08" PRIx32 "\n", parser_asm_line.imm);
     
     uint32_t output_buffer[2];
     encode_call(&parser_asm_line, output_buffer);

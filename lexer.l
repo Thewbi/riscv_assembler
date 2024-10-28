@@ -16,8 +16,10 @@
 "addi"	{ /*printf("ADDI\n");*/ return ADDI; }
 
 "beq"   { /*printf("BEQ\n");*/ return BEQ; }
+"bne"  { /*printf("BNEZ\n");*/ return BNE; }
+"bnez"  { /*printf("BNEZ\n");*/ return BNEZ; }
 
-"call"   { /*printf("CALL\n");*/ return CALL; }
+"call"  { /*printf("CALL\n");*/ return CALL; }
 
 "j"     { /*printf("J\n");*/ return J; }
 "jalr"  { /*printf("JALR\n");*/ return JALR; }
