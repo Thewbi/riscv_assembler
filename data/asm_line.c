@@ -22,7 +22,11 @@ void reset_asm_line(asm_line_t *data) {
 
 void insert_register(asm_line_t *data, enum register_ reg) {
 
+    printf("insert_register()\n");
+
     if (data->instruction_type == IT_B || data->instruction_type == IT_S) {
+
+        printf("insert_register() IT_B IT_S\n");
 
         if (R_UNDEFINED_REGISTER == data->reg_rs1) {
             data->reg_rs1 = reg;
@@ -35,23 +39,31 @@ void insert_register(asm_line_t *data, enum register_ reg) {
 
     } else {
 
+        printf("insert_register()\n");
+
         if (R_UNDEFINED_REGISTER == data->reg_rd) {
+            printf("insert_register() insert into rd \n");
             data->reg_rd = reg;
             return;
         }
         if (R_UNDEFINED_REGISTER == data->reg_rs1) {
+            printf("insert_register() insert into rs1 \n");
             data->reg_rs1 = reg;
             return;
         }
         if (R_UNDEFINED_REGISTER == data->reg_rs2) {
+            printf("insert_register() insert into rs2 \n");
             data->reg_rs2 = reg;
             return;
         }
 
     }
+
+    printf("insert_register() failure, no register found! \n");
 }
 
 void insert_offset(asm_line_t *data, uint32_t offset, uint8_t index) {
+
     //printf("ASM_LINE: insert_offset - offset_value: %d offset_index: %d\n", offset, index);
     switch(index) {
         case 0: data->offset_0 = offset; data->offset_0_used = 1; break;
@@ -60,6 +72,54 @@ void insert_offset(asm_line_t *data, uint32_t offset, uint8_t index) {
         default:
             break;
     }
+}
+
+void insert_identifier_offset(asm_line_t *data, char* offset, uint8_t index) {
+
+    printf("insert_identifier_offset \n");
+    printf("insert_identifier_offset %s \n", offset);
+
+    // for B and S instruction type, the rd register (index 0) is not used.
+    // Therefore increment the index so that index 1 and 2 are used.
+    if (data->instruction_type == IT_B || data->instruction_type == IT_S) {
+        index++;
+    }
+
+    switch(index) {
+        case 0: data->offset_identifier_0 = offset; data->offset_0_used = 1; break;
+        case 1: data->offset_identifier_1 = offset; data->offset_1_used = 1; break;
+        case 2: data->offset_identifier_2 = offset; data->offset_2_used = 1; break;
+        default:
+            break;
+    }
+}
+
+void insert_expr(asm_line_t *data, node_t* node, uint8_t index) {
+
+    //printf("insert_expr - string_val: %s\n", node->string_val);
+    printf("insert_expr current_node: %d \n", node);
+    if (node != NULL) {
+        printf("test %s \n", node->string_val);
+    }
+
+    switch (index) {
+
+        case 0:
+            data->offset_0_expression = node;
+            break;
+
+        case 1:
+            data->offset_1_expression = node;
+            break;
+
+        case 2:
+            data->offset_2_expression = node;
+            break;
+
+        default:
+            break;
+    }
+
 }
 
 void insert_integer_immediate(asm_line_t *data, uint32_t imm) {
@@ -74,20 +134,51 @@ void insert_integer_immediate(asm_line_t *data, uint32_t imm) {
 
         return;
     }
-    
+
     // DEBUG
     //printf("ASM_LINE: insert_integer_immediate: %d\n", imm);
-    
+
     uint32_t sign_extended = sign_extend_20_bit_to_uint32_t(imm);
     data->imm = sign_extended;
 }
 
 void print_asm_line(const asm_line_t *data) {
-    printf("[Instr: %s 0:{offset_used:%d offset:%d register:%s} 1:{offset_used:%d offset:%d register:%s} 2:{offset_used:%d offset:%d register:%s}]\n", 
-        instruction_to_string(data->instruction), 
-        data->offset_0_used, data->offset_0, register_to_string(data->reg_rd),
-        data->offset_1_used, data->offset_1, register_to_string(data->reg_rs1),
-        data->offset_2_used, data->offset_2, register_to_string(data->reg_rs2));
+
+    char buffer_0[100];
+    char buffer_1[100];
+    char buffer_2[100];
+
+    print_expression(data->offset_0_expression, buffer_0);
+    print_expression(data->offset_1_expression, buffer_1);
+    print_expression(data->offset_2_expression, buffer_2);
+
+    printf("[Instr: %s\n \
+    0:{offset_used:%d offset:%d offset_ident:%s register:%s expr:%s}\n \
+    1:{offset_used:%d offset:%d offset_ident:%s register:%s expr:%s}\n \
+    2:{offset_used:%d offset:%d offset_ident:%s register:%s expr:%s}\n \
+        ]\n",
+        instruction_to_string(data->instruction),
+        data->offset_0_used, data->offset_0, data->offset_identifier_0, register_to_string(data->reg_rd), buffer_0,
+        data->offset_1_used, data->offset_1, data->offset_identifier_1, register_to_string(data->reg_rs1), buffer_1,
+        data->offset_2_used, data->offset_2, data->offset_identifier_2, register_to_string(data->reg_rs2), buffer_2);
+
+}
+
+void print_expression(const node_t* data, char* buffer) {
+
+    if (data == NULL) {
+        strncpy(buffer, "NULL", 100);
+        return;
+    }
+
+    if (strlen(data->string_val) != 0) {
+        strncpy(buffer, data->string_val, strlen(data->string_val));
+        return;
+    }
+
+    printf("0x%" PRIx64 "", data->int_val);
+
+    snprintf(buffer, 100, "0x%" PRIx64 "", data->int_val);
 }
 
 const char* instruction_to_string(enum instruction data) {
@@ -101,6 +192,7 @@ const char* instruction_to_string(enum instruction data) {
 
         case I_BEQ: return "BEQ";
         case I_BGE: return "BGE";
+        case I_BNEZ: return "BNEZ";
 
         case I_CALL: return "CALL"; // pseudo instruction
 
@@ -127,7 +219,7 @@ const char* instruction_to_string(enum instruction data) {
         case I_SW: return "SW";
 
         case I_XORI: return "XORI";
-        
+
         default: return "UNKNOWN";
     }
 }
@@ -167,7 +259,7 @@ const char* register_to_string(enum register_ data) {
         case R_T4: return "R_T4"; // 29, Temporary
         case R_T5: return "R_T5"; // 30, Temporary
         case R_T6: return "R_T6"; // 31, Temporary
-  
+
         default: return "R_UNDEFINED_REGISTER";
     }
 }

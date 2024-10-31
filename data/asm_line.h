@@ -4,8 +4,11 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <inttypes.h>
+#include <cstring>
+#include <stdlib.h>
 
 #include "../common/common.h"
+#include "../common/node.h"
 
 // Adding new instruction
 //
@@ -42,7 +45,7 @@ enum instruction {
     I_BGE,
     I_BNE,
     I_LI,
-    
+
     // R-Type
     I_ADD,
     I_MUL,
@@ -66,9 +69,11 @@ enum instruction {
 
     // undefined
     I_UNDEFINED_INSTRUCTION
+
 };
 
 enum instruction_type {
+
     IT_R,
     IT_I,
     IT_S,
@@ -77,6 +82,7 @@ enum instruction_type {
     IT_J,
     IT_P, // (pseudoinstruction) you will not find P-Type in the RISC V specification!
     IT_UNDEFINED_INSTRUCTION
+
 };
 
 // cannot use name register since it is a reserved keyword in C
@@ -115,7 +121,7 @@ enum register_ {
   R_T4, // 29, Temporary
   R_T5, // 30, Temporary
   R_T6, // 31, Temporary
-  
+
   R_UNDEFINED_REGISTER
 
 };
@@ -133,53 +139,71 @@ typedef struct asm_line {
     uint32_t imm;
 
     uint16_t offset_0;
-    uint16_t offset_1;
-    uint16_t offset_2;
-
+    char* offset_identifier_0;
     uint8_t offset_0_used;
+    node_t* offset_0_expression;
+
+    uint16_t offset_1;
+    char* offset_identifier_1;
     uint8_t offset_1_used;
+    node_t* offset_1_expression;
+
+    uint16_t offset_2;
+    char* offset_identifier_2;
     uint8_t offset_2_used;
+    node_t* offset_2_expression;
 
 } asm_line_t;
 
 /**
  * Places standard values into a asm_line.
- * 
+ *
  * @param data the asm_line to reset.
  */
 void reset_asm_line(asm_line_t *data);
 
 /**
- * 
+ *
  */
 void insert_register(asm_line_t *data, enum register_);
 
 /**
- * 
+ *
  */
 void insert_offset(asm_line_t *data, uint32_t offset, uint8_t index);
+void insert_identifier_offset(asm_line_t *data, char* offset, uint8_t index);
 
 /**
- * 
+ *
+ */
+void insert_expr(asm_line_t *data, node_t* node, uint8_t index);
+
+/**
+ *
  */
 void insert_integer_immediate(asm_line_t *data, uint32_t imm);
 
 /**
  * Prints a asm_line using printf().
- * 
+ *
  * @param data the asm_line to print.
  */
 void print_asm_line(const asm_line_t *data);
 
 /**
+ *
+ */
+void print_expression(const node_t* data, char* buffer);
+
+/**
  * Converts the instruction enum to a string.
- * 
+ *
  * @param data the instruction to convert.
  */
 const char* instruction_to_string(enum instruction data);
 
 /**
- * 
+ *
  */
 const char* register_to_string(enum register_ data);
 

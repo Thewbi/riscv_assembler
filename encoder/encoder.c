@@ -2,9 +2,64 @@
 
 void encoder_callback(asm_line_t* asm_line) {
 
-    printf("encoder_callback\n");
+    // resolve pseudo instructions
+
+    switch (asm_line->instruction) {
+
+        case I_CALL: {
+            // call offset ->
+            //  auipc x6, offset[31:12]
+            //  jalr x1, x6, offset[11:0]
+
+            uint32_t data_0 = (asm_line->imm & 0xFFFFF000) >> 12;
+            uint32_t data_1 = (asm_line->imm & 0xFFF);
+
+            asm_line_t auipc_asm_line;
+            auipc_asm_line.instruction = I_AUIPC;
+            auipc_asm_line.instruction_type = IT_U;
+            auipc_asm_line.reg_rd = R_T1;
+            auipc_asm_line.offset_1 = data_0;
+            auipc_asm_line.offset_1_used = 1;
+
+            print_asm_line(&auipc_asm_line);
+
+            asm_line_t jalr_asm_line;
+            jalr_asm_line.instruction = I_JALR;
+            auipc_asm_line.instruction_type = IT_I;
+            jalr_asm_line.reg_rd = R_T1;
+            jalr_asm_line.reg_rs1 = R_RA;
+            jalr_asm_line.reg_rs2 = R_T1;
+            jalr_asm_line.offset_2 = data_1;
+            jalr_asm_line.offset_2_used = 1;
+
+            print_asm_line(&jalr_asm_line);
+
+        }
+        break;
+
+        default:
+            print_asm_line(asm_line);
+            break;
+
+    }
+
+
+
+    reset_asm_line(asm_line);
+
+}
+
+/*
+// this function is used by the fp_emit function pointer which
+// is called for each parsed row
+void encoder_callback(asm_line_t* asm_line) {
+
+    //printf("encoder_callback\n");
+
+    print_asm_line(asm_line);
 
     uint32_t encoded_asm_line = 0;
+    uint32_t output_buffer[2];
 
     switch (asm_line->instruction) {
 
@@ -15,6 +70,22 @@ void encoder_callback(asm_line_t* asm_line) {
         case I_ADDI:
             encoded_asm_line = encode_addi(asm_line);
             break;
+
+        case I_BNEZ:
+            encoded_asm_line = encode_bnez(asm_line);
+            break;
+
+        case I_CALL:
+             encode_call(asm_line, output_buffer);
+             break;
+
+        case I_LI:
+            encode_li(asm_line, output_buffer);
+            break;
+
+        // case I_RET:
+        //     encoded_asm_line = encode_ret(asm_line);
+        //     break;
 
         case I_SRLI:
             encoded_asm_line = encode_srli(asm_line);
@@ -29,14 +100,14 @@ void encoder_callback(asm_line_t* asm_line) {
             break;
 
         default:
-            printf("Unknown instruction!\n");
+            printf("Unknown instruction! %s \n", instruction_to_string(asm_line->instruction));
             return;
     }
 
-    printf("encoder_callback 0x%08x\n", encoded_asm_line);
+    //printf("encoder_callback 0x%08x\n", encoded_asm_line);
 
     reset_asm_line(asm_line);
-}
+}*/
 
 uint32_t encode_add(asm_line_t* asm_line) {
 
@@ -113,8 +184,9 @@ uint32_t encode_bnez(asm_line_t* asm_line) {
 
 void encode_call(asm_line_t* asm_line, uint32_t* output_buffer) {
 
-    // auipc x6, offset[31:12] 
-    // jalr x1, x6, offset[11:0]
+    // call offset ->
+    //  auipc x6, offset[31:12]
+    //  jalr x1, x6, offset[11:0]
 
     uint32_t data_0 = (asm_line->imm & 0xFFFFF000) >> 12;
     uint32_t data_1 = (asm_line->imm & 0xFFF);
@@ -217,7 +289,7 @@ uint32_t encode_lw(asm_line_t* asm_line) {
 
     // printf("asm_line->offset_0_used %d\n", asm_line->offset_0_used);
     // printf("asm_line->offset_0 %d\n", asm_line->offset_0);
-    
+
     // printf("asm_line->offset_1_used %d\n", asm_line->offset_1_used);
     // printf("asm_line->offset_1 %d\n", asm_line->offset_1);
 
@@ -255,7 +327,7 @@ uint32_t encode_lui(asm_line_t* asm_line) {
 // DEADBEEF = 3735928559 (data_0)
 // 000DEADB (data_1)
 //
-// 000DEADC = data_1 + 1 = 912092 
+// 000DEADC = data_1 + 1 = 912092
 // 000DEADC
 // DEADC000 = 3735928832 (data_2)
 //
@@ -269,17 +341,17 @@ uint32_t encode_lui(asm_line_t* asm_line) {
 //
 //                      0xDEADC
 //                      0xFFFFFFFFFFFFFEEF
-//                      
+//
 //                      B
 //                      1011
-//                    
-//                      0xD    E    A    D    B    0    0    0    
+//
+//                      0xD    E    A    D    B    0    0    0
 //                        1101 1110 1010 1101 1011 0000 0000 0000
-//                       
+//
 //                                           0    E    E    F
 //                                           0000 1110 1110 1111
-//                                                 
-//                                                 
+//
+//
 //                                                 take the 32 bit value (data_0)
 //                                                 split it into a 20 bit (data_1) and a twelve bit part (is ignored)
 //                                                 the 20 bit part is incremented by 1, then shifted left by 12 bits to get (data_2)
@@ -352,7 +424,7 @@ uint32_t encode_mul(asm_line_t* asm_line) {
     return encode_r_type(funct7, rs2, rs1, funct3, rd, opcode);
 }
 
-// mv (move) is a pseudoinstruction. It is implemented using: 
+// mv (move) is a pseudoinstruction. It is implemented using:
 // mv rd, rs --> addi rd, rs, 0
 // mv a0, a5 --> addi a0, a5, 0
 uint32_t encode_mv(asm_line_t* asm_line) {
@@ -406,7 +478,7 @@ uint32_t encode_sw(asm_line_t* asm_line) {
 
     // printf("asm_line->offset_0_used %d\n", asm_line->offset_0_used);
     // printf("asm_line->offset_0 %d\n", asm_line->offset_0);
-    
+
     // printf("asm_line->offset_1_used %d\n", asm_line->offset_1_used);
     // printf("asm_line->offset_1 %d\n", asm_line->offset_1);
 
@@ -522,7 +594,7 @@ uint8_t encode_register(enum register_ data) {
         case R_TP: // 4, Thread pointer
             return 0b00100;
 
-        // ABI Name: t0, Register: x5 - encoded: 0101 (= 5 decimal) 
+        // ABI Name: t0, Register: x5 - encoded: 0101 (= 5 decimal)
         case R_T0: // 5, Temporary/alternate link register
             return 0b00101;
 
@@ -606,7 +678,7 @@ uint8_t encode_register(enum register_ data) {
             return 0b11111;
 
         default:
-            printf("unknown register %d\n", data); 
+            printf("unknown register %d\n", data);
             return 0;
     }
 }

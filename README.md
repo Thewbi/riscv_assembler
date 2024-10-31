@@ -52,12 +52,42 @@ Copy this folder into the test folder.
 
 Then build the library using the install target
 
+Linux:
+
 ```
 cd test
 make install
 ```
 
-Then compile the tests
+On windows, use the cmake-gui (CMake) to configure and create a Visual Studio project.
+Once that Visual Studio project exists, you can open it in Visual Studio to build
+the cmocka libraries:
+
+Start CMake (cmake-gui) as administrator since it needs to create symlinks which is only allowed using elevated rights.
+Browse source > select the folder: "test\cmocka-1.1.7\cmocka-1.1.7"
+Where to build the binaries: "riscv_assembler/cmocka-build-dir"
+
+Click the configure button
+Click the generate button
+Click open project and let visual studio build the source code
+
+The .dll file is created inside: C:\Users\wolfg\dev\c\riscv_assembler\cmocka-build-dir\src\Debug
+
+inside the cmocka-build-dir folder, create a lib and a include folder.
+Copy the files cmocka.dll from C:\Users\wolfg\dev\c\riscv_assembler\cmocka-build-dir\src\Debug to C:\Users\wolfg\dev\c\riscv_assembler\test
+Copy the files cmocka.lib from C:\Users\wolfg\dev\c\riscv_assembler\cmocka-build-dir\src\Debug to C:\Users\wolfg\dev\c\riscv_assembler\test\lib
+
+ERROR:
+```
+CMake Error: failed to create symbolic link 'C:/Users/wolfg/dev/c/riscv_assembler/test/cmocka-1.1.7/cmocka-1.1.7/compile_commands.json': A required privilege is not held by the client.
+```
+
+SOLUTION:
+Start cmake-gui using administrator rights because of symlink creation.
+
+Once the cmocka library is compiled and available inside the test\lib folder the unit tests can be compiled.
+
+Compile the tests
 
 ```
 cd test
@@ -66,11 +96,17 @@ make
 
 Next, run the cmockatest executable to run all tests.
 
+Linux:
 ```
 ./cmockatest
 ```
 
-At the very end of the output, theres should be a message that all tests has passed:
+Windows:
+```
+cmockatest.exe
+```
+
+At the very end of the output, theres should be a message that all tests have passed:
 
 ```
 [==========] tests: 12 test(s) run.
@@ -121,7 +157,7 @@ https://stackoverflow.com/questions/30024660/initializing-stack-pointer
 The stack pointer is initially set to a undefined value.
 The register sp (stack pointer) (register x2) is used for the stack pointer.
 
-Looking at assembly code that gcc produces, the first instruction is most times 
+Looking at assembly code that gcc produces, the first instruction is most times
 
 ```
 addi	sp,sp,-32
@@ -131,8 +167,8 @@ This means that space is reserved on the stack. The application does not initial
 stack pointer to a sensical value instead it immediately uses the stack pointer.
 The application therefore expects the stack pointer to be initialized already and be ready to use.
 
-When there is an operating system running on the RISCV CPU, it will set the stack pointer before 
-loading application code to execute. When there is no operating system running on the emulator then 
+When there is an operating system running on the RISCV CPU, it will set the stack pointer before
+loading application code to execute. When there is no operating system running on the emulator then
 the only correct option left is to make the emulator set a standard value into the stack pointer.
 
 The instruction above substract 32 from the stack pointer. The stack is growing towards smaller addresses.

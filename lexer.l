@@ -1,5 +1,5 @@
 /********************************************************
- * ex1.l 
+ * ex1.l
  ********************************************************/
 %{
 #include "parser.h"
@@ -7,16 +7,21 @@
 #include <stdio.h>
 %}
 
+%option yylineno
 %option noyywrap
 %option warn nodefault
 
 %%
 
+".equ"	    { /*printf(".equ\n");*/ return AI_EQU; }
+".section"  { /*printf(".section\n");*/ return AI_SECTION; }
+".globl"    { /*printf(".globl\n");*/ return AI_GLOBL; }
+
 "add"	{ /*printf("ADD\n");*/ return ADD; }
 "addi"	{ /*printf("ADDI\n");*/ return ADDI; }
 
 "beq"   { /*printf("BEQ\n");*/ return BEQ; }
-"bne"  { /*printf("BNEZ\n");*/ return BNE; }
+"bne"   { /*printf("BNEZ\n");*/ return BNE; }
 "bnez"  { /*printf("BNEZ\n");*/ return BNEZ; }
 
 "call"  { /*printf("CALL\n");*/ return CALL; }
@@ -36,21 +41,21 @@
 "slli"  { /*printf("SRLI\n");*/ return SLLI; }
 "sw"    { /*printf("SRLI\n");*/ return SW; }
 
-"zero"  { /*printf("zero\n");*/ return REG_ZERO; } 
-"ra"    { /*printf("ra\n");*/ return REG_RA; } 
-"sp"    { /*printf("sp\n");*/ return REG_SP; } 
-"gp"    { /*printf("gp\n");*/ return REG_GP; } 
-"tp"    { /*printf("tp\n");*/ return REG_TP; } 
+"zero"  { /*printf("zero\n");*/ return REG_ZERO; }
+"ra"    { /*printf("ra\n");*/ return REG_RA; }
+"sp"    { /*printf("sp\n");*/ return REG_SP; }
+"gp"    { /*printf("gp\n");*/ return REG_GP; }
+"tp"    { /*printf("tp\n");*/ return REG_TP; }
 
-"t0"    { /*printf("lexer t0\n");*/ return REG_T0; } 
-"t1"    { /*printf("lexer t1\n");*/ return REG_T1; }  
-"t2"    { /*printf("t2\n");*/ return REG_T2; } 
-"t3"    { /*printf("t3\n");*/ return REG_T3; } 
-"t4"    { /*printf("t4\n");*/ return REG_T4; } 
-"t5"    { /*printf("t5\n");*/ return REG_T5; } 
-"t6"    { /*printf("t6\n");*/ return REG_T6; } 
+"t0"    { /*printf("lexer t0\n");*/ return REG_T0; }
+"t1"    { /*printf("lexer t1\n");*/ return REG_T1; }
+"t2"    { /*printf("t2\n");*/ return REG_T2; }
+"t3"    { /*printf("t3\n");*/ return REG_T3; }
+"t4"    { /*printf("t4\n");*/ return REG_T4; }
+"t5"    { /*printf("t5\n");*/ return REG_T5; }
+"t6"    { /*printf("t6\n");*/ return REG_T6; }
 
-"fp"    { /*printf("fp\n");*/ return REG_FP; } 
+"fp"    { /*printf("fp\n");*/ return REG_FP; }
 
 "a0"    { /*printf("lexer a0\n");*/ return REG_A0; }
 "a1"    { /*printf("a1\n");*/ return REG_A1; }
@@ -74,20 +79,27 @@
 "s10"   { /*printf("s10\n");*/ return REG_S10; }
 "s11"   { /*printf("s11\n");*/ return REG_S11; }
 
-"section"   { return SECTION; }
-"global"    { return GLOBAL; }
-
 "//".*  { /* DO NOTHING */ } /* https://stackoverflow.com/questions/25395251/detecting-and-skipping-line-comments-with-flex */
 "#".*   { /* DO NOTHING */ }
 
 [/][*][^*]*[*]+([^*/][^*]*[*]+)*[/]       { /* DO NOTHING */ }
 [/][*]                                    { /*printf("Unterminated comment");*/ }
 
-[a-zA-Z_][a-zA-Z_0-9]*   { /*printf("identifier\n");*/ return IDENTIFIER; }
+"."?[a-zA-Z_][a-zA-Z_0-9]* {
 
-"-"?[0-9]+  { yylval.int_val = atoi(yytext); return NUMERIC; }
+    // DEBUG
+    printf("lexer::identifier: %s\n", yytext);
 
-"-"?"0"[xX][0-9a-fA-F]+  { yylval.int_val = strtol(yytext, NULL, 0); return NUMERIC; }
+    // copy the value into the token
+    memset(yylval.string_val, 0, 100);
+    memcpy(yylval.string_val, yytext, strlen(yytext));
+
+    // return token type
+    return IDENTIFIER;
+}
+
+"-"?[0-9]+ { yylval.int_val = atoi(yytext); return NUMERIC; }
+"-"?"0"[xX][0-9a-fA-F]+ { yylval.int_val = strtol(yytext, NULL, 0); return NUMERIC; }
 
 "."     { return DOT; }
 ":"     { return COLON; }
