@@ -139,17 +139,17 @@ typedef struct asm_line {
     uint32_t imm;
 
     uint16_t offset_0;
-    char* offset_identifier_0;
+    char offset_identifier_0[100];
     uint8_t offset_0_used;
     node_t* offset_0_expression;
 
     uint16_t offset_1;
-    char* offset_identifier_1;
+    char offset_identifier_1[100];
     uint8_t offset_1_used;
     node_t* offset_1_expression;
 
     uint16_t offset_2;
-    char* offset_identifier_2;
+    char offset_identifier_2[100];
     uint8_t offset_2_used;
     node_t* offset_2_expression;
 

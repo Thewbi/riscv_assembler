@@ -112,6 +112,7 @@ param_1 :
     expr {
         printf("expr 1\n");
         insert_expr(&parser_asm_line, current_node, 0);
+        current_node = NULL;
     }
 
 param_2 :
@@ -125,6 +126,7 @@ param_2 :
     expr {
         printf("expr 2\n");
         insert_expr(&parser_asm_line, current_node, 1);
+        current_node = NULL;
     }
 
 param_3 :
@@ -138,6 +140,7 @@ param_3 :
     expr {
         printf("expr 3\n");
         insert_expr(&parser_asm_line, current_node, 2);
+        current_node = NULL;
     }
 
 label : IDENTIFIER COLON

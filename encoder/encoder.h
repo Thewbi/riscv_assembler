@@ -8,6 +8,8 @@
 #include "../common/common.h"
 #include "asm_line.h"
 
+void copy_asm_line(asm_line_t* target, asm_line_t* source);
+
 /**
  * Place the address of this function into the 'emit' function pointer
  * of the parser to feed all parsed lines into the encoder directly while
@@ -17,7 +19,7 @@ void encoder_callback(asm_line_t* asm_line);
 
 /**
  * https://www.eg.bucknell.edu/~csci206/riscv-converter/
- * 
+ *
  * https://riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf - page 104
  */
 uint32_t encode_add(asm_line_t* asm_line);

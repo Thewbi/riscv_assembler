@@ -24,6 +24,9 @@ extern int yydebug;
 // machine code and print the machine code to the console.
 extern void (*fp_emit)(asm_line_t*);
 
+extern int asm_line_array_index;
+extern asm_line_t asm_line_array[100];
+
 int main(int argc, char **argv)
 {
     reset_asm_line(&parser_asm_line);
@@ -38,6 +41,12 @@ int main(int argc, char **argv)
     yy_flex_debug = 0;
     yydebug = 0;
     yyparse();
+
+    printf("asm_lines: %d\n", asm_line_array_index);
+
+    for (int i = 0; i < asm_line_array_index; i++) {
+        print_asm_line(&asm_line_array[i]);
+    }
 
     return 0;
 }

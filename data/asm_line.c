@@ -18,15 +18,24 @@ void reset_asm_line(asm_line_t *data) {
     data->offset_0_used = 0;
     data->offset_1_used = 0;
     data->offset_2_used = 0;
+
+    data->offset_0_expression = NULL;
+    data->offset_1_expression = NULL;
+    data->offset_2_expression = NULL;
+
+    memset(data->offset_identifier_0, 0, 100);
+    memset(data->offset_identifier_1, 0, 100);
+    memset(data->offset_identifier_2, 0, 100);
+
 }
 
 void insert_register(asm_line_t *data, enum register_ reg) {
 
-    printf("insert_register()\n");
+    //printf("insert_register()\n");
 
     if (data->instruction_type == IT_B || data->instruction_type == IT_S) {
 
-        printf("insert_register() IT_B IT_S\n");
+        //printf("insert_register() IT_B IT_S\n");
 
         if (R_UNDEFINED_REGISTER == data->reg_rs1) {
             data->reg_rs1 = reg;
@@ -39,20 +48,20 @@ void insert_register(asm_line_t *data, enum register_ reg) {
 
     } else {
 
-        printf("insert_register()\n");
+        //printf("insert_register()\n");
 
         if (R_UNDEFINED_REGISTER == data->reg_rd) {
-            printf("insert_register() insert into rd \n");
+            //printf("insert_register() insert into rd \n");
             data->reg_rd = reg;
             return;
         }
         if (R_UNDEFINED_REGISTER == data->reg_rs1) {
-            printf("insert_register() insert into rs1 \n");
+            //printf("insert_register() insert into rs1 \n");
             data->reg_rs1 = reg;
             return;
         }
         if (R_UNDEFINED_REGISTER == data->reg_rs2) {
-            printf("insert_register() insert into rs2 \n");
+            //printf("insert_register() insert into rs2 \n");
             data->reg_rs2 = reg;
             return;
         }
@@ -76,8 +85,8 @@ void insert_offset(asm_line_t *data, uint32_t offset, uint8_t index) {
 
 void insert_identifier_offset(asm_line_t *data, char* offset, uint8_t index) {
 
-    printf("insert_identifier_offset \n");
-    printf("insert_identifier_offset %s \n", offset);
+    // printf("insert_identifier_offset \n");
+    // printf("insert_identifier_offset %s \n", offset);
 
     // for B and S instruction type, the rd register (index 0) is not used.
     // Therefore increment the index so that index 1 and 2 are used.
@@ -86,9 +95,29 @@ void insert_identifier_offset(asm_line_t *data, char* offset, uint8_t index) {
     }
 
     switch(index) {
-        case 0: data->offset_identifier_0 = offset; data->offset_0_used = 1; break;
-        case 1: data->offset_identifier_1 = offset; data->offset_1_used = 1; break;
-        case 2: data->offset_identifier_2 = offset; data->offset_2_used = 1; break;
+
+        case 0: {
+
+            //data->offset_identifier_0 = offset;
+            memcpy(data->offset_identifier_0, offset, strnlen(offset, 100));
+            data->offset_0_used = 1;
+        }
+        break;
+
+        case 1: {
+            //data->offset_identifier_1 = offset;
+            memcpy(data->offset_identifier_1, offset, strnlen(offset, 100));
+            data->offset_1_used = 1;
+        }
+        break;
+
+        case 2: {
+            //data->offset_identifier_2 = offset;
+            memcpy(data->offset_identifier_2, offset, strnlen(offset, 100));
+            data->offset_2_used = 1;
+        }
+        break;
+
         default:
             break;
     }
@@ -97,10 +126,10 @@ void insert_identifier_offset(asm_line_t *data, char* offset, uint8_t index) {
 void insert_expr(asm_line_t *data, node_t* node, uint8_t index) {
 
     //printf("insert_expr - string_val: %s\n", node->string_val);
-    printf("insert_expr current_node: %d \n", node);
-    if (node != NULL) {
-        printf("test %s \n", node->string_val);
-    }
+    // printf("insert_expr current_node: %d \n", node);
+    // if (node != NULL) {
+    //     printf("test %s \n", node->string_val);
+    // }
 
     switch (index) {
 
@@ -147,6 +176,10 @@ void print_asm_line(const asm_line_t *data) {
     char buffer_0[100];
     char buffer_1[100];
     char buffer_2[100];
+
+    memset(buffer_0, 0, 100);
+    memset(buffer_1, 0, 100);
+    memset(buffer_2, 0, 100);
 
     print_expression(data->offset_0_expression, buffer_0);
     print_expression(data->offset_1_expression, buffer_1);
