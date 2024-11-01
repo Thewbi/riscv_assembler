@@ -2,6 +2,20 @@
 
 void reset_asm_line(asm_line_t *data) {
 
+    //printf("reset\n");
+
+    //
+    // assembler instruction
+    //
+
+    data->asm_instruction = AI_UNDEFINED;
+    memset(data->asm_instruction_symbol, 0, 100);
+    data->asm_instruction_expr = NULL;
+
+    //
+    // mnemonic / cpu instruction
+    //
+
     data->instruction = I_UNDEFINED_INSTRUCTION;
     data->instruction_type = IT_UNDEFINED_INSTRUCTION;
 
@@ -26,6 +40,111 @@ void reset_asm_line(asm_line_t *data) {
     memset(data->offset_identifier_0, 0, 100);
     memset(data->offset_identifier_1, 0, 100);
     memset(data->offset_identifier_2, 0, 100);
+
+}
+
+void copy_asm_line(asm_line_t* target, asm_line_t* source) {
+
+    //printf("copy\n");
+
+    //
+    // assembler instruction
+    //
+
+    target->asm_instruction = source->asm_instruction;
+
+    memset(target->asm_instruction_symbol, 0, 100);
+    memcpy(target->asm_instruction_symbol, source->asm_instruction_symbol, 100);
+
+    target->asm_instruction_expr = source->asm_instruction_expr;
+
+    //
+    // mnemonic / cpu instruction
+    //
+
+    target->instruction = source->instruction;
+    target->instruction_type = source->instruction_type;
+
+    target->reg_rd = source->reg_rd;
+    target->reg_rs1 = source->reg_rs1;
+    target->reg_rs2 = source->reg_rs2;
+
+    target->imm = source->imm;
+
+    target->offset_0 = source->offset_0;
+    //target->offset_identifier_0 = source->offset_identifier_0; // TODO: deep copy?
+    memcpy(target->offset_identifier_0, source->offset_identifier_0, 100);
+    target->offset_0_used = source->offset_0_used;
+    target->offset_0_expression = source->offset_0_expression; // TODO: deep copy?
+
+    target->offset_1 = source->offset_1;
+    //target->offset_identifier_1 = source->offset_identifier_1; // TODO: deep copy?
+    memcpy(target->offset_identifier_1, source->offset_identifier_1, 100);
+    target->offset_1_used = source->offset_1_used;
+    target->offset_1_expression = source->offset_1_expression; // TODO: deep copy?
+
+    target->offset_2 = source->offset_2;
+    //target->offset_identifier_2 = source->offset_identifier_2; // TODO: deep copy?
+    memcpy(target->offset_identifier_2, source->offset_identifier_2, 100);
+    target->offset_2_used = source->offset_2_used;
+    target->offset_2_expression = source->offset_2_expression; // TODO: deep copy?
+}
+
+void print_asm_line(const asm_line_t *data) {
+
+    //printf("print_asm_line\n");
+
+    if (data->asm_instruction != AI_UNDEFINED) {
+
+        // char buffer_0[100];
+        // char buffer_1[100];
+        // char buffer_2[100];
+
+        // memset(buffer_0, 0, 100);
+        // memset(buffer_1, 0, 100);
+        // memset(buffer_2, 0, 100);
+
+        // print_expression(data->offset_0_expression, buffer_0);
+        // print_expression(data->offset_1_expression, buffer_1);
+        // print_expression(data->offset_2_expression, buffer_2);
+
+        char buffer_3[100];
+
+        memset(buffer_3, 0, 100);
+
+        //printf("print_expression ...\n");
+        print_expression(data->asm_instruction_expr, buffer_3);
+        //printf("print_expression done.\n");
+
+        printf("[AssemblerInstr: Instr:%s Symbol:%s Val: %s]\n",
+            assembler_instruction_to_string(data->asm_instruction),
+            data->asm_instruction_symbol, buffer_3);
+
+    } else {
+
+        char buffer_0[100];
+        char buffer_1[100];
+        char buffer_2[100];
+
+        memset(buffer_0, 0, 100);
+        memset(buffer_1, 0, 100);
+        memset(buffer_2, 0, 100);
+
+        print_expression(data->offset_0_expression, buffer_0);
+        print_expression(data->offset_1_expression, buffer_1);
+        print_expression(data->offset_2_expression, buffer_2);
+
+        printf("[Instr: %s\n\
+    0:{offset_used:%d offset:%d offset_ident:%s register:%s expr:%s}\n\
+    1:{offset_used:%d offset:%d offset_ident:%s register:%s expr:%s}\n\
+    2:{offset_used:%d offset:%d offset_ident:%s register:%s expr:%s}\n\
+]\n",
+            instruction_to_string(data->instruction),
+            data->offset_0_used, data->offset_0, data->offset_identifier_0, register_to_string(data->reg_rd), buffer_0,
+            data->offset_1_used, data->offset_1, data->offset_identifier_1, register_to_string(data->reg_rs1), buffer_1,
+            data->offset_2_used, data->offset_2, data->offset_identifier_2, register_to_string(data->reg_rs2), buffer_2);
+
+    }
 
 }
 
@@ -171,32 +290,6 @@ void insert_integer_immediate(asm_line_t *data, uint32_t imm) {
     data->imm = sign_extended;
 }
 
-void print_asm_line(const asm_line_t *data) {
-
-    char buffer_0[100];
-    char buffer_1[100];
-    char buffer_2[100];
-
-    memset(buffer_0, 0, 100);
-    memset(buffer_1, 0, 100);
-    memset(buffer_2, 0, 100);
-
-    print_expression(data->offset_0_expression, buffer_0);
-    print_expression(data->offset_1_expression, buffer_1);
-    print_expression(data->offset_2_expression, buffer_2);
-
-    printf("[Instr: %s\n \
-    0:{offset_used:%d offset:%d offset_ident:%s register:%s expr:%s}\n \
-    1:{offset_used:%d offset:%d offset_ident:%s register:%s expr:%s}\n \
-    2:{offset_used:%d offset:%d offset_ident:%s register:%s expr:%s}\n \
-        ]\n",
-        instruction_to_string(data->instruction),
-        data->offset_0_used, data->offset_0, data->offset_identifier_0, register_to_string(data->reg_rd), buffer_0,
-        data->offset_1_used, data->offset_1, data->offset_identifier_1, register_to_string(data->reg_rs1), buffer_1,
-        data->offset_2_used, data->offset_2, data->offset_identifier_2, register_to_string(data->reg_rs2), buffer_2);
-
-}
-
 void print_expression(const node_t* data, char* buffer) {
 
     if (data == NULL) {
@@ -209,14 +302,14 @@ void print_expression(const node_t* data, char* buffer) {
         return;
     }
 
-    printf("0x%" PRIx64 "", data->int_val);
+    //printf("0x%" PRIx64 "", data->int_val);
 
     snprintf(buffer, 100, "0x%" PRIx64 "", data->int_val);
 }
 
 const char* instruction_to_string(enum instruction data) {
 
-    switch(data) {
+    switch (data) {
 
         case I_ADD: return "ADD";
         case I_ADDI: return "ADDI";
@@ -255,6 +348,20 @@ const char* instruction_to_string(enum instruction data) {
 
         default: return "UNKNOWN";
     }
+}
+
+const char* assembler_instruction_to_string(enum assembler_instruction data) {
+
+    switch (data) {
+
+        case AI_EQU: return "EQU";
+        case AI_SECTION: return "SECTION";
+        case AI_GLOBL: return "GLOBL";
+
+        default: return "UNKNOWN ASSEMBLER INSTRUCTION!";
+
+    }
+
 }
 
 const char* register_to_string(enum register_ data) {

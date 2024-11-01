@@ -3,37 +3,13 @@
 int asm_line_array_index = 0;
 asm_line_t asm_line_array[100];
 
-void copy_asm_line(asm_line_t* target, asm_line_t* source) {
-
-    target->instruction = source->instruction;
-    target->instruction_type = source->instruction_type;
-
-    target->reg_rd = source->reg_rd;
-    target->reg_rs1 = source->reg_rs1;
-    target->reg_rs2 = source->reg_rs2;
-
-    target->imm = source->imm;
-
-    target->offset_0 = source->offset_0;
-    //target->offset_identifier_0 = source->offset_identifier_0; // TODO: deep copy?
-    memcpy(target->offset_identifier_0, source->offset_identifier_0, 100);
-    target->offset_0_used = source->offset_0_used;
-    target->offset_0_expression = source->offset_0_expression; // TODO: deep copy?
-
-    target->offset_1 = source->offset_1;
-    //target->offset_identifier_1 = source->offset_identifier_1; // TODO: deep copy?
-    memcpy(target->offset_identifier_1, source->offset_identifier_1, 100);
-    target->offset_1_used = source->offset_1_used;
-    target->offset_1_expression = source->offset_1_expression; // TODO: deep copy?
-
-    target->offset_2 = source->offset_2;
-    //target->offset_identifier_2 = source->offset_identifier_2; // TODO: deep copy?
-    memcpy(target->offset_identifier_2, source->offset_identifier_2, 100);
-    target->offset_2_used = source->offset_2_used;
-    target->offset_2_expression = source->offset_2_expression; // TODO: deep copy?
-
-}
-
+// Whenever the parser reduces a rule for a asm_line, it is performing an action.
+// Inside this action, it calls the fp_emit function pointer.
+// This method "encoder_callback()" is registered as fp_emit function pointer
+// and therefore is called whenever a asm_line is reduced.
+//
+// It copies the working asm_line into the array of asm_lines and resets
+// the working asm_line so it can be reused in the next line parse iteration.
 void encoder_callback(asm_line_t* asm_line) {
 
     copy_asm_line(&asm_line_array[asm_line_array_index], asm_line);

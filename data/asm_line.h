@@ -126,7 +126,29 @@ enum register_ {
 
 };
 
+enum assembler_instruction {
+
+    AI_EQU,
+    AI_SECTION,
+    AI_GLOBL,
+
+    AI_UNDEFINED
+
+};
+
 typedef struct asm_line {
+
+    //
+    // assembler instruction
+    //
+
+    enum assembler_instruction asm_instruction;
+    char asm_instruction_symbol[100];
+    node_t* asm_instruction_expr;
+
+    //
+    // mnemonic / cpu instruction
+    //
 
     enum instruction instruction;
 
@@ -161,6 +183,8 @@ typedef struct asm_line {
  * @param data the asm_line to reset.
  */
 void reset_asm_line(asm_line_t *data);
+
+void copy_asm_line(asm_line_t* target, asm_line_t* source);
 
 /**
  *
@@ -201,6 +225,8 @@ void print_expression(const node_t* data, char* buffer);
  * @param data the instruction to convert.
  */
 const char* instruction_to_string(enum instruction data);
+
+const char* assembler_instruction_to_string(enum assembler_instruction data);
 
 /**
  *

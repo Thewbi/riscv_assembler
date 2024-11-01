@@ -16,7 +16,7 @@
 #define YYERROR_VERBOSE 1
 
 extern int yylineno;
-//extern node_t* current_node;
+
 node_t* current_node = NULL;
 
 // defining this symbol makes the generated riscv emulator or assembler a self sustained
@@ -51,20 +51,22 @@ void (*fp_emit)(asm_line_t*);
   int int_val;
   char string_val[100];
   char sym;
+  node_t* expr_ptr;
 };
 
-%token <sym> AI_EQU AI_SECTION AI_GLOBL
+%token <sym> EQU SECTION GLOBL
 %token <sym> ADD ADDI BEQ BNE BNEZ CALL J JALR LB LI LW LUI MUL MV SRLI SLLI SW
 %token <sym> NEW_LINE
 %token <int_val> NUMERIC
 %token <string_val> IDENTIFIER
-%token <sym> SECTION GLOBAL
 %token <sym> DOT COLON COMMA OPENING_BRACKET CLOSING_BRACKET
 %token <sym> REG_ZERO REG_RA REG_SP REG_GP REG_TP REG_T0 REG_T1 REG_T2 REG_T3 REG_T4 REG_T5 REG_T6 REG_FP REG_A0 REG_A1 REG_A2 REG_A3 REG_A4 REG_A5 REG_A6 REG_A7 REG_S0 REG_S1 REG_S2 REG_S3 REG_S4 REG_S5 REG_S6 REG_S7 REG_S8 REG_S9 REG_S10 REG_S11
 
 //%token <val> NUM
 //%token <sym> OPA OPM LP RP STOP
 //%type  <val> exp term sfactor factor res
+
+%type <expr_ptr> expr; // the expr rule will return a node_t pointer
 
 //-- SECTION 3: GRAMMAR RULES ---------------------------------------
 
@@ -85,60 +87,90 @@ asm_file :
 
 line_end : NEW_LINE
 
-asm_line : label mnemonic params { printf("label mnemonic params\n"); /*print_asm_line(&parser_asm_line);*/ if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); } }
+asm_line : label mnemonic params {
+        //printf("label mnemonic params\n");
+        /*print_asm_line(&parser_asm_line);*/
+        if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
+    }
 	|
-	mnemonic params { printf("mnemonic params\n"); /*print_asm_line(&parser_asm_line);*/ if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); } }
+	mnemonic params {
+        //printf("mnemonic params\n");
+        /*print_asm_line(&parser_asm_line);*/
+        if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
+    }
 	|
-	label mnemonic { printf("label mnemonic\n"); }
+	label mnemonic {
+        //printf("label mnemonic\n");
+        }
 	|
-	mnemonic { printf("mnemonic\n"); }
+	mnemonic {
+        //printf("mnemonic\n");
+        }
     |
-    label { printf("label\n"); }
+    label {
+        //printf("label\n");
+        }
     |
-    assembler_instruction { printf("assembler_instruction\n"); }
+    assembler_instruction {
+        //printf("assembler_instruction\n");
+        if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
+        }
 
-params : param_1 COMMA param_2 COMMA param_3 { printf("param_1 COMMA param_2 COMMA param_3\n"); }
-    | param_1 COMMA param_2 { printf("param_1 COMMA param_2\n"); }
-    | param_1 { printf("param_1\n"); }
+params : param_1 COMMA param_2 COMMA param_3 {
+        //printf("param_1 COMMA param_2 COMMA param_3\n");
+        }
+    | param_1 COMMA param_2 {
+        //printf("param_1 COMMA param_2\n");
+        }
+    | param_1 {
+        //printf("param_1\n");
+        }
 
 param_1 :
     IDENTIFIER OPENING_BRACKET expr {
-        printf("identifier OFFSET 1\n");
+        //printf("identifier OFFSET 1\n");
         insert_identifier_offset(&parser_asm_line, (char *)$1, 0);
     } CLOSING_BRACKET
     |
-    NUMERIC OPENING_BRACKET expr { /**/printf("numeric OFFSET 1\n"); insert_offset(&parser_asm_line, $2, 0); } CLOSING_BRACKET
+    NUMERIC OPENING_BRACKET expr {
+        //printf("numeric OFFSET 1\n");
+        insert_offset(&parser_asm_line, $2, 0);
+        } CLOSING_BRACKET
     |
     expr {
-        printf("expr 1\n");
+        //printf("expr 1\n");
         insert_expr(&parser_asm_line, current_node, 0);
         current_node = NULL;
     }
 
 param_2 :
     IDENTIFIER OPENING_BRACKET expr {
-        printf("identifier OFFSET 2: %s\n", $1);
+        //printf("identifier OFFSET 2: %s\n", $1);
         insert_identifier_offset(&parser_asm_line, (char *)$1, 1);
     } CLOSING_BRACKET
     |
-    NUMERIC OPENING_BRACKET expr { /**/printf("numeric OFFSET 2\n"); insert_offset(&parser_asm_line, $2, 1); } CLOSING_BRACKET
+    NUMERIC OPENING_BRACKET expr {
+        //printf("numeric OFFSET 2\n");
+        insert_offset(&parser_asm_line, $2, 1); } CLOSING_BRACKET
     |
     expr {
-        printf("expr 2\n");
+        //printf("expr 2\n");
         insert_expr(&parser_asm_line, current_node, 1);
         current_node = NULL;
     }
 
 param_3 :
     IDENTIFIER OPENING_BRACKET expr {
-        printf("identifier OFFSET 3\n");
+        //printf("identifier OFFSET 3\n");
         insert_identifier_offset(&parser_asm_line, (char *)$1, 2);
     } CLOSING_BRACKET
     |
-    NUMERIC OPENING_BRACKET expr { /**/printf("numeric OFFSET 3\n"); insert_offset(&parser_asm_line, $2, 2); } CLOSING_BRACKET
+    NUMERIC OPENING_BRACKET expr {
+        //printf("numeric OFFSET 3\n");
+        insert_offset(&parser_asm_line, $2, 2); } CLOSING_BRACKET
     |
     expr {
-        printf("expr 3\n");
+        //printf("expr 3\n");
         insert_expr(&parser_asm_line, current_node, 2);
         current_node = NULL;
     }
@@ -148,20 +180,28 @@ label : IDENTIFIER COLON
 // https://www.gnu.org/software/bison/manual/bison.html
 expr:
     NUMERIC {
-        printf("PARSER-NUMERIC: %08" PRIx32 "\n", $1);
+        //printf("PARSER-NUMERIC: %08" PRIx32 "\n", $1);
         //insert_integer_immediate(&parser_asm_line, $1);
 
         if (current_node == NULL)
         {
+
+
             current_node = new node_t;
             current_node->int_val = $1;
+
+            //printf("PARSER-NUMERIC: creating node: %d\n", current_node->int_val);
+
+            $$ = current_node;
         }
     }
     |
-    register { printf("expr - register\n"); }
+    register {
+        //printf("expr - register\n");
+    }
     |
     IDENTIFIER {
-        printf("expr - IDENTIFIER: %s \n", $1);
+        //printf("expr - IDENTIFIER: %s \n", $1);
 
         if (current_node == NULL)
         {
@@ -170,6 +210,26 @@ expr:
             memcpy(current_node->string_val, $1, strlen($1));
         }
     }
+
+assembler_instruction :
+    EQU IDENTIFIER COMMA expr {
+
+        parser_asm_line.asm_instruction = AI_EQU;
+
+        //printf("AAA: %s\n", $2);
+
+        //parser_asm_line.asm_instruction_symbol = $2,
+        memset(parser_asm_line.asm_instruction_symbol, 0, 100);
+        memcpy(parser_asm_line.asm_instruction_symbol, $2, strlen($2));
+
+        //printf("BBB: %s\n", parser_asm_line.asm_instruction_symbol);
+
+        parser_asm_line.asm_instruction_expr = $4;
+    }
+    |
+    SECTION IDENTIFIER
+    |
+    GLOBL IDENTIFIER
 
 mnemonic : ADD { /*printf("Parser-ADD: %d\n", I_ADD);*/ parser_asm_line.instruction = I_ADD; parser_asm_line.instruction_type = IT_R; }
     | ADDI { /*printf("Parser-ADDI: %d\n", I_ADDI);*/ parser_asm_line.instruction = I_ADDI; parser_asm_line.instruction_type = IT_R; }
@@ -194,7 +254,7 @@ register : REG_ZERO { /*printf("REG_ZERO\n");*/ insert_register(&parser_asm_line
     | REG_SP { /*printf("REG_SP\n");*/ insert_register(&parser_asm_line, R_SP); }
     | REG_GP { /*printf("REG_GP\n");*/ insert_register(&parser_asm_line, R_GP); }
     | REG_TP { /*printf("REG_TP\n");*/ insert_register(&parser_asm_line, R_TP); }
-    | REG_T0 { printf("REG_T0\n"); insert_register(&parser_asm_line, R_T0); }
+    | REG_T0 { /*printf("REG_T0\n");*/ insert_register(&parser_asm_line, R_T0); }
     | REG_T1 { /*printf("REG_T1\n");*/ insert_register(&parser_asm_line, R_T1); }
     | REG_T2 { /*printf("REG_T2\n");*/ insert_register(&parser_asm_line, R_T2); }
     | REG_T3 { /*printf("REG_T3\n");*/ insert_register(&parser_asm_line, R_T3); }
@@ -223,12 +283,7 @@ register : REG_ZERO { /*printf("REG_ZERO\n");*/ insert_register(&parser_asm_line
     | REG_S10 { /*printf("REG_S10\n");*/ insert_register(&parser_asm_line, R_S10); }
     | REG_S11 { /*printf("REG_S11\n");*/ insert_register(&parser_asm_line, R_S11); }
 
-assembler_instruction :
-    AI_EQU IDENTIFIER COMMA expr
-    |
-    AI_SECTION IDENTIFIER
-    |
-    AI_GLOBL IDENTIFIER
+
 
 /*
 asm_line: IDENTIFIER COLON ADD NEW_LINE

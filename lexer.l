@@ -2,9 +2,11 @@
  * ex1.l
  ********************************************************/
 %{
+    #include <node.h>
 #include "parser.h"
 
 #include <stdio.h>
+
 %}
 
 %option yylineno
@@ -13,9 +15,9 @@
 
 %%
 
-".equ"	    { /*printf(".equ\n");*/ return AI_EQU; }
-".section"  { /*printf(".section\n");*/ return AI_SECTION; }
-".globl"    { /*printf(".globl\n");*/ return AI_GLOBL; }
+".equ"	    { /*printf(".equ\n");*/ return EQU; }
+".section"  { /*printf(".section\n");*/ return SECTION; }
+".globl"    { /*printf(".globl\n");*/ return GLOBL; }
 
 "add"	{ /*printf("ADD\n");*/ return ADD; }
 "addi"	{ /*printf("ADDI\n");*/ return ADDI; }
@@ -88,7 +90,7 @@
 "."?[a-zA-Z_][a-zA-Z_0-9]* {
 
     // DEBUG
-    printf("lexer::identifier: %s\n", yytext);
+    //printf("lexer::identifier: %s\n", yytext);
 
     // copy the value into the token
     memset(yylval.string_val, 0, 100);
