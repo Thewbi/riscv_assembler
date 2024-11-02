@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <inttypes.h>
-//#include <cstring>
 #include <stdlib.h>
 
 #include "../common/common.h"
@@ -138,6 +137,12 @@ enum assembler_instruction {
 };
 
 typedef struct asm_line {
+
+    //
+    // general
+    //
+
+    uint32_t line_nr;
 
     //
     // Label to jump to in assembler code

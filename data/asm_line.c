@@ -53,6 +53,13 @@ void copy_asm_line(asm_line_t* target, asm_line_t* source) {
 
     //printf("copy\n");
 
+
+    //
+    // general
+    //
+
+    target->line_nr = source->line_nr;
+
     //
     // Label to jump to in assembler code
     //
@@ -110,7 +117,7 @@ void print_asm_line(const asm_line_t *data) {
 
     if (strlen(data->label) != 0) {
 
-        printf("[Label: %s]\n", data->label);
+        printf("[(%d) Label: %s]\n", data->line_nr, data->label);
 
     } else if (data->asm_instruction != AI_UNDEFINED) {
 
@@ -134,7 +141,8 @@ void print_asm_line(const asm_line_t *data) {
         print_expression(data->asm_instruction_expr, buffer_3);
         //printf("print_expression done.\n");
 
-        printf("[AssemblerInstr: Instr:%s Symbol:%s Val: %s]\n",
+        printf("[(%d) AssemblerInstr: Instr:%s Symbol:%s Val: %s]\n",
+            data->line_nr,
             assembler_instruction_to_string(data->asm_instruction),
             data->asm_instruction_symbol, buffer_3);
 
@@ -152,11 +160,12 @@ void print_asm_line(const asm_line_t *data) {
         print_expression(data->offset_1_expression, buffer_1);
         print_expression(data->offset_2_expression, buffer_2);
 
-        printf("[Instr: %s\n\
+        printf("[(%d) Instr: %s\n\
     0:{offset_used:%d offset:%d offset_ident:%s register:%s offset_expr:%s}\n\
     1:{offset_used:%d offset:%d offset_ident:%s register:%s offset_expr:%s}\n\
     2:{offset_used:%d offset:%d offset_ident:%s register:%s offset_expr:%s}\n\
 ]\n",
+            data->line_nr,
             instruction_to_string(data->instruction),
             data->offset_0_used, data->offset_0, data->offset_identifier_0, register_to_string(data->reg_rd), buffer_0,
             data->offset_1_used, data->offset_1, data->offset_identifier_1, register_to_string(data->reg_rs1), buffer_1,
@@ -394,9 +403,7 @@ const char* assembler_instruction_to_string(enum assembler_instruction data) {
         case AI_GLOBL: return "GLOBL";
 
         default: return "UNKNOWN ASSEMBLER INSTRUCTION!";
-
     }
-
 }
 
 const char* register_to_string(enum register_ data) {

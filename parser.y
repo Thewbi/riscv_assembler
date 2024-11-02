@@ -91,37 +91,47 @@ line_end : NEW_LINE
 
 asm_line :
     label mnemonic params {
-        printf("label mnemonic params\n");
+        //printf("label mnemonic params\n");
         /*print_asm_line(&parser_asm_line);*/
-        printf("Line: %d\n", (yylineno -1));
+        //printf("Line: %d\n", (yylineno -1));
+
+        parser_asm_line.line_nr = (yylineno -1);
 
         if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
     }
 	|
 	mnemonic params {
-        printf("mnemonic params\n");
+        //printf("mnemonic params\n");
         /*print_asm_line(&parser_asm_line);*/
-        printf("Line: %d\n", (yylineno -1));
+        //printf("Line: %d\n", (yylineno -1));
+
+        parser_asm_line.line_nr = (yylineno -1);
 
         if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
     }
 	|
 	label mnemonic {
-        printf("label mnemonic\n");
-        printf("Line: %d\n", (yylineno -1));
+        //printf("label mnemonic\n");
+        //printf("Line: %d\n", (yylineno -1));
+
+        parser_asm_line.line_nr = (yylineno -1);
     }
 	|
 	mnemonic {
-        printf("mnemonic\n");
-        printf("Line: %d\n", yylineno);
+        //printf("mnemonic\n");
+        //printf("Line: %d\n", yylineno);
+
+        parser_asm_line.line_nr = yylineno;
     }
     |
     label {
         //printf("label\n");
-        printf("label Line: %d\n", (yylineno-1));
+        //printf("label Line: %d\n", (yylineno-1));
 
         memset(parser_asm_line.label, 0, 100);
         memcpy(parser_asm_line.label, $1, strlen($1));
+
+        parser_asm_line.line_nr = (yylineno -1);
 
         //printf("Line: %d label: %s \n", parser_asm_line.label, yylineno);
         //printf("Line: %d\n", yylineno);
@@ -130,9 +140,11 @@ asm_line :
     }
     |
     assembler_instruction {
-        printf("assembler_instruction\n");
+        //printf("assembler_instruction\n");
 
-        printf("Line: %d\n", yylineno);
+        //printf("Line: %d\n", yylineno);
+
+        parser_asm_line.line_nr = yylineno;
 
         if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
     }
