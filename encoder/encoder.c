@@ -158,7 +158,8 @@ uint32_t encode_addi(asm_line_t* asm_line) {
 
     uint8_t rd = encode_register(asm_line->reg_rd);
     uint8_t rs1 = encode_register(asm_line->reg_rs1);
-    uint16_t imm = asm_line->imm;
+    //uint16_t imm = asm_line->imm;
+    uint16_t imm = asm_line->offset_2_expression->int_val;
 
     return encode_i_type(imm, rs1, funct3, rd, opcode);
 }
@@ -170,7 +171,8 @@ uint32_t encode_beq(asm_line_t* asm_line) {
 
     uint8_t rs1 = encode_register(asm_line->reg_rs1);
     uint8_t rs2 = encode_register(asm_line->reg_rs2);
-    uint16_t imm = asm_line->imm;
+    //uint16_t imm = asm_line->imm;
+    uint16_t imm = asm_line->offset_2_expression->int_val;
 
     return encode_b_type(imm, rs2, rs1, funct3, opcode);
 }
@@ -182,7 +184,8 @@ uint32_t encode_bne(asm_line_t* asm_line) {
 
     uint8_t rs1 = encode_register(asm_line->reg_rs1);
     uint8_t rs2 = encode_register(asm_line->reg_rs2);
-    uint16_t imm = asm_line->imm;
+    //uint16_t imm = asm_line->imm;
+    uint16_t imm = asm_line->offset_2_expression->int_val;
 
     return encode_b_type(imm, rs2, rs1, funct3, opcode);
 }
@@ -194,7 +197,8 @@ uint32_t encode_bnez(asm_line_t* asm_line) {
 
     uint8_t rs1 = encode_register(asm_line->reg_rd);
     uint8_t rs2 = encode_register(R_ZERO);
-    uint16_t imm = asm_line->imm;
+    //uint16_t imm = asm_line->imm;
+    uint16_t imm = asm_line->offset_1_expression->int_val;
 
     return encode_b_type(imm, rs2, rs1, funct3, opcode);
 }
@@ -205,8 +209,10 @@ void encode_call(asm_line_t* asm_line, uint32_t* output_buffer) {
     //  auipc x6, offset[31:12]
     //  jalr x1, x6, offset[11:0]
 
-    uint32_t data_0 = (asm_line->imm & 0xFFFFF000) >> 12;
-    uint32_t data_1 = (asm_line->imm & 0xFFF);
+    uint32_t imm_int_val = asm_line->offset_0_expression->int_val;
+
+    uint32_t data_0 = (imm_int_val & 0xFFFFF000) >> 12;
+    uint32_t data_1 = (imm_int_val & 0xFFF);
 
     enum register_ free_temp_register = R_T1; // x6
 
@@ -235,12 +241,15 @@ void encode_call(asm_line_t* asm_line, uint32_t* output_buffer) {
     output_buffer[1] = jalr_encoded;
 }
 
+// j 0xBFFF00
 void encode_j(asm_line_t* asm_line, uint32_t* output_buffer) {
 
     // implemented using:
     // https://www.reddit.com/r/RISCV/comments/129qg6t/can_someone_pls_explain/?tl=de
 
-    uint32_t data_0 = asm_line->imm;
+    //uint32_t data_0 = asm_line->imm;
+    //uint32_t data_0 = sign_extend_20_bit_to_uint32_t(asm_line->offset_0_expression->int_val);
+    uint32_t data_0 = asm_line->offset_0_expression->int_val;
     //printf("data_0: %08" PRIx32 "\n", data_0);
 
     // 1. Take the value 0xBFFF00 and multiply it by 4 because it is the amount of instructions with 4 byte per instruction
@@ -323,12 +332,19 @@ uint32_t encode_lw(asm_line_t* asm_line) {
     return encode_i_type(imm, rs1, funct3, rd, opcode);
 }
 
+// https://luplab.gitlab.io/rvcodecjs/#q=0xdeadc537&abi=false&isa=AUTO
 uint32_t encode_lui(asm_line_t* asm_line) {
+
+    //print_asm_line(asm_line);
 
     uint8_t opcode = 0b0110111;
 
     uint8_t rd = encode_register(asm_line->reg_rd);
-    uint32_t imm = asm_line->imm;
+    //uint32_t imm = asm_line->imm;
+
+    //uint16_t imm = asm_line->offset_0_expression->int_val;
+    int32_t imm = asm_line->offset_1_expression->int_val;
+    //uint16_t imm = asm_line->offset_2_expression->int_val;
 
     //printf("encode_lui asm_line->imm: %d\n", imm);
 
@@ -384,7 +400,8 @@ void encode_li(asm_line_t* asm_line, uint32_t* output_buffer) {
     //printf("asm_line->imm: %08" PRIx32 "\n", asm_line->imm);
 
     // take the 32 bit value (data_0)
-    uint32_t data_0 = asm_line->imm;
+    //uint32_t data_0 = asm_line->imm;
+    uint32_t data_0 = asm_line->offset_1_expression->int_val;
 
     // split it into a 20 bit (data_1) and a twelve bit part (is ignored)
     uint32_t data_1 = ((data_0 & 0b11111111111111111111000000000000) >> 12);
@@ -456,6 +473,19 @@ uint32_t encode_mv(asm_line_t* asm_line) {
     return encode_i_type(imm, rs1, funct3, rd, opcode);
 }
 
+uint32_t encode_ret(asm_line_t* asm_line) {
+
+    uint8_t funct3 = 0b000;
+    uint8_t opcode = 0b1100111;
+    uint16_t imm = 0;
+
+    uint8_t rs1 = encode_register(R_RA);
+    uint8_t rd = encode_register(R_ZERO);
+
+    // encode jalr (https://luplab.gitlab.io/rvcodecjs/#q=jalr+x0,+0(x1)&abi=false&isa=AUTO)
+    return encode_i_type(imm, rs1, funct3, rd, opcode);
+}
+
 uint32_t encode_srli(asm_line_t* asm_line) {
 
     //printf("encode_srli\n");
@@ -465,7 +495,8 @@ uint32_t encode_srli(asm_line_t* asm_line) {
 
     uint8_t rd = encode_register(asm_line->reg_rd);
     uint8_t rs1 = encode_register(asm_line->reg_rs1);
-    uint16_t imm = asm_line->imm;
+    //uint16_t imm = asm_line->imm;
+    uint16_t imm = asm_line->offset_2_expression->int_val;
 
     return encode_i_type(imm, rs1, funct3, rd, opcode);
 }
@@ -479,9 +510,14 @@ uint32_t encode_slli(asm_line_t* asm_line) {
 
     uint8_t rd = encode_register(asm_line->reg_rd);
     uint8_t rs1 = encode_register(asm_line->reg_rs1);
-    uint16_t imm = asm_line->imm;
+    //uint16_t imm = asm_line->imm;
+    uint16_t imm = asm_line->offset_2_expression->int_val;
 
-    return encode_i_type(imm, rs1, funct3, rd, opcode);
+    uint32_t result = encode_i_type(imm, rs1, funct3, rd, opcode);
+
+    //printf("encode_slli result: %d\n", result);
+
+    return result;
 }
 
 // https://luplab.gitlab.io/rvcodecjs/#q=sw++++++ra,28(sp)&abi=false&isa=AUTO
@@ -537,11 +573,13 @@ uint32_t encode_i_type(uint16_t imm, uint8_t rs1, uint8_t funct3, uint8_t rd, ui
     // printf("encode_i_type rd: %d \n", rd);
     // printf("encode_i_type opcode: %d \n", opcode);
 
-    return ((opcode & 0b1111111) << 0) |
+    uint32_t result = ((opcode & 0b1111111) << 0) |
            ((rd & 0b11111) << 7) |
            ((funct3 & 0b111) << (7+5)) |
            ((rs1 & 0b11111) << (7+5+3)) |
            ((imm & 0b111111111111) << (7+5+3+5));
+
+    return result;
 }
 
 uint32_t encode_b_type(uint16_t imm, uint8_t rs2, uint8_t rs1, uint8_t funct3, uint8_t opcode) {

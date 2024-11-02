@@ -2,10 +2,11 @@
  * ex1.l
  ********************************************************/
 %{
-    #include <node.h>
-#include "parser.h"
 
 #include <stdio.h>
+
+#include <node.h>
+#include "parser.h"
 
 %}
 

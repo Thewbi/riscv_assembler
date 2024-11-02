@@ -19,12 +19,12 @@ extern int yy_flex_debug;
 extern void (*fp_emit)(asm_line_t*);
 
 /**
- * j 0xBFFF00
+ * https://stackoverflow.com/questions/65979263/assembly-what-is-ret
  *
- * auipc x5, 0x03000 -> 03000297
- * jalr x0, 0xc00(x5) -> 0xc0028067
+ * pseudo instruction ret
+ * ret -> jalr x0, 0(x1)
  */
-void j_encode_valid_input_test(void **state)
+void ret_encode_valid_input_test(void **state)
 {
     // Arrange
 
@@ -37,9 +37,9 @@ void j_encode_valid_input_test(void **state)
 
     //fp_emit = &emit;
 
-    yyin = fopen("resources/j.s", "r");
+    yyin = fopen("resources/ret.s", "r");
     if (!yyin) {
-        printf("Cannot open '%s'. Aborting.\n", "resources/j.s");
+        printf("Cannot open '%s'. Aborting.\n", "resources/ret.s");
     }
 
     yy_flex_debug = 0;
@@ -51,23 +51,17 @@ void j_encode_valid_input_test(void **state)
     // The parser will load data into the variable parser_asm_line
     yyparse();
 
-    //print_asm_line(&parser_asm_line);
-
     // printf("parser_asm_line->reg_rd %d\n", parser_asm_line.reg_rd);
     // printf("parser_asm_line->reg_rs1 %d\n", parser_asm_line.reg_rs1);
     // printf("parser_asm_line->reg_rs2 %d\n", parser_asm_line.reg_rs2);
     // printf("parser_asm_line->imm %d\n", parser_asm_line.imm);
     // printf("parser_asm_line->imm %08" PRIx32 "\n", parser_asm_line.imm);
 
-    uint32_t output_buffer[2];
-    encode_j(&parser_asm_line, output_buffer);
+    uint32_t result = encode_ret(&parser_asm_line);
 
     // Assert
 
-    // auipc x5, 0x03000 -> 03000297
-    assert_int_equal(0x03000297, output_buffer[0]);
-
-    // jalr x0, 0xc00(x5) -> 0xc0028067
-    assert_int_equal(0xc0028067, output_buffer[1]);
+    // jalr x0, 0(x1) -> 00008067
+    assert_int_equal(0x00008067, result);
 }
 

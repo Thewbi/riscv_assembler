@@ -42,6 +42,25 @@ void slli_encode_valid_input_test(void **state)
     // The parser will load data into the variable parser_asm_line
     yyparse();
 
+    //print_asm_line(&parser_asm_line);
+
+    //printf("A\n");
+    assert_int_equal(9, parser_asm_line.reg_rd);
+
+    //printf("B\n");
+    assert_int_equal(9, parser_asm_line.reg_rs1);
+
+    //printf("C\n");
+    assert_int_equal(2, parser_asm_line.offset_2_expression->int_val);
+    //assert_int_equal(2, parser_asm_line.imm);
+    //printf("D\n");
+
+    //printf("parser_asm_line->reg_rd %d\n", parser_asm_line.reg_rd);
+    //printf("parser_asm_line->reg_rs1 %d\n", parser_asm_line.reg_rs1);
+    //printf("parser_asm_line->reg_rs2 %d\n", parser_asm_line.reg_rs2);
+    //printf("parser_asm_line->imm %d\n", parser_asm_line.imm);
+    //printf("parser_asm_line->imm %08" PRIx32 "\n", parser_asm_line.imm);
+
     uint32_t result = encode_slli(&parser_asm_line);
 
     // Assert

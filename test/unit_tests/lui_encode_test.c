@@ -49,10 +49,10 @@ void lui_encode_valid_input_test(void **state)
     yyparse();
 
     //printf("parser_asm_line->reg_rd %d\n", parser_asm_line.reg_rd);
-    // printf("parser_asm_line->reg_rs1 %d\n", parser_asm_line.reg_rs1);
-    // printf("parser_asm_line->reg_rs2 %d\n", parser_asm_line.reg_rs2);
+    //printf("parser_asm_line->reg_rs1 %d\n", parser_asm_line.reg_rs1);
+    //printf("parser_asm_line->reg_rs2 %d\n", parser_asm_line.reg_rs2);
     //printf("parser_asm_line->imm %d\n", parser_asm_line.imm);
-    
+
     uint32_t result = encode_lui(&parser_asm_line);
 
     // Assert

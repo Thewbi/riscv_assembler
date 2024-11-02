@@ -5,6 +5,12 @@ void reset_asm_line(asm_line_t *data) {
     //printf("reset\n");
 
     //
+    // Label to jump to in assembler code
+    //
+
+    memset(data->label, 0, 100);
+
+    //
     // assembler instruction
     //
 
@@ -46,6 +52,13 @@ void reset_asm_line(asm_line_t *data) {
 void copy_asm_line(asm_line_t* target, asm_line_t* source) {
 
     //printf("copy\n");
+
+    //
+    // Label to jump to in assembler code
+    //
+
+    memset(target->label, 0, 100);
+    memcpy(target->label, source->label, 100);
 
     //
     // assembler instruction
@@ -93,8 +106,13 @@ void copy_asm_line(asm_line_t* target, asm_line_t* source) {
 void print_asm_line(const asm_line_t *data) {
 
     //printf("print_asm_line\n");
+    //printf("print_asm_line label: %s \n", data->label);
 
-    if (data->asm_instruction != AI_UNDEFINED) {
+    if (strlen(data->label) != 0) {
+
+        printf("[Label: %s]\n", data->label);
+
+    } else if (data->asm_instruction != AI_UNDEFINED) {
 
         // char buffer_0[100];
         // char buffer_1[100];
@@ -135,9 +153,9 @@ void print_asm_line(const asm_line_t *data) {
         print_expression(data->offset_2_expression, buffer_2);
 
         printf("[Instr: %s\n\
-    0:{offset_used:%d offset:%d offset_ident:%s register:%s expr:%s}\n\
-    1:{offset_used:%d offset:%d offset_ident:%s register:%s expr:%s}\n\
-    2:{offset_used:%d offset:%d offset_ident:%s register:%s expr:%s}\n\
+    0:{offset_used:%d offset:%d offset_ident:%s register:%s offset_expr:%s}\n\
+    1:{offset_used:%d offset:%d offset_ident:%s register:%s offset_expr:%s}\n\
+    2:{offset_used:%d offset:%d offset_ident:%s register:%s offset_expr:%s}\n\
 ]\n",
             instruction_to_string(data->instruction),
             data->offset_0_used, data->offset_0, data->offset_identifier_0, register_to_string(data->reg_rd), buffer_0,
@@ -146,6 +164,38 @@ void print_asm_line(const asm_line_t *data) {
 
     }
 
+}
+
+void print_expression(const node_t* data, char* buffer) {
+
+    //printf("print_expression A %d\n", data);
+
+    if (data == NULL) {
+
+        //printf("print_expression B\n");
+
+        strncpy(buffer, "NULL", 100);
+        return;
+    }
+
+    //printf("print_expression x\n");
+    //printf("print_expression x %d\n", data->string_val[0]);
+    int val = strnlen(data->string_val, 100);
+    //printf("print_expression y %d\n", val);
+
+    if (strlen(data->string_val) != 0) {
+
+        //printf("print_expression C\n");
+
+        strncpy(buffer, data->string_val, strlen(data->string_val));
+        return;
+    }
+
+    //printf("print_expression D\n");
+
+    //printf("0x%" PRIx64 "", data->int_val);
+
+    snprintf(buffer, 100, "0x%" PRIx64 "", data->int_val);
 }
 
 void insert_register(asm_line_t *data, enum register_ reg) {
@@ -290,22 +340,7 @@ void insert_integer_immediate(asm_line_t *data, uint32_t imm) {
     data->imm = sign_extended;
 }
 
-void print_expression(const node_t* data, char* buffer) {
 
-    if (data == NULL) {
-        strncpy(buffer, "NULL", 100);
-        return;
-    }
-
-    if (strlen(data->string_val) != 0) {
-        strncpy(buffer, data->string_val, strlen(data->string_val));
-        return;
-    }
-
-    //printf("0x%" PRIx64 "", data->int_val);
-
-    snprintf(buffer, 100, "0x%" PRIx64 "", data->int_val);
-}
 
 const char* instruction_to_string(enum instruction data) {
 

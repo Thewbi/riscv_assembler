@@ -5,7 +5,7 @@
 %{
 
 #include <stdio.h>
-#include <cstring>
+//#include <cstring>
 
 #include <asm_line.h>
 #include <encoder.h>
@@ -67,6 +67,7 @@ void (*fp_emit)(asm_line_t*);
 //%type  <val> exp term sfactor factor res
 
 %type <expr_ptr> expr; // the expr rule will return a node_t pointer
+%type <string_val> label;
 
 //-- SECTION 3: GRAMMAR RULES ---------------------------------------
 
@@ -101,30 +102,37 @@ asm_line : label mnemonic params {
 	|
 	label mnemonic {
         //printf("label mnemonic\n");
-        }
+    }
 	|
 	mnemonic {
         //printf("mnemonic\n");
-        }
+    }
     |
     label {
         //printf("label\n");
-        }
+
+        memset(parser_asm_line.label, 0, 100);
+        memcpy(parser_asm_line.label, $1, strlen($1));
+
+        //printf("label %s\n", parser_asm_line.label);
+
+        if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
+    }
     |
     assembler_instruction {
         //printf("assembler_instruction\n");
         if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
-        }
+    }
 
 params : param_1 COMMA param_2 COMMA param_3 {
         //printf("param_1 COMMA param_2 COMMA param_3\n");
-        }
+    }
     | param_1 COMMA param_2 {
         //printf("param_1 COMMA param_2\n");
-        }
+    }
     | param_1 {
         //printf("param_1\n");
-        }
+    }
 
 param_1 :
     IDENTIFIER OPENING_BRACKET expr {
@@ -151,7 +159,8 @@ param_2 :
     |
     NUMERIC OPENING_BRACKET expr {
         //printf("numeric OFFSET 2\n");
-        insert_offset(&parser_asm_line, $2, 1); } CLOSING_BRACKET
+        insert_offset(&parser_asm_line, $2, 1);
+    } CLOSING_BRACKET
     |
     expr {
         //printf("expr 2\n");
@@ -167,7 +176,8 @@ param_3 :
     |
     NUMERIC OPENING_BRACKET expr {
         //printf("numeric OFFSET 3\n");
-        insert_offset(&parser_asm_line, $2, 2); } CLOSING_BRACKET
+        insert_offset(&parser_asm_line, $2, 2);
+    } CLOSING_BRACKET
     |
     expr {
         //printf("expr 3\n");
@@ -175,7 +185,9 @@ param_3 :
         current_node = NULL;
     }
 
-label : IDENTIFIER COLON
+label : IDENTIFIER COLON {
+    strncpy($$, $1, 100);
+}
 
 // https://www.gnu.org/software/bison/manual/bison.html
 expr:
@@ -185,19 +197,27 @@ expr:
 
         if (current_node == NULL)
         {
+            //current_node = new node_t;
+            current_node = (node_t *)malloc(sizeof(node_t));
+            reset_node(current_node);
 
-
-            current_node = new node_t;
+            //printf("PARSER-NUMERIC: creating node: %d\n", $1);
+            //printf("PARSER-NUMERIC: creating node: %08" PRIx32 "\n", $1);
+            //current_node->int_val = sign_extend_20_bit_to_uint32_t($1);
             current_node->int_val = $1;
+            //printf("PARSER-NUMERIC: creating node: %d\n", current_node->int_val);
 
             //printf("PARSER-NUMERIC: creating node: %d\n", current_node->int_val);
 
             $$ = current_node;
+        } else {
+            printf("PARSER-NUMERIC: not null!\n");
         }
     }
     |
     register {
         //printf("expr - register\n");
+        $$ = current_node;
     }
     |
     IDENTIFIER {
@@ -205,9 +225,16 @@ expr:
 
         if (current_node == NULL)
         {
-            current_node = new node_t;
+            //current_node = new node_t;
+            current_node = (node_t *)malloc(sizeof(node_t));
+
+            reset_node(current_node);
             memset(current_node->string_val, 0, 100);
             memcpy(current_node->string_val, $1, strlen($1));
+
+            $$ = current_node;
+        } else {
+            printf("expr - IDENTIFIER: not null!\n");
         }
     }
 
@@ -225,11 +252,30 @@ assembler_instruction :
         //printf("BBB: %s\n", parser_asm_line.asm_instruction_symbol);
 
         parser_asm_line.asm_instruction_expr = $4;
+        //parser_asm_line.asm_instruction_expr = NULL;
+        current_node = NULL;
     }
     |
-    SECTION IDENTIFIER
+    SECTION IDENTIFIER {
+
+        parser_asm_line.asm_instruction = AI_SECTION;
+
+        memset(parser_asm_line.asm_instruction_symbol, 0, 100);
+        memcpy(parser_asm_line.asm_instruction_symbol, $2, strlen($2));
+
+        current_node = NULL;
+    }
     |
-    GLOBL IDENTIFIER
+    GLOBL IDENTIFIER {
+
+        parser_asm_line.asm_instruction = AI_GLOBL;
+
+        memset(parser_asm_line.asm_instruction_symbol, 0, 100);
+        memcpy(parser_asm_line.asm_instruction_symbol, $2, strlen($2));
+
+        current_node = NULL;
+
+    }
 
 mnemonic : ADD { /*printf("Parser-ADD: %d\n", I_ADD);*/ parser_asm_line.instruction = I_ADD; parser_asm_line.instruction_type = IT_R; }
     | ADDI { /*printf("Parser-ADDI: %d\n", I_ADDI);*/ parser_asm_line.instruction = I_ADDI; parser_asm_line.instruction_type = IT_R; }

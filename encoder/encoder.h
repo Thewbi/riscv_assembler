@@ -44,6 +44,8 @@ uint32_t encode_mul(asm_line_t* asm_line);
 
 uint32_t encode_mv(asm_line_t* asm_line);
 
+uint32_t encode_ret(asm_line_t* asm_line);
+
 uint32_t encode_srli(asm_line_t* asm_line);
 
 uint32_t encode_slli(asm_line_t* asm_line);

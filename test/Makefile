@@ -10,6 +10,8 @@ all: test
 test: unit_tests/main.c \
 	../common/common.h \
 	../common/common.c \
+	../common/node.h \
+	../common/node.c \
 	../decoder/decoder.h \
 	../decoder/decoder.c \
 	../encoder/encoder.h \
@@ -62,6 +64,10 @@ test: unit_tests/main.c \
 	unit_tests/mv_encode_test.h \
 	unit_tests/mv_decode_test.c \
 	unit_tests/mv_decode_test.h \
+	unit_tests/ret_encode_test.c \
+	unit_tests/ret_encode_test.h \
+	unit_tests/ret_decode_test.c \
+	unit_tests/ret_decode_test.h \
 	unit_tests/srli_decode_test.c \
 	unit_tests/srli_decode_test.h \
 	unit_tests/srli_encode_test.c \
@@ -103,13 +109,16 @@ test: unit_tests/main.c \
 	unit_tests/mul_decode_test.c \
 	unit_tests/mv_encode_test.c \
 	unit_tests/mv_decode_test.c \
-	unit_tests/srli_decode_test.c \
+	unit_tests/ret_encode_test.c \
+	unit_tests/ret_decode_test.c \
 	unit_tests/srli_encode_test.c \
-	unit_tests/slli_decode_test.c \
+	unit_tests/srli_decode_test.c \
 	unit_tests/slli_encode_test.c \
+	unit_tests/slli_decode_test.c \
 	unit_tests/sw_encode_test.c \
 	unit_tests/sw_decode_test.c \
 	../common/common.c \
+	../common/node.c \
 	../data/asm_line.c \
 	../decoder/decoder.c \
 	../encoder/encoder.c \
