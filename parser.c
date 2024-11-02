@@ -1713,109 +1713,109 @@ yyreduce:
 
   case 39: /* mnemonic: ADD  */
 #line 310 "parser.y"
-               { /*printf("Parser-ADD: %d\n", I_ADD);*/ parser_asm_line.instruction = I_ADD; parser_asm_line.instruction_type = IT_R; }
+               { /*printf("Parser-ADD: %d\n", I_ADD);*/ /*parser_asm_line.instruction = I_ADD; parser_asm_line.instruction_type = IT_R;*/ set_instruction(&parser_asm_line, I_ADD, IT_R); }
 #line 1718 "parser.c"
     break;
 
   case 40: /* mnemonic: ADDI  */
 #line 311 "parser.y"
-           { /*printf("Parser-ADDI: %d\n", I_ADDI);*/ parser_asm_line.instruction = I_ADDI; parser_asm_line.instruction_type = IT_R; }
+           { /*printf("Parser-ADDI: %d\n", I_ADDI);*/ /*parser_asm_line.instruction = I_ADDI; parser_asm_line.instruction_type = IT_R;*/ set_instruction(&parser_asm_line, I_ADDI, IT_R); }
 #line 1724 "parser.c"
     break;
 
   case 41: /* mnemonic: BEQ  */
 #line 312 "parser.y"
-          { /*printf("Parser-BEQ: %d\n", I_BEQ);*/ parser_asm_line.instruction = I_BEQ; parser_asm_line.instruction_type = IT_B; }
+          { /*printf("Parser-BEQ: %d\n", I_BEQ);*/ /*parser_asm_line.instruction = I_BEQ; parser_asm_line.instruction_type = IT_B;*/ set_instruction(&parser_asm_line, I_BEQ, IT_B); }
 #line 1730 "parser.c"
     break;
 
   case 42: /* mnemonic: BNE  */
 #line 313 "parser.y"
-          { /*printf("Parser-BNE: %d\n", I_BNE);*/ parser_asm_line.instruction = I_BNE; parser_asm_line.instruction_type = IT_B; }
+          { /*printf("Parser-BNE: %d\n", I_BNE);*/ /*parser_asm_line.instruction = I_BNE; parser_asm_line.instruction_type = IT_B;*/ set_instruction(&parser_asm_line, I_BNE, IT_B); }
 #line 1736 "parser.c"
     break;
 
   case 43: /* mnemonic: BNEZ  */
 #line 314 "parser.y"
-           { /*printf("Parser-BNEZ: %d\n", I_BNEZ);*/ parser_asm_line.instruction = I_BNEZ; parser_asm_line.instruction_type = IT_P; }
+           { /*printf("Parser-BNEZ: %d\n", I_BNEZ);*/ /*parser_asm_line.instruction = I_BNEZ; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_BNEZ, IT_P); }
 #line 1742 "parser.c"
     break;
 
   case 44: /* mnemonic: CALL  */
 #line 315 "parser.y"
-           { /*printf("Parser-CALL: %d\n", I_CALL);*/ parser_asm_line.instruction = I_CALL; parser_asm_line.instruction_type = IT_P; }
+           { /*printf("Parser-CALL: %d\n", I_CALL);*/ /*parser_asm_line.instruction = I_CALL; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_CALL, IT_P); }
 #line 1748 "parser.c"
     break;
 
   case 45: /* mnemonic: J  */
 #line 316 "parser.y"
-        { /*printf("Parser-J: %d\n", I_J);*/ parser_asm_line.instruction = I_J; parser_asm_line.instruction_type = IT_P; }
+        { /*printf("Parser-J: %d\n", I_J);*/ /*parser_asm_line.instruction = I_J; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_J, IT_P); }
 #line 1754 "parser.c"
     break;
 
   case 46: /* mnemonic: JALR  */
 #line 317 "parser.y"
-           { /*printf("Parser-JALR: %d\n", I_JALR);*/ parser_asm_line.instruction = I_JALR; parser_asm_line.instruction_type = IT_J; }
+           { /*printf("Parser-JALR: %d\n", I_JALR);*/ /*parser_asm_line.instruction = I_JALR; parser_asm_line.instruction_type = IT_J;*/ set_instruction(&parser_asm_line, I_JALR, IT_J); }
 #line 1760 "parser.c"
     break;
 
   case 47: /* mnemonic: LB  */
 #line 318 "parser.y"
-         { /*printf("Parser-LB: %d\n", I_LB);*/ parser_asm_line.instruction = I_LB; parser_asm_line.instruction_type = IT_I; }
+         { /*printf("Parser-LB: %d\n", I_LB);*/ /*parser_asm_line.instruction = I_LB; parser_asm_line.instruction_type = IT_I;*/ set_instruction(&parser_asm_line, I_LB, IT_I); }
 #line 1766 "parser.c"
     break;
 
   case 48: /* mnemonic: LI  */
 #line 319 "parser.y"
-         { /*printf("Parser-LI: %d\n", I_LI);*/ parser_asm_line.instruction = I_LI; parser_asm_line.instruction_type = IT_I; }
+         { /*printf("Parser-LI: %d\n", I_LI);*/ /*parser_asm_line.instruction = I_LI; parser_asm_line.instruction_type = IT_I;*/ set_instruction(&parser_asm_line, I_LI, IT_I); }
 #line 1772 "parser.c"
     break;
 
   case 49: /* mnemonic: LW  */
 #line 320 "parser.y"
-         { /*printf("Parser-LW: %d\n", I_LW);*/ parser_asm_line.instruction = I_LW; parser_asm_line.instruction_type = IT_I; }
+         { /*printf("Parser-LW: %d\n", I_LW);*/ /*parser_asm_line.instruction = I_LW; parser_asm_line.instruction_type = IT_I;*/ set_instruction(&parser_asm_line, I_LW, IT_I); }
 #line 1778 "parser.c"
     break;
 
   case 50: /* mnemonic: LUI  */
 #line 321 "parser.y"
-          { /*printf("Parser-LUI: %d\n", I_LUI);*/ parser_asm_line.instruction = I_LUI; parser_asm_line.instruction_type = IT_U; }
+          { /*printf("Parser-LUI: %d\n", I_LUI);*/ /*parser_asm_line.instruction = I_LUI; parser_asm_line.instruction_type = IT_U;*/ set_instruction(&parser_asm_line, I_LUI, IT_U); }
 #line 1784 "parser.c"
     break;
 
   case 51: /* mnemonic: MUL  */
 #line 322 "parser.y"
-          { /*printf("Parser-LW: %d\n", I_MUL);*/ parser_asm_line.instruction = I_MUL; parser_asm_line.instruction_type = IT_R; }
+          { /*printf("Parser-LW: %d\n", I_MUL);*/ /*parser_asm_line.instruction = I_MUL; parser_asm_line.instruction_type = IT_R;*/ set_instruction(&parser_asm_line, I_MUL, IT_R); }
 #line 1790 "parser.c"
     break;
 
   case 52: /* mnemonic: MV  */
 #line 323 "parser.y"
-         { /*printf("Parser-LW: %d\n", I_MV);*/ parser_asm_line.instruction = I_MV; parser_asm_line.instruction_type = IT_P; }
+         { /*printf("Parser-LW: %d\n", I_MV);*/ /*parser_asm_line.instruction = I_MV; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_MV, IT_P); }
 #line 1796 "parser.c"
     break;
 
   case 53: /* mnemonic: RET  */
 #line 324 "parser.y"
-          { /*printf("Parser-RET: %d\n", I_RET);*/ parser_asm_line.instruction = I_RET; parser_asm_line.instruction_type = IT_P; }
+          { /*printf("Parser-RET: %d\n", I_RET);*/ /*parser_asm_line.instruction = I_RET; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_RET, IT_P); }
 #line 1802 "parser.c"
     break;
 
   case 54: /* mnemonic: SRLI  */
 #line 325 "parser.y"
-           { /*printf("Parser-SRLI: %d\n", I_SRLI);*/ parser_asm_line.instruction = I_SRLI; parser_asm_line.instruction_type = IT_I; }
+           { /*printf("Parser-SRLI: %d\n", I_SRLI);*/ /*parser_asm_line.instruction = I_SRLI; parser_asm_line.instruction_type = IT_I;*/ set_instruction(&parser_asm_line, I_SRLI, IT_I); }
 #line 1808 "parser.c"
     break;
 
   case 55: /* mnemonic: SLLI  */
 #line 326 "parser.y"
-           { /*printf("Parser-SLLI: %d\n", I_SLLI);*/ parser_asm_line.instruction = I_SLLI; parser_asm_line.instruction_type = IT_I; }
+           { /*printf("Parser-SLLI: %d\n", I_SLLI);*/ /*parser_asm_line.instruction = I_SLLI; parser_asm_line.instruction_type = IT_I;*/ set_instruction(&parser_asm_line, I_SLLI, IT_I); }
 #line 1814 "parser.c"
     break;
 
   case 56: /* mnemonic: SW  */
 #line 327 "parser.y"
-         { /*printf("Parser-SW: %d\n", I_SW);*/ parser_asm_line.instruction = I_SW; parser_asm_line.instruction_type = IT_S; }
+         { /*printf("Parser-SW: %d\n", I_SW);*/ /*parser_asm_line.instruction = I_SW; parser_asm_line.instruction_type = IT_S;*/ set_instruction(&parser_asm_line, I_SW, IT_S); }
 #line 1820 "parser.c"
     break;
 

@@ -143,6 +143,7 @@ typedef struct asm_line {
     //
 
     uint32_t line_nr;
+    uint8_t size_in_bytes;
 
     //
     // Label to jump to in assembler code
@@ -244,5 +245,7 @@ const char* assembler_instruction_to_string(enum assembler_instruction data);
  *
  */
 const char* register_to_string(enum register_ data);
+
+void set_instruction(asm_line_t *data, const enum instruction instr, const enum instruction_type type);
 
 #endif

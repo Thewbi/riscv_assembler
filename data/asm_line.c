@@ -5,6 +5,13 @@ void reset_asm_line(asm_line_t *data) {
     //printf("reset\n");
 
     //
+    // general
+    //
+
+    data->line_nr = 0;
+    data->size_in_bytes = 0;
+
+    //
     // Label to jump to in assembler code
     //
 
@@ -59,6 +66,7 @@ void copy_asm_line(asm_line_t* target, asm_line_t* source) {
     //
 
     target->line_nr = source->line_nr;
+    target->size_in_bytes = source->size_in_bytes;
 
     //
     // Label to jump to in assembler code
@@ -121,18 +129,6 @@ void print_asm_line(const asm_line_t *data) {
 
     } else if (data->asm_instruction != AI_UNDEFINED) {
 
-        // char buffer_0[100];
-        // char buffer_1[100];
-        // char buffer_2[100];
-
-        // memset(buffer_0, 0, 100);
-        // memset(buffer_1, 0, 100);
-        // memset(buffer_2, 0, 100);
-
-        // print_expression(data->offset_0_expression, buffer_0);
-        // print_expression(data->offset_1_expression, buffer_1);
-        // print_expression(data->offset_2_expression, buffer_2);
-
         char buffer_3[100];
 
         memset(buffer_3, 0, 100);
@@ -148,6 +144,8 @@ void print_asm_line(const asm_line_t *data) {
 
     } else {
 
+        //printf("asm_line with parameters\n");
+
         char buffer_0[100];
         char buffer_1[100];
         char buffer_2[100];
@@ -160,13 +158,14 @@ void print_asm_line(const asm_line_t *data) {
         print_expression(data->offset_1_expression, buffer_1);
         print_expression(data->offset_2_expression, buffer_2);
 
-        printf("[(%d) Instr: %s\n\
+        printf("[(%d) Instr: %s Size: %d\n\
     0:{offset_used:%d offset:%d offset_ident:%s register:%s offset_expr:%s}\n\
     1:{offset_used:%d offset:%d offset_ident:%s register:%s offset_expr:%s}\n\
     2:{offset_used:%d offset:%d offset_ident:%s register:%s offset_expr:%s}\n\
 ]\n",
             data->line_nr,
             instruction_to_string(data->instruction),
+            data->size_in_bytes,
             data->offset_0_used, data->offset_0, data->offset_identifier_0, register_to_string(data->reg_rd), buffer_0,
             data->offset_1_used, data->offset_1, data->offset_identifier_1, register_to_string(data->reg_rs1), buffer_1,
             data->offset_2_used, data->offset_2, data->offset_identifier_2, register_to_string(data->reg_rs2), buffer_2);
@@ -349,8 +348,6 @@ void insert_integer_immediate(asm_line_t *data, uint32_t imm) {
     data->imm = sign_extended;
 }
 
-
-
 const char* instruction_to_string(enum instruction data) {
 
     switch (data) {
@@ -374,7 +371,7 @@ const char* instruction_to_string(enum instruction data) {
         case I_LH: return "LH";
         case I_LBU: return "LBU";
         case I_LHU: return "LHU";
-        case I_LI: return "LI";
+        case I_LI: return "LI"; // pseudo instruction
         case I_LUI: return "LUI";
         case I_LW: return "LW";
 
@@ -444,4 +441,33 @@ const char* register_to_string(enum register_ data) {
 
         default: return "R_UNDEFINED_REGISTER";
     }
+}
+
+void set_instruction(asm_line_t *data, const enum instruction instr, const enum instruction_type type) {
+
+    //printf("set_instruction()\n");
+
+    data->instruction = instr;
+    data->instruction_type = type;
+
+    data->size_in_bytes = 4;
+    switch (data->instruction) {
+
+        case I_CALL:
+            data->size_in_bytes = 8;
+            break;
+
+        case I_J:
+            data->size_in_bytes = 8;
+            break;
+
+        case I_LI:
+            data->size_in_bytes = 8;
+            break;
+
+        case I_MV:
+            data->size_in_bytes = 4;
+            break;
+    }
+
 }
