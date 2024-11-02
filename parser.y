@@ -91,35 +91,45 @@ line_end : NEW_LINE
 asm_line : label mnemonic params {
         //printf("label mnemonic params\n");
         /*print_asm_line(&parser_asm_line);*/
+        printf("Line: %d\n", yylineno);
+
         if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
     }
 	|
 	mnemonic params {
         //printf("mnemonic params\n");
         /*print_asm_line(&parser_asm_line);*/
+        printf("Line: %d\n", yylineno);
+
         if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
     }
 	|
 	label mnemonic {
         //printf("label mnemonic\n");
+        printf("Line: %d\n", yylineno);
     }
 	|
 	mnemonic {
         //printf("mnemonic\n");
+        printf("Line: %d\n", yylineno);
     }
     |
     label {
         //printf("label\n");
+        //printf("Line: %d\n", yylineno);
 
         memset(parser_asm_line.label, 0, 100);
         memcpy(parser_asm_line.label, $1, strlen($1));
 
-        //printf("label %s\n", parser_asm_line.label);
+        printf("label %s Line: %d\n", parser_asm_line.label, yylineno);
+        //printf("Line: %d\n", yylineno);
 
         if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
     }
     |
     assembler_instruction {
+        printf("Line: %d\n", yylineno);
+
         //printf("assembler_instruction\n");
         if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
     }
@@ -199,6 +209,9 @@ expr:
         {
             //current_node = new node_t;
             current_node = (node_t *)malloc(sizeof(node_t));
+
+            //printf("Line: %d\n", yylineno);
+
             reset_node(current_node);
 
             //printf("PARSER-NUMERIC: creating node: %d\n", $1);
@@ -227,6 +240,8 @@ expr:
         {
             //current_node = new node_t;
             current_node = (node_t *)malloc(sizeof(node_t));
+
+            //printf("Line: %d\n", yylineno);
 
             reset_node(current_node);
             memset(current_node->string_val, 0, 100);

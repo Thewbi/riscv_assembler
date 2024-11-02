@@ -46,7 +46,7 @@ int main(int argc, char **argv)
 
     for (int i = 0; i < asm_line_array_index; i++) {
 
-        printf("line %d\n", i);
+        //printf("line %d\n", i);
         print_asm_line(&asm_line_array[i]);
     }
 
