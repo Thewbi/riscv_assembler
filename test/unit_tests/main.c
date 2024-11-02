@@ -41,6 +41,9 @@
 #include <mv_encode_test.h>
 #include <mv_decode_test.h>
 
+#include <ret_encode_test.h>
+#include <ret_decode_test.h>
+
 #include <srli_decode_test.h>
 #include <srli_encode_test.h>
 
@@ -77,6 +80,9 @@ int main(void)
         cmocka_unit_test(bnez_encode_valid_input_test),
         //cmocka_unit_test(bnez_decode_valid_input_test),
 
+        cmocka_unit_test(j_encode_valid_input_test),
+        cmocka_unit_test(j_decode_valid_input_test),
+
         cmocka_unit_test(ld_with_offset_valid_input_test),
 
         cmocka_unit_test(lui_encode_valid_input_test),
@@ -84,9 +90,6 @@ int main(void)
 
         cmocka_unit_test(li_encode_valid_input_test),
         cmocka_unit_test(li_decode_valid_input_test),
-
-        cmocka_unit_test(j_encode_valid_input_test),
-        cmocka_unit_test(j_decode_valid_input_test),
 
         cmocka_unit_test(lw_encode_valid_input_test),
         cmocka_unit_test(lw_decode_valid_input_test),
@@ -96,6 +99,9 @@ int main(void)
 
         cmocka_unit_test(mv_encode_valid_input_test),
         cmocka_unit_test(mv_decode_valid_input_test),
+
+        cmocka_unit_test(ret_encode_valid_input_test),
+        cmocka_unit_test(ret_decode_valid_input_test),
 
         cmocka_unit_test(srli_encode_valid_input_test),
         cmocka_unit_test(srli_decode_valid_input_test),

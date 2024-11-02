@@ -55,7 +55,7 @@ void (*fp_emit)(asm_line_t*);
 };
 
 %token <sym> EQU SECTION GLOBL
-%token <sym> ADD ADDI BEQ BNE BNEZ CALL J JALR LB LI LW LUI MUL MV SRLI SLLI SW
+%token <sym> ADD ADDI BEQ BNE BNEZ CALL J JALR LB LI LW LUI MUL MV RET SRLI SLLI SW
 %token <sym> NEW_LINE
 %token <int_val> NUMERIC
 %token <string_val> IDENTIFIER
@@ -143,7 +143,7 @@ param_1 :
     NUMERIC OPENING_BRACKET expr {
         //printf("numeric OFFSET 1\n");
         insert_offset(&parser_asm_line, $2, 0);
-        } CLOSING_BRACKET
+    } CLOSING_BRACKET
     |
     expr {
         //printf("expr 1\n");
@@ -291,6 +291,7 @@ mnemonic : ADD { /*printf("Parser-ADD: %d\n", I_ADD);*/ parser_asm_line.instruct
     | LUI { /*printf("Parser-LUI: %d\n", I_LUI);*/ parser_asm_line.instruction = I_LUI; parser_asm_line.instruction_type = IT_U; }
     | MUL { /*printf("Parser-LW: %d\n", I_MUL);*/ parser_asm_line.instruction = I_MUL; parser_asm_line.instruction_type = IT_R; }
     | MV { /*printf("Parser-LW: %d\n", I_MV);*/ parser_asm_line.instruction = I_MV; parser_asm_line.instruction_type = IT_P; }
+    | RET { /*printf("Parser-RET: %d\n", I_RET);*/ parser_asm_line.instruction = I_RET; parser_asm_line.instruction_type = IT_P; }
     | SRLI { /*printf("Parser-SRLI: %d\n", I_SRLI);*/ parser_asm_line.instruction = I_SRLI; parser_asm_line.instruction_type = IT_I; }
     | SLLI { /*printf("Parser-SLLI: %d\n", I_SLLI);*/ parser_asm_line.instruction = I_SLLI; parser_asm_line.instruction_type = IT_I; }
     | SW { /*printf("Parser-SW: %d\n", I_SW);*/ parser_asm_line.instruction = I_SW; parser_asm_line.instruction_type = IT_S; }
@@ -328,8 +329,6 @@ register : REG_ZERO { /*printf("REG_ZERO\n");*/ insert_register(&parser_asm_line
     | REG_S9 { /*printf("REG_S9\n");*/ insert_register(&parser_asm_line, R_S9); }
     | REG_S10 { /*printf("REG_S10\n");*/ insert_register(&parser_asm_line, R_S10); }
     | REG_S11 { /*printf("REG_S11\n");*/ insert_register(&parser_asm_line, R_S11); }
-
-
 
 /*
 asm_line: IDENTIFIER COLON ADD NEW_LINE

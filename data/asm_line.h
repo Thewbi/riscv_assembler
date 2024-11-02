@@ -66,6 +66,7 @@ enum instruction {
     I_CALL, // pseudo instruction
     I_J, // pseudo instruction
     I_MV, // pseudo instruction
+    I_RET, // pseudo instruction
 
     // undefined
     I_UNDEFINED_INSTRUCTION

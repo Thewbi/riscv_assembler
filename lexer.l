@@ -40,6 +40,8 @@
 "mul"   { /*printf("MUL\n");*/ return MUL; }
 "mv"    { /*printf("MV\n");*/ return MV; }
 
+"ret"   { /*printf("RET\n");*/ return RET; }
+
 "srli"  { /*printf("SRLI\n");*/ return SRLI; }
 "slli"  { /*printf("SRLI\n");*/ return SLLI; }
 "sw"    { /*printf("SRLI\n");*/ return SW; }
