@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #include "../common/common.h"
+#include "../common/register.h"
 #include "../common/node.h"
 
 // Adding new instruction
@@ -85,47 +86,6 @@ enum instruction_type {
 
 };
 
-// cannot use name register since it is a reserved keyword in C
-// https://riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf - page 109
-enum register_ {
-
-  R_ZERO, // 0, Hard-wired zero
-  R_RA, // 1, Return address
-  R_SP, // 2, Stack pointer
-  R_GP, // 3, Global pointer
-  R_TP, // 4, Thread pointer
-  R_T0, // 5, Temporary/alternate link register
-  R_T1, // 6, Temporary
-  R_T2, // 7, Temporary
-  R_S0, // 8, Saved register/frame pointer
-  R_S1, // 9, Saved register
-  R_A0, // 10, Function arguments/return values
-  R_A1, // 11, Function arguments/return values
-  R_A2, // 12, Function arguments
-  R_A3, // 13, Function arguments
-  R_A4, // 14, Function arguments
-  R_A5, // 15, Function arguments
-  R_A6, // 16, Function arguments
-  R_A7, // 17, Function arguments
-  R_S2, // 18, Saved registers
-  R_S3, // 19, Saved registers
-  R_S4, // 20, Saved registers
-  R_S5, // 21, Saved registers
-  R_S6, // 22, Saved registers
-  R_S7, // 23, Saved registers
-  R_S8, // 24, Saved registers
-  R_S9, // 25, Saved registers
-  R_S10, // 26, Saved registers
-  R_S11, // 27, Saved registers
-  R_T3, // 28, Temporary
-  R_T4, // 29, Temporary
-  R_T5, // 30, Temporary
-  R_T6, // 31, Temporary
-
-  R_UNDEFINED_REGISTER
-
-};
-
 enum assembler_instruction {
 
     AI_EQU,
@@ -173,17 +133,17 @@ typedef struct asm_line {
 
     uint32_t imm;
 
-    uint16_t offset_0;
+    uint32_t offset_0;
     char offset_identifier_0[100];
     uint8_t offset_0_used;
     node_t* offset_0_expression;
 
-    uint16_t offset_1;
+    uint32_t offset_1;
     char offset_identifier_1[100];
     uint8_t offset_1_used;
     node_t* offset_1_expression;
 
-    uint16_t offset_2;
+    uint32_t offset_2;
     char offset_identifier_2[100];
     uint8_t offset_2_used;
     node_t* offset_2_expression;
@@ -196,6 +156,7 @@ typedef struct asm_line {
  * @param data the asm_line to reset.
  */
 void reset_asm_line(asm_line_t *data);
+void reset_asm_lines(asm_line_t *data, const int size);
 
 void copy_asm_line(asm_line_t* target, asm_line_t* source);
 
@@ -247,5 +208,7 @@ const char* assembler_instruction_to_string(enum assembler_instruction data);
 const char* register_to_string(enum register_ data);
 
 void set_instruction(asm_line_t *data, const enum instruction instr, const enum instruction_type type);
+
+void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int size, const int index);
 
 #endif

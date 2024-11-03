@@ -16,7 +16,7 @@
           "request": "launch",
           "program": "${workspaceFolder}\\test\\cmockatest.exe",
           "cwd": "${workspaceFolder}",
-          "stopAtEntry": false,            
+          "stopAtEntry": false,
           "launchCompleteCommand": "exec-run",
           "linux": {
             "MIMode": "gdb",
@@ -36,6 +36,29 @@
           "type": "cppdbg",
           "request": "launch",
           "program": "${workspaceFolder}/emulator",
+          "cwd": "${workspaceFolder}",
+          "stopAtEntry": false,
+          "preLaunchTask": "make",
+          "launchCompleteCommand": "exec-run",
+          "linux": {
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb"
+          },
+          "osx": {
+            "MIMode": "lldb"
+          },
+          "windows": {
+            "MIMode": "gdb",
+            "targetArchitecture": "x64",
+            "miDebuggerPath": "C:\\cygwin64\\bin\\gdb.exe"
+          }
+        },
+        {
+          "name": "assembler",
+          "type": "cppdbg",
+          "request": "launch",
+          "program": "${workspaceFolder}/assembler",
+          "args": ["test/resources/blinker.s"],
           "cwd": "${workspaceFolder}",
           "stopAtEntry": false,
           "preLaunchTask": "make",

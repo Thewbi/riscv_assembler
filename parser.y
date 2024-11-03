@@ -114,7 +114,9 @@ asm_line :
         //printf("label mnemonic\n");
         //printf("Line: %d\n", (yylineno -1));
 
-        parser_asm_line.line_nr = (yylineno -1);
+        parser_asm_line.line_nr = (yylineno - 1);
+
+        if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
     }
 	|
 	mnemonic {
@@ -122,6 +124,8 @@ asm_line :
         //printf("Line: %d\n", yylineno);
 
         parser_asm_line.line_nr = yylineno;
+
+        if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
     }
     |
     label {
@@ -131,7 +135,7 @@ asm_line :
         memset(parser_asm_line.label, 0, 100);
         memcpy(parser_asm_line.label, $1, strlen($1));
 
-        parser_asm_line.line_nr = (yylineno -1);
+        parser_asm_line.line_nr = (yylineno - 1);
 
         //printf("Line: %d label: %s \n", parser_asm_line.label, yylineno);
         //printf("Line: %d\n", yylineno);
@@ -141,7 +145,6 @@ asm_line :
     |
     assembler_instruction {
         //printf("assembler_instruction\n");
-
         //printf("Line: %d\n", yylineno);
 
         parser_asm_line.line_nr = yylineno;

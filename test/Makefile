@@ -10,6 +10,8 @@ all: test
 test: unit_tests/main.c \
 	../common/common.h \
 	../common/common.c \
+	../common/register.h \
+	../common/register.c \
 	../common/node.h \
 	../common/node.c \
 	../decoder/decoder.h \
@@ -118,6 +120,7 @@ test: unit_tests/main.c \
 	unit_tests/sw_encode_test.c \
 	unit_tests/sw_decode_test.c \
 	../common/common.c \
+	../common/register.c \
 	../common/node.c \
 	../data/asm_line.c \
 	../decoder/decoder.c \

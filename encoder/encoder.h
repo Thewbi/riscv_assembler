@@ -6,6 +6,7 @@
 #include <inttypes.h>
 
 #include "../common/common.h"
+#include "../common/register.h"
 #include "asm_line.h"
 
 /**

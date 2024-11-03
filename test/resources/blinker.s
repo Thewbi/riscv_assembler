@@ -11,7 +11,7 @@
 #    Do not resolve pseudo instructions just yet because labels and symbols are not replaced by concrete values
 # 2. Build a map from labels and symbols to addresses or values
 # 3. Replace all labels and symbols by numeric values (address or values) in each asm_line
-#    For addresse, remember that not each line is 4 byte long but use the length stored in each asm_line instead of just 4
+#    For addresses, remember that not each line is 4 byte long but use the length stored in each asm_line instead of just 4
 # 4. Replace all pseudo instructions by real instruction asm_line objects
 # 5. Encode asm_line objects into 32 bit machine code
 
@@ -22,21 +22,21 @@
 
 .globl start
 
-start:
-    li   gp, IO_BASE
-    li   sp, 0x1800
-.L0:
-    li   t0, 5
-    sw   t0, IO_LEDS(gp)
-    call wait
-    li   t0, 10
-    sw   t0, IO_LEDS(gp)
-    call wait
-    j    .L0
-wait:
-    li   t0, 1
-    slli t0, t0, 17
-.L1:
-    addi t0, t0, -1
-    bnez t0, .L1
-    ret
+start:                          # 0
+    li   gp, IO_BASE            # 0 +8
+    li   sp, 0x1800             # 8 +8
+.L0:                            # 16
+    li   t0, 5                  # 16 +8
+    sw   t0, IO_LEDS(gp)        # 24 +4
+    call wait                   # 28 +8
+    li   t0, 10                 # 36 +8
+    sw   t0, IO_LEDS(gp)        # 44 +4
+    call wait                   # 48 +8
+    j    .L0                    # 56 +8
+wait:                           # 64
+    li   t0, 1                  # 64 +8
+    slli t0, t0, 17             # 72 +4
+.L1:                            # 76
+    addi t0, t0, -1             # 76 +4
+    bnez t0, .L1                # 80 +4
+    ret                         # 84 +4

@@ -17,22 +17,30 @@ assembler: assembler.c \
 	encoder/encoder.c \
 	common/common.c \
 	common/common.h \
+	common/register.h \
+	common/register.c \
 	common/node.h \
-	common/node.c
-	g++ -o assembler \
+	common/node.c \
+	container\trivial_map\trivial_map.h \
+	container\trivial_map\trivial_map.c
+	g++ -g -o assembler \
 	assembler.c \
 	parser.c \
 	lex.yy.c \
 	data/asm_line.c \
 	encoder/encoder.c \
 	common/common.c \
-	common/node.c -I ./ -I common -I data -I encoder
+	common/register.c \
+	common/node.c \
+	container\trivial_map\trivial_map.c -I ./ -I common -I common -I container -I data -I encoder
 
 # Build the emulator.
 # The emulator does not use the parser as it does not execute from .s files but only from assembled machine code.
 # Use the assembler application to produce machine code from .s files first.
 emulator: common/common.c \
 	common/common.h \
+	common/register.h \
+	common/register.c \
 	common/node.h \
 	common/node.c \
 	emulator.c \
@@ -51,6 +59,7 @@ emulator: common/common.c \
 	cpu/cpu.c
 	g++ -g -o emulator \
 	common/common.c \
+	common/register.c \
 	common/node.c \
 	emulator.c \
 	parser.c \
