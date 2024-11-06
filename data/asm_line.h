@@ -102,6 +102,7 @@ typedef struct asm_line {
     // general
     //
 
+    uint8_t used;
     uint32_t line_nr;
     uint8_t size_in_bytes;
 
@@ -187,6 +188,7 @@ void insert_integer_immediate(asm_line_t *data, uint32_t imm);
  * @param data the asm_line to print.
  */
 void print_asm_line(const asm_line_t *data);
+void serialize_asm_line(const asm_line_t *data);
 
 /**
  *

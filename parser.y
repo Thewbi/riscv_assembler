@@ -55,7 +55,7 @@ void (*fp_emit)(asm_line_t*);
 };
 
 %token <sym> EQU SECTION GLOBL
-%token <sym> ADD ADDI BEQ BNE BNEZ CALL J JALR LB LI LW LUI MUL MV RET SRLI SLLI SW
+%token <sym> ADD ADDI AUIPC BEQ BNE BNEZ CALL J JALR LB LI LW LUI MUL MV RET SRLI SLLI SW
 %token <sym> NEW_LINE
 %token <int_val> NUMERIC
 %token <string_val> IDENTIFIER
@@ -312,6 +312,7 @@ assembler_instruction :
 
 mnemonic : ADD { /*printf("Parser-ADD: %d\n", I_ADD);*/ /*parser_asm_line.instruction = I_ADD; parser_asm_line.instruction_type = IT_R;*/ set_instruction(&parser_asm_line, I_ADD, IT_R); }
     | ADDI { /*printf("Parser-ADDI: %d\n", I_ADDI);*/ /*parser_asm_line.instruction = I_ADDI; parser_asm_line.instruction_type = IT_R;*/ set_instruction(&parser_asm_line, I_ADDI, IT_R); }
+    | AUIPC { /*printf("Parser-AUIPC: %d\n", I_AUIPC);*/ /*parser_asm_line.instruction = I_AUIPC; parser_asm_line.instruction_type = IT_U;*/ set_instruction(&parser_asm_line, I_AUIPC, IT_U); }
     | BEQ { /*printf("Parser-BEQ: %d\n", I_BEQ);*/ /*parser_asm_line.instruction = I_BEQ; parser_asm_line.instruction_type = IT_B;*/ set_instruction(&parser_asm_line, I_BEQ, IT_B); }
     | BNE { /*printf("Parser-BNE: %d\n", I_BNE);*/ /*parser_asm_line.instruction = I_BNE; parser_asm_line.instruction_type = IT_B;*/ set_instruction(&parser_asm_line, I_BNE, IT_B); }
     | BNEZ { /*printf("Parser-BNEZ: %d\n", I_BNEZ);*/ /*parser_asm_line.instruction = I_BNEZ; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_BNEZ, IT_P); }

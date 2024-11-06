@@ -22,6 +22,7 @@
 
 "add"	{ /*printf("ADD\n");*/ return ADD; }
 "addi"	{ /*printf("ADDI\n");*/ return ADDI; }
+"auipc"	{ /*printf("ADDI\n");*/ return AUIPC; }
 
 "beq"   { /*printf("BEQ\n");*/ return BEQ; }
 "bne"   { /*printf("BNEZ\n");*/ return BNE; }

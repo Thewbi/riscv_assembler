@@ -60,7 +60,7 @@ int main(int argc, char **argv)
     yyparse();
 
     // DEBUG
-    printf("asm_lines: %d\n", asm_line_array_index);
+    printf("asm_lines after parse: %d\n", asm_line_array_index);
     for (int i = 0; i < asm_line_array_index; i++) {
         //printf("line %d\n", i);
         print_asm_line(&asm_line_array[i]);
@@ -228,20 +228,44 @@ int main(int argc, char **argv)
         }
     }
 
+    // DEBUG
+    printf("\n\n");
+    printf("asm_lines after replace labels: %d\n", 100);
+    for (int i = 0; i < 100; i++) {
+        //printf("line %d\n", i);
+        if (asm_line_array[i].used != 0) {
+            print_asm_line(&asm_line_array[i]);
+        }
+    }
+
     //
     // Replace Pseudo instructions
     //
 
-    for (int i = 0; i < asm_line_array_index; i++) {
+    for (int i = 0; i < 100; i++) {
+        if (i == 43) {
+            printf("\n");
+        }
         resolve_pseudo_instructions_asm_line(asm_line_array, 100, i);
     }
 
     // DEBUG
     printf("\n\n");
-    printf("asm_lines after replace: %d\n", 100);
+    printf("asm_lines after replace pseudo instructions: %d\n", 100);
     for (int i = 0; i < 100; i++) {
         //printf("line %d\n", i);
-        print_asm_line(&asm_line_array[i]);
+        if (asm_line_array[i].used != 0) {
+            print_asm_line(&asm_line_array[i]);
+        }
+    }
+
+    printf("\n\n");
+    printf("code:\n");
+    for (int i = 0; i < 100; i++) {
+        //printf("line %d\n", i);
+        if (asm_line_array[i].used != 0) {
+            serialize_asm_line(&asm_line_array[i]);
+        }
     }
 
 /*

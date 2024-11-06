@@ -1,4 +1,4 @@
-//addi rd, rs1, imm
+//addi rd, rs1, imm  ->  rd = rs1 + imm
 
 // https://luplab.gitlab.io/rvcodecjs/#q=addi+t0,+t0,+15&abi=false&isa=AUTO
 // addi x5, x5, 15
