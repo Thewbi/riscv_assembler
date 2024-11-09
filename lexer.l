@@ -19,12 +19,14 @@
 ".equ"	    { /*printf(".equ\n");*/ return EQU; }
 ".section"  { /*printf(".section\n");*/ return SECTION; }
 ".globl"    { /*printf(".globl\n");*/ return GLOBL; }
+".global"    { /*printf(".global\n");*/ return GLOBAL; }
 
 "add"	{ /*printf("ADD\n");*/ return ADD; }
 "addi"	{ /*printf("ADDI\n");*/ return ADDI; }
 "auipc"	{ /*printf("ADDI\n");*/ return AUIPC; }
 
 "beq"   { /*printf("BEQ\n");*/ return BEQ; }
+"beqz"   { /*printf("BEQZ\n");*/ return BEQZ; }
 "bne"   { /*printf("BNEZ\n");*/ return BNE; }
 "bnez"  { /*printf("BNEZ\n");*/ return BNEZ; }
 
@@ -90,6 +92,19 @@
 
 [/][*][^*]*[*]+([^*/][^*]*[*]+)*[/]       { /* DO NOTHING */ }
 [/][*]                                    { /*printf("Unterminated comment");*/ }
+
+[0-9]+[fb] {
+
+    // DEBUG
+    //printf("lexer::identifier: %s\n", yytext);
+
+    // copy the value into the token
+    memset(yylval.string_val, 0, 100);
+    memcpy(yylval.string_val, yytext, strlen(yytext));
+
+    // return token type
+    return IDENTIFIER;
+}
 
 "."?[a-zA-Z_][a-zA-Z_0-9]* {
 

@@ -19,6 +19,7 @@
 #include <parser.h>
 #include <node.h>
 #include <trivial_map/trivial_map.h>
+#include <trivial_map/tuple_set.h>
 
 asm_line_t parser_asm_line;
 
@@ -77,13 +78,24 @@ int main(int argc, char **argv)
 
     for (int i = 0; i < asm_line_array_index; i++) {
         if (strnlen(asm_line_array[i].label, 100) > 0) {
+
             // printf("line_nr:%d label:%s address:%d address/4:%d size_in_bytes:%d\n",
             //     asm_line_array[i].line_nr,
             //     asm_line_array[i].label,
             //     current_address,
             //     current_address/4,
             //     asm_line_array[i].size_in_bytes);
-            if (!insert_or_replace_trivial_map(label_address_map, 20, asm_line_array[i].label, current_address)) {
+
+            if (contains_key_trivial_map(label_address_map, 20, asm_line_array[i].label)) {
+                printf("Label is already contained: %s\n", asm_line_array[i].label);
+            }
+
+            // if (!insert_or_replace_trivial_map(label_address_map, 20, asm_line_array[i].label, current_address)) {
+            //     printf("Insert label address mapping failed!\n");
+            //     break;
+            // }
+
+            if (!insert_tuple_set()) {
                 printf("Insert label address mapping failed!\n");
                 break;
             }
@@ -93,7 +105,11 @@ int main(int argc, char **argv)
 
         current_address = current_address + asm_line_array[i].size_in_bytes;
     }
-    //print_trivial_map(label_address_map, 20);
+
+    // DEBUG
+    printf("\n");
+    printf("label map:\n");
+    print_trivial_map(label_address_map, 20);
 
     //
     // collect all .equ assembler instructions and store them inside the equ_map
@@ -111,7 +127,11 @@ int main(int argc, char **argv)
             }
         }
     }
-    //print_trivial_map(equ_map, 20);
+
+    // DEBUG
+    printf("\n");
+    printf("equ map:\n");
+    print_trivial_map(equ_map, 20);
 
     //
     // replace labels in lines

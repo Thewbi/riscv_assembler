@@ -14,6 +14,8 @@ test: unit_tests/main.c \
 	../common/register.c \
 	../common/node.h \
 	../common/node.c \
+	../container/tuple_set/tuple_set.h \
+	../container/tuple_set/tuple_set.c \
 	../decoder/decoder.h \
 	../decoder/decoder.c \
 	../encoder/encoder.h \
@@ -82,6 +84,9 @@ test: unit_tests/main.c \
 	unit_tests/sw_encode_test.h \
 	unit_tests/sw_decode_test.c \
 	unit_tests/sw_decode_test.h \
+	unit_tests/container/tuple_set/tuple_set_test.c \
+	unit_tests/container/tuple_set/tuple_set_test.h \
+	unit_tests/sw_decode_test.h \
 	../data/asm_line.c \
 	../parser.c \
 	../parser.h
@@ -119,9 +124,11 @@ test: unit_tests/main.c \
 	unit_tests/slli_decode_test.c \
 	unit_tests/sw_encode_test.c \
 	unit_tests/sw_decode_test.c \
+	unit_tests/container/tuple_set/tuple_set_test.c \
 	../common/common.c \
 	../common/register.c \
 	../common/node.c \
+	../container/tuple_set/tuple_set.c \
 	../data/asm_line.c \
 	../decoder/decoder.c \
 	../encoder/encoder.c \

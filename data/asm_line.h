@@ -62,6 +62,7 @@ enum instruction {
     I_JALR,
 
     // P-Type (pseudoinstruction)
+    I_BEQZ, // pseudo instruction
     I_BNEZ, // pseudo instruction
     I_CALL, // pseudo instruction
     I_J, // pseudo instruction

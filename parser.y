@@ -54,8 +54,8 @@ void (*fp_emit)(asm_line_t*);
   node_t* expr_ptr;
 };
 
-%token <sym> EQU SECTION GLOBL
-%token <sym> ADD ADDI AUIPC BEQ BNE BNEZ CALL J JALR LB LI LW LUI MUL MV RET SRLI SLLI SW
+%token <sym> EQU SECTION GLOBL GLOBAL
+%token <sym> ADD ADDI AUIPC BEQ BEQZ BNE BNEZ CALL J JALR LB LI LW LUI MUL MV RET SRLI SLLI SW
 %token <sym> NEW_LINE
 %token <int_val> NUMERIC
 %token <string_val> IDENTIFIER
@@ -213,9 +213,17 @@ param_3 :
         current_node = NULL;
     }
 
-label : IDENTIFIER COLON {
-    strncpy($$, $1, 100);
-}
+label :
+    IDENTIFIER COLON {
+        strncpy($$, $1, 100);
+    }
+    |
+    NUMERIC COLON {
+        char buffer[100];
+        memset(buffer, 0, 100);
+        snprintf(buffer, 100, "%d", $1);
+        strncpy($$, buffer, 100);
+    }
 
 // https://www.gnu.org/software/bison/manual/bison.html
 expr:
@@ -309,11 +317,23 @@ assembler_instruction :
         current_node = NULL;
 
     }
+    |
+    GLOBAL IDENTIFIER {
+
+        parser_asm_line.asm_instruction = AI_GLOBL;
+
+        memset(parser_asm_line.asm_instruction_symbol, 0, 100);
+        memcpy(parser_asm_line.asm_instruction_symbol, $2, strlen($2));
+
+        current_node = NULL;
+
+    }
 
 mnemonic : ADD { /*printf("Parser-ADD: %d\n", I_ADD);*/ /*parser_asm_line.instruction = I_ADD; parser_asm_line.instruction_type = IT_R;*/ set_instruction(&parser_asm_line, I_ADD, IT_R); }
     | ADDI { /*printf("Parser-ADDI: %d\n", I_ADDI);*/ /*parser_asm_line.instruction = I_ADDI; parser_asm_line.instruction_type = IT_R;*/ set_instruction(&parser_asm_line, I_ADDI, IT_R); }
     | AUIPC { /*printf("Parser-AUIPC: %d\n", I_AUIPC);*/ /*parser_asm_line.instruction = I_AUIPC; parser_asm_line.instruction_type = IT_U;*/ set_instruction(&parser_asm_line, I_AUIPC, IT_U); }
     | BEQ { /*printf("Parser-BEQ: %d\n", I_BEQ);*/ /*parser_asm_line.instruction = I_BEQ; parser_asm_line.instruction_type = IT_B;*/ set_instruction(&parser_asm_line, I_BEQ, IT_B); }
+    | BEQZ { /*printf("Parser-BEQZ: %d\n", I_BEQZ);*/ /*parser_asm_line.instruction = I_BEQZ; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_BEQZ, IT_P); }
     | BNE { /*printf("Parser-BNE: %d\n", I_BNE);*/ /*parser_asm_line.instruction = I_BNE; parser_asm_line.instruction_type = IT_B;*/ set_instruction(&parser_asm_line, I_BNE, IT_B); }
     | BNEZ { /*printf("Parser-BNEZ: %d\n", I_BNEZ);*/ /*parser_asm_line.instruction = I_BNEZ; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_BNEZ, IT_P); }
     | CALL { /*printf("Parser-CALL: %d\n", I_CALL);*/ /*parser_asm_line.instruction = I_CALL; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_CALL, IT_P); }

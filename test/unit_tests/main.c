@@ -55,6 +55,8 @@
 
 #include <lb_with_offset_test.h>
 
+#include <container/tuple_set/tuple_set_test.h>
+
 int main(void)
 {
     asm_line_t parser_asm_line;
@@ -110,7 +112,15 @@ int main(void)
         cmocka_unit_test(slli_decode_valid_input_test),
 
         cmocka_unit_test(sw_encode_valid_input_test),
-        cmocka_unit_test(sw_decode_valid_input_test)
+        cmocka_unit_test(sw_decode_valid_input_test),
+
+        cmocka_unit_test(initialize_tuple_set_element_test),
+        cmocka_unit_test(tuple_set_initialize_test),
+        cmocka_unit_test(insert_tuple_set_test),
+        cmocka_unit_test(contains_key_tuple_set_not_contained_test),
+        cmocka_unit_test(contains_key_tuple_set_contained_test),
+        cmocka_unit_test(retrieve_by_key_tuple_set_test),
+        cmocka_unit_test(retrieve_by_key_tuple_set_not_contained_test)
 
     };
 

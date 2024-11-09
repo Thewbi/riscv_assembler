@@ -504,6 +504,7 @@ const char* instruction_to_string(enum instruction data) {
         case I_AUIPC: return "AUIPC";
 
         case I_BEQ: return "BEQ";
+        case I_BEQZ: return "BEQZ"; // pseudo instruction
         case I_BGE: return "BGE";
         case I_BNEZ: return "BNEZ";
         case I_BNE: return "BNE";
@@ -630,6 +631,31 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
     asm_line_t* data = &asm_line_array[index];
 
     switch (data->instruction) {
+
+        case I_BEQZ: {
+
+            int line_nr = asm_line_array[index].line_nr;
+
+            uint32_t imm_int_val = 0;
+            if (data->offset_0_used) {
+                imm_int_val = data->offset_0;
+            }
+
+            asm_line_t beq;
+            reset_asm_line(&beq);
+            beq.used = 1;
+            beq.line_nr = line_nr;
+            beq.instruction = I_BEQ;
+            beq.instruction_type = IT_B;
+            beq.reg_rd = data->reg_rd;
+            beq.reg_rs1 = R_ZERO;
+            beq.imm = imm_int_val;
+
+            reset_asm_line(&asm_line_array[index]);
+            copy_asm_line(&asm_line_array[index], &beq);
+
+        }
+        break;
 
         case I_CALL: {
 
