@@ -168,7 +168,105 @@ void retrieve_by_key_tuple_set_not_contained_test(void **state) {
 
     // Assert
 
-    // found n0 record
+    // found no record
     assert_int_equal(0, result);
+
+}
+
+void retrieve_by_key_less_than_value_tuple_set_test(void **state) {
+
+    // Arrange
+
+    tuple_set_element_t tuple_set[20];
+    initialize_tuple_set(tuple_set, 20);
+
+    strncpy(tuple_set[0].key, "key_1", 100);
+    tuple_set[0].value = 50;
+    tuple_set[0].used = 1;
+
+    strncpy(tuple_set[1].key, "key_1", 100);
+    tuple_set[1].value = 100;
+    tuple_set[1].used = 1;
+
+    strncpy(tuple_set[2].key, "key_1", 100);
+    tuple_set[2].value = 200;
+    tuple_set[2].used = 1;
+
+    // Act
+
+    const uint32_t start_value_first = 150;
+    tuple_set_element_t* result_element_first;
+    int result_first = retrieve_by_key_less_than_value_tuple_set(tuple_set, 20, "key_1", start_value_first, &result_element_first);
+
+    const uint32_t start_value_second = 250;
+    tuple_set_element_t* result_element_second;
+    int result_second = retrieve_by_key_less_than_value_tuple_set(tuple_set, 20, "key_1", start_value_second, &result_element_second);
+
+    // Assert
+
+    // found record
+    assert_int_equal(1, result_first);
+
+    // key matches first value, value matches first value, record is used
+    assert_int_equal(0, strncmp(result_element_first->key, "key_1", 100));
+    assert_int_equal(100, result_element_first->value);
+    assert_int_equal(1, result_element_first->used);
+
+    // found record
+    assert_int_equal(1, result_second);
+
+    // key matches first value, value matches first value, record is used
+    assert_int_equal(0, strncmp(result_element_second->key, "key_1", 100));
+    assert_int_equal(200, result_element_second->value);
+    assert_int_equal(1, result_element_second->used);
+
+}
+
+void retrieve_by_key_greater_than_value_tuple_set_test(void **state) {
+
+    // Arrange
+
+    tuple_set_element_t tuple_set[20];
+    initialize_tuple_set(tuple_set, 20);
+
+    strncpy(tuple_set[0].key, "key_1", 100);
+    tuple_set[0].value = 50;
+    tuple_set[0].used = 1;
+
+    strncpy(tuple_set[1].key, "key_1", 100);
+    tuple_set[1].value = 100;
+    tuple_set[1].used = 1;
+
+    strncpy(tuple_set[2].key, "key_1", 100);
+    tuple_set[2].value = 200;
+    tuple_set[2].used = 1;
+
+    // Act
+
+    const uint32_t start_value_first = 25;
+    tuple_set_element_t* result_element_first;
+    int result_first = retrieve_by_key_greater_than_value_tuple_set(tuple_set, 20, "key_1", start_value_first, &result_element_first);
+
+    const uint32_t start_value_second = 75;
+    tuple_set_element_t* result_element_second;
+    int result_second = retrieve_by_key_greater_than_value_tuple_set(tuple_set, 20, "key_1", start_value_second, &result_element_second);
+
+    // Assert
+
+    // found record
+    assert_int_equal(1, result_first);
+
+    // key matches first value, value matches first value, record is used
+    assert_int_equal(0, strncmp(result_element_first->key, "key_1", 100));
+    assert_int_equal(50, result_element_first->value);
+    assert_int_equal(1, result_element_first->used);
+
+    // found record
+    assert_int_equal(1, result_second);
+
+    // key matches first value, value matches first value, record is used
+    assert_int_equal(0, strncmp(result_element_second->key, "key_1", 100));
+    assert_int_equal(100, result_element_second->value);
+    assert_int_equal(1, result_element_second->used);
 
 }

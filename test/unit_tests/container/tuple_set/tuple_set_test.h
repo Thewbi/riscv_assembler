@@ -17,4 +17,7 @@ void retrieve_by_key_tuple_set_test(void **state);
 
 void retrieve_by_key_tuple_set_not_contained_test(void **state);
 
+void retrieve_by_key_less_than_value_tuple_set_test(void **state);
+void retrieve_by_key_greater_than_value_tuple_set_test(void **state);
+
 #endif

@@ -120,7 +120,9 @@ int main(void)
         cmocka_unit_test(contains_key_tuple_set_not_contained_test),
         cmocka_unit_test(contains_key_tuple_set_contained_test),
         cmocka_unit_test(retrieve_by_key_tuple_set_test),
-        cmocka_unit_test(retrieve_by_key_tuple_set_not_contained_test)
+        cmocka_unit_test(retrieve_by_key_tuple_set_not_contained_test),
+        cmocka_unit_test(retrieve_by_key_less_than_value_tuple_set_test),
+        cmocka_unit_test(retrieve_by_key_greater_than_value_tuple_set_test)
 
     };
 

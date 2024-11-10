@@ -15,7 +15,7 @@ void initialize_tuple_set(tuple_set_element_t* set, const int size) {
 int contains_key_tuple_set(const tuple_set_element_t* set, const int size, const char* key) {
     for (int i = 0; i < size; i++) {
         const tuple_set_element_t* element = set+i;
-        if ((strncmp(element->key, key, 100) == 0) && (element->used == 1)) {
+        if ((element->used == 1) && (strncmp(element->key, key, 100) == 0)) {
             return 1;
         }
     }
@@ -65,7 +65,7 @@ int retrieve_by_key_tuple_set(tuple_set_element_t* set,
 
     for (int i = 0; i < size; i++) {
         const tuple_set_element_t* element = set+i;
-        if ((strncmp(element->key, key, 100) == 0) && (element->used == 1)) {
+        if ((element->used == 1) && (strncmp(element->key, key, 100) == 0)) {
             *result = &set[i];
             return 1;
         }
@@ -81,9 +81,31 @@ int retrieve_by_key_tuple_set(tuple_set_element_t* set,
 // @param key       the key to retrieve the value for
 // @param value     the value to retrieve the tuple for
 // @param result    [out] returns the retrieved value (for the key and relative value) here
-int retrieve_by_key_less_than_value_tuple_set(const tuple_set_element_t* set,
-    const int size, const char* key, const uint32_t value, tuple_set_element_t* result) {
+int retrieve_by_key_less_than_value_tuple_set(tuple_set_element_t* set,
+    const int size, const char* key, const uint32_t value, tuple_set_element_t** result) {
 
+    uint32_t largest_value = 0;
+    int32_t largest_value_index = -1;
+
+    for (int i = 0; i < size; i++) {
+
+        const tuple_set_element_t* element = set + i;
+        if ((element->used == 1) && (strncmp(element->key, key, 100) == 0) && (element->value <= value)) {
+
+            if (largest_value < element->value) {
+
+                largest_value = element->value;
+                largest_value_index = i;
+            }
+        }
+    }
+
+    if (largest_value_index > -1) {
+        *result = &set[largest_value_index];
+        return 1;
+    }
+
+    return 0;
 }
 
 // returns 0 if there exists no tuple satisfying the condition ( tuple.key == key && tuple.value > value )
@@ -94,9 +116,31 @@ int retrieve_by_key_less_than_value_tuple_set(const tuple_set_element_t* set,
 // @param key       the key to retrieve the value for
 // @param value     the value to retrieve the tuple for
 // @param result     [out] returns the retrieved value (for the key and relative value) here
-int retrieve_by_key_greater_than_value_tuple_set(const tuple_set_element_t* set,
-    const int size, const char* key, const uint32_t value, tuple_set_element_t* result) {
+int retrieve_by_key_greater_than_value_tuple_set(tuple_set_element_t* set,
+    const int size, const char* key, const uint32_t value, tuple_set_element_t** result) {
 
+    uint32_t smallest_value = UINT32_MAX;
+    int32_t smallest_value_index = -1;
+
+    for (int i = 0; i < size; i++) {
+
+        const tuple_set_element_t* element = set + i;
+        if ((element->used == 1) && (strncmp(element->key, key, 100) == 0) && (element->value >= value)) {
+
+            if (smallest_value > element->value) {
+
+                smallest_value = element->value;
+                smallest_value_index = i;
+            }
+        }
+    }
+
+    if (smallest_value_index > -1) {
+        *result = &set[smallest_value_index];
+        return 1;
+    }
+
+    return 0;
 }
 
 void print_tuple_set(tuple_set_element_t* set, const int size);
