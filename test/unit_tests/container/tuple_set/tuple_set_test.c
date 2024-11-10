@@ -269,4 +269,6 @@ void retrieve_by_key_greater_than_value_tuple_set_test(void **state) {
     assert_int_equal(100, result_element_second->value);
     assert_int_equal(1, result_element_second->used);
 
+    //print_tuple_set(tuple_set, 20);
+
 }

@@ -143,4 +143,12 @@ int retrieve_by_key_greater_than_value_tuple_set(tuple_set_element_t* set,
     return 0;
 }
 
-void print_tuple_set(tuple_set_element_t* set, const int size);
+void print_tuple_set(tuple_set_element_t* set, const int size) {
+
+    for (int i = 0; i < size; i++) {
+
+        const tuple_set_element_t* element = set + i;
+
+        printf("%d) key: %s value: %d used: %d\n", i, element->key, element->value, element->used);
+    }
+}
