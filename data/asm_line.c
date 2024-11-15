@@ -67,10 +67,10 @@ void copy_asm_line(asm_line_t* target, asm_line_t* source) {
 
     //printf("copy\n");
 
-
     //
     // general
     //
+
     target->used = source->used;
     target->line_nr = source->line_nr;
     target->size_in_bytes = source->size_in_bytes;
@@ -245,8 +245,11 @@ void serialize_asm_line(const asm_line_t *data) {
             case I_ANDI:
                 printf("%s, ", register_to_string(data->reg_rd));
                 printf("%s, ", register_to_string(data->reg_rs1));
-                //printf("%08" PRIx32 "", data->imm);
-                printf("%08" PRIx32 "", data->offset_2_expression->int_val);
+                if (data->offset_2_expression != NULL) {
+                    printf("%08" PRIx32 "", data->offset_2_expression->int_val);
+                } else {
+                    printf("%08" PRIx32 "", data->imm);
+                }
                 break;
 
             // S-Type
@@ -256,9 +259,8 @@ void serialize_asm_line(const asm_line_t *data) {
             case I_LBU:
             case I_LHU:
                 printf("%s, ", register_to_string(data->reg_rd));
-                printf("%s(", register_to_string(data->reg_rs2));
                 printf("%08" PRIx32 "", data->imm);
-                printf(")");
+                printf("(%s)", register_to_string(data->reg_rs1));
                 break;
 
             // B-Type
@@ -266,11 +268,30 @@ void serialize_asm_line(const asm_line_t *data) {
             case I_BGE:
             case I_BNE:
             case I_LI:
-                //printf("%s, ", register_to_string(data->reg_rd));
-                printf("%s, ", register_to_string(data->reg_rs1));
-                printf("%s, ", register_to_string(data->reg_rs2));
-                //printf("%08" PRIx32 "", data->imm);
-                printf("%08" PRIx32 "", data->offset_2_expression->int_val);
+                if (data->reg_rd != R_UNDEFINED_REGISTER) {
+                    printf("%s, ", register_to_string(data->reg_rd));
+                }
+                if (data->reg_rs1 != R_UNDEFINED_REGISTER) {
+                    printf("%s, ", register_to_string(data->reg_rs1));
+                }
+                if (data->reg_rs2 != R_UNDEFINED_REGISTER) {
+                    printf("%s, ", register_to_string(data->reg_rs2));
+                }
+
+                if (data->offset_0_used) {
+                    printf("%08" PRIx32 "", data->offset_0);
+                }
+                else if (data->offset_1_used) {
+                    printf("%08" PRIx32 "", data->offset_1);
+                }
+                else if (data->offset_2_used) {
+                    printf("%08" PRIx32 "", data->offset_2);
+                }
+                else if (data->offset_2_expression != NULL) {
+                    printf("%08" PRIx32 "", data->offset_2_expression->int_val);
+                } else {
+                    printf("%08" PRIx32 "", data->imm);
+                }
                 break;
 
             // R-Type
@@ -293,16 +314,24 @@ void serialize_asm_line(const asm_line_t *data) {
             case I_AUIPC:
             case I_LUI:
                 printf("%s, ", register_to_string(data->reg_rd));
-                //printf("%08" PRIx32 "", data->imm);
-                printf("%08" PRIx32 "", data->offset_1_expression->int_val);
+                if (data->offset_1_expression != NULL) {
+                    printf("%08" PRIx32 "", data->offset_1_expression->int_val);
+                } else {
+                    printf("%08" PRIx32 "", data->imm);
+                }
                 break;
 
             // // J-Type
-            // I_JAL, // jump and link
+            case I_JAL: // jump and link (pseudo instruction j is implemented via jal)
+                printf("%s, ", register_to_string(data->reg_rd));
+                printf("%08" PRIx32 "", data->imm);
+                break;
             case I_JALR:
                 printf("%s, ", register_to_string(data->reg_rd));
-                printf("%s, ", register_to_string(data->reg_rs1));
+                //printf("%s, ", register_to_string(data->reg_rs1));
+                //printf("%08" PRIx32 "", data->imm);
                 printf("%08" PRIx32 "", data->imm);
+                printf("(%s)", register_to_string(data->reg_rs1));
                 break;
 
             // // P-Type (pseudoinstruction)
@@ -555,6 +584,7 @@ const char* assembler_instruction_to_string(enum assembler_instruction data) {
 
 const char* register_to_string(enum register_ data) {
 
+    /*
     switch(data) {
         case R_ZERO: return "R_ZERO"; // 0, Hard-wired zero
         case R_RA: return "R_RA"; // 1, Return address
@@ -590,6 +620,43 @@ const char* register_to_string(enum register_ data) {
         case R_T6: return "R_T6"; // 31, Temporary
 
         default: return "R_UNDEFINED_REGISTER";
+    }*/
+
+    switch(data) {
+        case R_ZERO: return "zero"; // 0, Hard-wired zero
+        case R_RA: return "ra"; // 1, Return address
+        case R_SP: return "sp"; // 2, Stack pointer
+        case R_GP: return "gp"; // 3, Global pointer
+        case R_TP: return "tp"; // 4, Thread pointer
+        case R_T0: return "t0"; // 5, Temporary/alternate link register
+        case R_T1: return "t1"; // 6, Temporary
+        case R_T2: return "t2"; // 7, Temporary
+        case R_S0: return "fp"; // 8, Saved register/frame pointer
+        case R_S1: return "s1"; // 9, Saved register
+        case R_A0: return "a0"; // 10, Function arguments/return values
+        case R_A1: return "a1"; // 11, Function arguments/return values
+        case R_A2: return "a2"; // 12, Function arguments
+        case R_A3: return "a3"; // 13, Function arguments
+        case R_A4: return "a4"; // 14, Function arguments
+        case R_A5: return "a5"; // 15, Function arguments
+        case R_A6: return "a6"; // 16, Function arguments
+        case R_A7: return "a7"; // 17, Function arguments
+        case R_S2: return "s2"; // 18, Saved registers
+        case R_S3: return "s3"; // 19, Saved registers
+        case R_S4: return "s4"; // 20, Saved registers
+        case R_S5: return "s5"; // 21, Saved registers
+        case R_S6: return "s6"; // 22, Saved registers
+        case R_S7: return "s7"; // 23, Saved registers
+        case R_S8: return "s8"; // 24, Saved registers
+        case R_S9: return "s9"; // 25, Saved registers
+        case R_S10: return "s10"; // 26, Saved registers
+        case R_S11: return "s11"; // 27, Saved registers
+        case R_T3: return "t3"; // 28, Temporary
+        case R_T4: return "t4"; // 29, Temporary
+        case R_T5: return "t5"; // 30, Temporary
+        case R_T6: return "t6"; // 31, Temporary
+
+        default: return "R_UNDEFINED_REGISTER";
     }
 }
 
@@ -607,8 +674,9 @@ void set_instruction(asm_line_t *data, const enum instruction instr, const enum 
             data->size_in_bytes = 8;
             break;
 
+        // pseudo instruction -> is replaced with JAL
         case I_J:
-            data->size_in_bytes = 8;
+            data->size_in_bytes = 4;
             break;
 
         case I_LI:
@@ -632,6 +700,38 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
 
     switch (data->instruction) {
 
+        case I_J: {
+
+            int line_nr = asm_line_array[index].line_nr;
+
+            uint32_t imm_int_val = 0;
+            if (data->offset_0_used) {
+                imm_int_val = data->offset_0;
+            }
+
+            // Plain unconditional jumps (assembler pseudo-op J) are encoded as a JAL with rd=x0
+            asm_line_t jal;
+            reset_asm_line(&jal);
+            jal.used = 1;
+            jal.line_nr = line_nr;
+            jal.instruction = I_JAL;
+            jal.instruction_type = IT_J;
+            jal.reg_rd = R_ZERO;
+            jal.reg_rs1 = R_ZERO;
+            jal.imm = imm_int_val;
+
+            jal.offset_0_used = data->offset_0_used;
+            jal.offset_0 = data->offset_0;
+            jal.offset_1_used = data->offset_1_used;
+            jal.offset_1 = data->offset_1;
+            jal.offset_2_used = data->offset_2_used;
+            jal.offset_2 = data->offset_2;
+
+            reset_asm_line(&asm_line_array[index]);
+            copy_asm_line(&asm_line_array[index], &jal);
+        }
+        break;
+
         case I_BEQZ: {
 
             int line_nr = asm_line_array[index].line_nr;
@@ -647,9 +747,17 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             beq.line_nr = line_nr;
             beq.instruction = I_BEQ;
             beq.instruction_type = IT_B;
-            beq.reg_rd = data->reg_rd;
-            beq.reg_rs1 = R_ZERO;
+            //beq.reg_rd = data->reg_rd;
+            beq.reg_rs1 = data->reg_rd;
+            beq.reg_rs2 = R_ZERO;
             beq.imm = imm_int_val;
+
+            // beq.offset_0_used = data->offset_0_used;
+            // beq.offset_0 = data->offset_0;
+            // beq.offset_1_used = data->offset_1_used;
+            // beq.offset_1 = data->offset_1;
+            // beq.offset_2_used = data->offset_2_used;
+            // beq.offset_2 = data->offset_2;
 
             reset_asm_line(&asm_line_array[index]);
             copy_asm_line(&asm_line_array[index], &beq);
@@ -708,7 +816,7 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             asm_line_t jalr;
             reset_asm_line(&jalr);
             jalr.used = 1;
-            jalr.line_nr = line_nr+1;
+            jalr.line_nr = line_nr + 1;
             jalr.instruction = I_JALR;
             jalr.instruction_type = IT_J;
             jalr.reg_rd = R_ZERO;
@@ -724,14 +832,8 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
 
             copy_asm_line(&asm_line_array[index], &auipc);
             copy_asm_line(&asm_line_array[index+1], &jalr);
-
         }
         break;
-
-        //TODO:
-        // case I_J:
-        //     data->size_in_bytes = 8;
-        //     break;
 
         case I_LI: {
 
@@ -783,7 +885,7 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             asm_line_t addi;
             reset_asm_line(&addi);
             addi.used = 1;
-            addi.line_nr = line_nr+1;
+            addi.line_nr = line_nr + 1;
             addi.instruction = I_ADDI;
             addi.instruction_type = IT_I;
             addi.reg_rd = data->reg_rd;
@@ -797,7 +899,7 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             // }
             // reset_asm_line(&asm_line_array[index]);
             // reset_asm_line(&asm_line_array[index+1]);
-            // //asm_line_array[index+1] = addi;
+            // //asm_line_array[index + 1] = addi;
             // copy_asm_line(&asm_line_array[index+1], &addi);
 
             //printf("index: %d\n", index);
@@ -808,26 +910,49 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
                 //printf("index: %d\n", (i > index));
                 //printf("copy %d <- %d\n", i+1, i);
                 copy_asm_line(&asm_line_array[i+1], &asm_line_array[i]);
-                asm_line_array[i+1].line_nr++;
+                asm_line_array[i + 1].line_nr++;
             }
 
             copy_asm_line(&asm_line_array[index], &lui);
             copy_asm_line(&asm_line_array[index+1], &addi);
-
         }
         break;
 
-        // case I_MV:
-        //     data->size_in_bytes = 4;
-        //     break;
-
-        case I_BNEZ:
+        case I_BNEZ: {
             // the I_BNEZ pseudo instruction is converted to the I_BNE instruction
             // bnez rs, offset => bne rs, x0, offset
             // see: https://riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf
             data->instruction = I_BNE;
+            data->instruction_type = IT_I;
+            data->reg_rd = data->reg_rd;
+            data->reg_rs1 = data->reg_rd;
+            data->imm = 0;
+        }
+        break;
+
+        case I_MV: {
+            // the I_BNEZ pseudo instruction is converted to the I_BNE instruction
+            // mv rd, rs --> addi rd, rs, 0
+            // mv a0, a5 --> addi a0, a5, 0
+            // see: https://riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf
+            data->instruction = I_ADDI;
             data->instruction_type = IT_B;
             data->reg_rs1 = R_ZERO;
-            break;
+        }
+        break;
+
+        case I_RET: {
+            // pseudo instruction
+            // ret --> jalr x0, x1, 0
+            //
+            // someone has to place the return address into x0 so ret will jump to it
+            // see: https://riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf
+            data->instruction = I_JALR;
+            data->instruction_type = IT_J;
+            data->reg_rd = R_ZERO;
+            data->reg_rs1 = R_RA;
+            data->imm = 0;
+        }
+        break;
     }
 }

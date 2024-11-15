@@ -64,7 +64,7 @@ int retrieve_by_key_tuple_set(tuple_set_element_t* set, const int size, const ch
 // @param value     the value to retrieve the tuple for
 // @param result    [out] returns the retrieved value (for the key and relative value) here
 int retrieve_by_key_less_than_value_tuple_set(tuple_set_element_t* set,
-    const int size, const char* key, const uint32_t value, tuple_set_element_t** result);
+    const int size, const char* key, const uint8_t compare_size, const uint32_t value, tuple_set_element_t** result);
 
 // returns 0 if there exists no tuple satisfying the condition ( tuple.key == key && tuple.value > value )
 // returns 1 if a tuple was found. The tuple is returned in the value [out] parameter
@@ -75,7 +75,7 @@ int retrieve_by_key_less_than_value_tuple_set(tuple_set_element_t* set,
 // @param value     the value to retrieve the tuple for
 // @param result     [out] returns the retrieved value (for the key and relative value) here
 int retrieve_by_key_greater_than_value_tuple_set(tuple_set_element_t* set,
-    const int size, const char* key, const uint32_t value, tuple_set_element_t** result);
+    const int size, const char* key, const uint8_t compare_size, const uint32_t value, tuple_set_element_t** result);
 
 void print_tuple_set(tuple_set_element_t* set, const int size);
 

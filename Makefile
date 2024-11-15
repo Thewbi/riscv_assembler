@@ -22,7 +22,9 @@ assembler: assembler.c \
 	common/node.h \
 	common/node.c \
 	container\trivial_map\trivial_map.h \
-	container\trivial_map\trivial_map.c
+	container\trivial_map\trivial_map.c \
+	container\tuple_set\tuple_set.h \
+	container\tuple_set\tuple_set.c
 	g++ -g -o assembler \
 	assembler.c \
 	parser.c \
@@ -32,7 +34,8 @@ assembler: assembler.c \
 	common/common.c \
 	common/register.c \
 	common/node.c \
-	container\trivial_map\trivial_map.c -I ./ -I common -I common -I container -I data -I encoder
+	container\trivial_map\trivial_map.c \
+	container\tuple_set\tuple_set.c -I ./ -I common -I container -I data -I encoder
 
 # Build the emulator.
 # The emulator does not use the parser as it does not execute from .s files but only from assembled machine code.

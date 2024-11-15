@@ -40,6 +40,8 @@ void addi_encode_valid_input_test(void **state)
     // The parser will load data into the variable parser_asm_line
     yyparse();
 
+    print_asm_line(&parser_asm_line);
+
     uint32_t result = encode_addi(&parser_asm_line);
 
     // Assert

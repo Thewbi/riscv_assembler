@@ -44,7 +44,6 @@ enum instruction {
     I_BEQ,
     I_BGE,
     I_BNE,
-    I_LI,
 
     // R-Type
     I_ADD,
@@ -68,6 +67,7 @@ enum instruction {
     I_J, // pseudo instruction
     I_MV, // pseudo instruction
     I_RET, // pseudo instruction
+    I_LI, // pseudo instruction
 
     // undefined
     I_UNDEFINED_INSTRUCTION

@@ -1819,7 +1819,7 @@ yyreduce:
 
   case 52: /* mnemonic: LI  */
 #line 343 "parser.y"
-         { /*printf("Parser-LI: %d\n", I_LI);*/ /*parser_asm_line.instruction = I_LI; parser_asm_line.instruction_type = IT_I;*/ set_instruction(&parser_asm_line, I_LI, IT_I); }
+         { /*printf("Parser-LI: %d\n", I_LI);*/ /*parser_asm_line.instruction = I_LI; parser_asm_line.instruction_type = IT_I;*/ set_instruction(&parser_asm_line, I_LI, IT_P); }
 #line 1824 "parser.c"
     break;
 

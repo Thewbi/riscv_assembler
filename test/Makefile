@@ -134,7 +134,7 @@ test: unit_tests/main.c \
 	../encoder/encoder.c \
 	../parser.c \
 	../lex.yy.c \
-	-L./lib -I./ -I./include -I./unit_tests -I../common -I../data -I../encoder -I../decoder -I../ -lcmocka \
+	-L./lib -I./ -I./include -I./unit_tests -I../common -I ../container -I../data -I../encoder -I../decoder -I../ -lcmocka \
 	-o cmockatest
 
 # compile mocka libraries

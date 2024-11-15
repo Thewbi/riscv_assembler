@@ -3,6 +3,29 @@
 int asm_line_array_index = 0;
 asm_line_t asm_line_array[100];
 
+int32_t encode_immediate_part(asm_line_t* asm_line) {
+
+    int32_t imm = 0;
+
+    if (asm_line->offset_0_used) {
+        imm = asm_line->offset_0;
+    } else if (asm_line->offset_1_used) {
+        imm = asm_line->offset_1;
+    } else if (asm_line->offset_2_used) {
+        imm = asm_line->offset_2;
+    } else if (asm_line->offset_0_expression != NULL) {
+        imm = asm_line->offset_0_expression->int_val;
+    } else if (asm_line->offset_1_expression != NULL) {
+        imm = asm_line->offset_1_expression->int_val;
+    } else if (asm_line->offset_2_expression != NULL) {
+        imm = asm_line->offset_2_expression->int_val;
+    } else {
+        imm = asm_line->imm;
+    }
+
+    return imm;
+}
+
 // Whenever the parser reduces a rule for a asm_line, it is performing an action.
 // Inside this action, it calls the fp_emit function pointer.
 // This method "encoder_callback()" is registered as fp_emit function pointer
@@ -52,8 +75,11 @@ uint32_t encode_addi(asm_line_t* asm_line) {
 
     uint8_t rd = encode_register(asm_line->reg_rd);
     uint8_t rs1 = encode_register(asm_line->reg_rs1);
-    //uint16_t imm = asm_line->imm;
-    uint16_t imm = asm_line->offset_2_expression->int_val;
+    int32_t imm = encode_immediate_part(asm_line);
+
+    // printf("rd %d\n", rd);
+    // printf("rs1 %d\n", rs1);
+    // printf("imm %d\n", imm);
 
     return encode_i_type(imm, rs1, funct3, rd, opcode);
 }
@@ -63,7 +89,7 @@ uint32_t encode_auipc(asm_line_t* asm_line) {
     uint8_t opcode = 0b0010111;
 
     uint8_t rd = encode_register(asm_line->reg_rd);
-    uint16_t imm = asm_line->offset_1_expression->int_val;
+    int32_t imm = encode_immediate_part(asm_line);
 
     return encode_u_type(imm, rd, opcode);
 }
@@ -75,8 +101,7 @@ uint32_t encode_beq(asm_line_t* asm_line) {
 
     uint8_t rs1 = encode_register(asm_line->reg_rs1);
     uint8_t rs2 = encode_register(asm_line->reg_rs2);
-    //uint16_t imm = asm_line->imm;
-    uint16_t imm = asm_line->offset_2_expression->int_val;
+    int32_t imm = encode_immediate_part(asm_line);
 
     return encode_b_type(imm, rs2, rs1, funct3, opcode);
 }
@@ -88,8 +113,7 @@ uint32_t encode_bne(asm_line_t* asm_line) {
 
     uint8_t rs1 = encode_register(asm_line->reg_rs1);
     uint8_t rs2 = encode_register(asm_line->reg_rs2);
-    //uint16_t imm = asm_line->imm;
-    uint16_t imm = asm_line->offset_2_expression->int_val;
+    int32_t imm = encode_immediate_part(asm_line);
 
     return encode_b_type(imm, rs2, rs1, funct3, opcode);
 }
@@ -218,9 +242,44 @@ void encode_j(asm_line_t* asm_line, uint32_t* output_buffer) {
     output_buffer[1] = jalr_encoded;
 }
 
+uint32_t encode_jal(asm_line_t* asm_line) {
+
+    uint8_t funct3 = 0b000;
+    uint8_t opcode = 0b1101111;
+
+    uint8_t rd = encode_register(asm_line->reg_rd);
+    uint16_t imm = encode_immediate_part(asm_line);
+
+    return encode_j_type(imm, rd, opcode);
+}
+
+uint32_t encode_jalr(asm_line_t* asm_line) {
+
+    uint8_t funct3 = 0b000;
+    uint8_t opcode = 0b1101111;
+
+    uint8_t rd = encode_register(asm_line->reg_rd);
+    uint8_t rs1 = encode_register(asm_line->reg_rs1);
+    uint16_t imm = encode_immediate_part(asm_line);
+
+    return encode_i_type(imm, rs1, funct3, rd, opcode);
+}
+
+uint32_t encode_lb(asm_line_t* asm_line) {
+
+    uint8_t funct3 = 0b000;
+    uint8_t opcode = 0b0000011;
+
+    uint8_t rs1 = encode_register(asm_line->reg_rs1);
+    uint8_t rd = encode_register(asm_line->reg_rd);
+    uint16_t imm = asm_line->offset_1;
+
+    return encode_i_type(imm, rs1, funct3, rd, opcode);
+}
+
 uint32_t encode_lw(asm_line_t* asm_line) {
 
-    // printf("encode_sw\n");
+    // printf("encode_lw\n");
 
     // printf("asm_line->reg_rs1 %d\n", asm_line->reg_rs1);
     // printf("asm_line->reg_rs2 %d\n", asm_line->reg_rs2);
@@ -256,7 +315,8 @@ uint32_t encode_lui(asm_line_t* asm_line) {
     //uint32_t imm = asm_line->imm;
 
     //uint16_t imm = asm_line->offset_0_expression->int_val;
-    int32_t imm = asm_line->offset_1_expression->int_val;
+    int32_t imm = encode_immediate_part(asm_line);
+
     //uint16_t imm = asm_line->offset_2_expression->int_val;
 
     //printf("encode_lui asm_line->imm: %d\n", imm);
@@ -461,6 +521,7 @@ uint32_t encode_sw(asm_line_t* asm_line) {
     return encode_s_type(imm, rs1, rs2, funct3, opcode);
 }
 
+// funct7 rs2 rs1 funct3 rd
 uint32_t encode_r_type(uint8_t funct7, uint8_t rs2, uint8_t rs1, uint8_t funct3, uint8_t rd, uint8_t opcode) {
 
     // printf("encode_r_type funct7: %d \n", funct7);
@@ -478,6 +539,7 @@ uint32_t encode_r_type(uint8_t funct7, uint8_t rs2, uint8_t rs1, uint8_t funct3,
            ((funct7 & 0b1111111) << (7+5+3+5+5));
 }
 
+// imm[11:0] rs1 funct3 rd
 uint32_t encode_i_type(uint16_t imm, uint8_t rs1, uint8_t funct3, uint8_t rd, uint8_t opcode) {
 
     // printf("encode_i_type imm: %d \n", imm);
@@ -495,6 +557,12 @@ uint32_t encode_i_type(uint16_t imm, uint8_t rs1, uint8_t funct3, uint8_t rd, ui
     return result;
 }
 
+// imm[11:5] rs2 rs1 funct3 imm[4:0]
+uint32_t encode_s_type(uint16_t imm, uint8_t rs2, uint8_t rs1, uint8_t funct3, uint8_t opcode) {
+    return encode_b_type(imm, rs2, rs1, funct3, opcode);
+}
+
+// imm[12] imm[10:5] rs2 rs1 funct3 imm[4:1] imm[11] opcode
 uint32_t encode_b_type(uint16_t imm, uint8_t rs2, uint8_t rs1, uint8_t funct3, uint8_t opcode) {
 
     // printf("encode_b_type imm: %d \n", imm);
@@ -526,10 +594,7 @@ uint32_t encode_b_type(uint16_t imm, uint8_t rs2, uint8_t rs1, uint8_t funct3, u
 
 }
 
-uint32_t encode_s_type(uint16_t imm, uint8_t rs2, uint8_t rs1, uint8_t funct3, uint8_t opcode) {
-    return encode_b_type(imm, rs2, rs1, funct3, opcode);
-}
-
+// imm[31:12] rd opcode
 uint32_t encode_u_type(uint32_t imm, uint8_t rd, uint8_t opcode) {
 
     //printf("encode_u_type opcode: %d \n", opcode);
@@ -540,6 +605,95 @@ uint32_t encode_u_type(uint32_t imm, uint8_t rd, uint8_t opcode) {
     return ((opcode & 0b1111111) << 0) |
            ((rd & 0b11111) << 7) |
            ((imm & 0b11111111111111111111) << (7+5));
+}
+
+// imm[20] imm[10:1] imm[11] imm[19:12] rd opcode
+uint32_t encode_j_type(uint32_t imm, uint8_t rd, uint8_t opcode) {
+
+    uint16_t imm_20 = (imm >> 19) & 0b1; // 1
+    uint16_t imm_10_1 = (imm >> 1) & 0b1111111111; // 10
+    uint16_t imm_11 = (imm >> 10) & 0b1; // 1
+    uint16_t imm_19_12 = (imm >> 11) & 0b11111111; // 8
+
+    return ((opcode & 0b1111111) << 0) |
+           ((rd & 0b11111) << 7) |
+           ((imm_19_12 & 0b11111111) << (7+5)) |
+           ((imm_11 & 0b1) << (7+5+8)) |
+           ((imm_10_1 & 0b1111111111) << (7+5+8+1)) |
+           ((imm_20 & 0b1) << (7+5+3+5+10));
+}
+
+uint32_t encode(asm_line_t* asm_line) {
+
+    //print_asm_line(asm_line);
+
+    uint32_t encoded_asm_line = 0;
+    uint32_t output_buffer[2];
+
+    switch (asm_line->instruction) {
+
+        case I_ADD:
+            encoded_asm_line = encode_add(asm_line);
+            break;
+
+        case I_ADDI:
+            encoded_asm_line = encode_addi(asm_line);
+            break;
+
+        case I_BEQ:
+            encoded_asm_line = encode_beq(asm_line);
+            break;
+
+        case I_BNEZ:
+            encoded_asm_line = encode_bnez(asm_line);
+            break;
+
+        case I_JAL:
+            encoded_asm_line = encode_jal(asm_line);
+            break;
+
+        case I_JALR:
+            encoded_asm_line = encode_jalr(asm_line);
+            break;
+
+        case I_LUI:
+            encoded_asm_line = encode_lui(asm_line);
+            break;
+
+        case I_LB:
+            encoded_asm_line = encode_lb(asm_line);
+            break;
+
+        // case I_CALL:
+        //      encode_call(asm_line, output_buffer);
+        //      break;
+
+        // case I_LI:
+        //     encode_li(asm_line, output_buffer);
+        //     break;
+
+        // case I_RET:
+        //     encoded_asm_line = encode_ret(asm_line);
+        //     break;
+
+        case I_SRLI:
+            encoded_asm_line = encode_srli(asm_line);
+            break;
+
+        case I_SLLI:
+            encoded_asm_line = encode_slli(asm_line);
+            break;
+
+        case I_SW:
+            encoded_asm_line = encode_sw(asm_line);
+            break;
+
+        default:
+            //printf("Unknown instruction! %s \n", instruction_to_string(asm_line->instruction));
+            return 0;
+    }
+
+    return encoded_asm_line;
 }
 
 /*

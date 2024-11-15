@@ -1,4 +1,4 @@
-#include "tuple_set.h"
+#include <tuple_set/tuple_set.h>
 
 void initialize_tuple_set_element(tuple_set_element_t* element) {
     memset(element->key, 0, 100);
@@ -82,7 +82,7 @@ int retrieve_by_key_tuple_set(tuple_set_element_t* set,
 // @param value     the value to retrieve the tuple for
 // @param result    [out] returns the retrieved value (for the key and relative value) here
 int retrieve_by_key_less_than_value_tuple_set(tuple_set_element_t* set,
-    const int size, const char* key, const uint32_t value, tuple_set_element_t** result) {
+    const int size, const char* key, const uint8_t compare_size, const uint32_t value, tuple_set_element_t** result) {
 
     uint32_t largest_value = 0;
     int32_t largest_value_index = -1;
@@ -90,7 +90,7 @@ int retrieve_by_key_less_than_value_tuple_set(tuple_set_element_t* set,
     for (int i = 0; i < size; i++) {
 
         const tuple_set_element_t* element = set + i;
-        if ((element->used == 1) && (strncmp(element->key, key, 100) == 0) && (element->value <= value)) {
+        if ((element->used == 1) && (strncmp(element->key, key, compare_size) == 0) && (element->value < value)) {
 
             if (largest_value < element->value) {
 
@@ -117,7 +117,7 @@ int retrieve_by_key_less_than_value_tuple_set(tuple_set_element_t* set,
 // @param value     the value to retrieve the tuple for
 // @param result     [out] returns the retrieved value (for the key and relative value) here
 int retrieve_by_key_greater_than_value_tuple_set(tuple_set_element_t* set,
-    const int size, const char* key, const uint32_t value, tuple_set_element_t** result) {
+    const int size, const char* key, const uint8_t compare_size, const uint32_t value, tuple_set_element_t** result) {
 
     uint32_t smallest_value = UINT32_MAX;
     int32_t smallest_value_index = -1;
@@ -125,7 +125,7 @@ int retrieve_by_key_greater_than_value_tuple_set(tuple_set_element_t* set,
     for (int i = 0; i < size; i++) {
 
         const tuple_set_element_t* element = set + i;
-        if ((element->used == 1) && (strncmp(element->key, key, 100) == 0) && (element->value >= value)) {
+        if ((element->used == 1) && (strncmp(element->key, key, compare_size) == 0) && (element->value > value)) {
 
             if (smallest_value > element->value) {
 

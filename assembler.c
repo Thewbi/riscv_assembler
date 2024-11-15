@@ -19,7 +19,7 @@
 #include <parser.h>
 #include <node.h>
 #include <trivial_map/trivial_map.h>
-#include <trivial_map/tuple_set.h>
+#include <tuple_set/tuple_set.h>
 
 asm_line_t parser_asm_line;
 
@@ -71,12 +71,16 @@ int main(int argc, char **argv)
     // collect all labels and store them inside the label_address_map
     //
 
-    trivial_map_element_t label_address_map[20];
-    initialize_trivial_map(label_address_map, 20);
+    // trivial_map_element_t label_address_map[20];
+    // initialize_trivial_map(label_address_map, 20);
+
+    tuple_set_element_t label_address_map[20];
+    initialize_tuple_set(label_address_map, 20);
 
     int current_address = 0x0000;
 
     for (int i = 0; i < asm_line_array_index; i++) {
+
         if (strnlen(asm_line_array[i].label, 100) > 0) {
 
             // printf("line_nr:%d label:%s address:%d address/4:%d size_in_bytes:%d\n",
@@ -86,22 +90,23 @@ int main(int argc, char **argv)
             //     current_address/4,
             //     asm_line_array[i].size_in_bytes);
 
-            if (contains_key_trivial_map(label_address_map, 20, asm_line_array[i].label)) {
-                printf("Label is already contained: %s\n", asm_line_array[i].label);
-            }
+            // if (contains_key_trivial_map(label_address_map, 20, asm_line_array[i].label)) {
+            //     printf("Label is already contained: %s\n", asm_line_array[i].label);
+            // }
 
             // if (!insert_or_replace_trivial_map(label_address_map, 20, asm_line_array[i].label, current_address)) {
             //     printf("Insert label address mapping failed!\n");
             //     break;
             // }
 
-            if (!insert_tuple_set()) {
+            if (!insert_tuple_set(label_address_map, 20, asm_line_array[i].label, current_address)) {
                 printf("Insert label address mapping failed!\n");
                 break;
             }
-        } else {
-            //printf("size_in_bytes:%d\n", asm_line_array[i].size_in_bytes);
         }
+        //else {
+            //printf("size_in_bytes:%d\n", asm_line_array[i].size_in_bytes);
+        //}
 
         current_address = current_address + asm_line_array[i].size_in_bytes;
     }
@@ -109,7 +114,8 @@ int main(int argc, char **argv)
     // DEBUG
     printf("\n");
     printf("label map:\n");
-    print_trivial_map(label_address_map, 20);
+    //print_trivial_map(label_address_map, 20);
+    print_tuple_set(label_address_map, 20);
 
     //
     // collect all .equ assembler instructions and store them inside the equ_map
@@ -139,112 +145,225 @@ int main(int argc, char **argv)
 
     //printf("Replace\n");
 
+    uint32_t address = 0;
+
     for (int i = 0; i < asm_line_array_index; i++) {
+
+        address += asm_line_array[i].size_in_bytes;
+
         if (asm_line_array[i].offset_0_used && strnlen(asm_line_array[i].offset_identifier_0, 100) > 0) {
-            //printf("offset_identifier_0 found: %s\n", asm_line_array[i].offset_identifier_0);
 
-            if (contains_key_trivial_map(equ_map, 20, asm_line_array[i].offset_identifier_0)) {
-                int value = 0;
-                retrieve_by_key_trivial_map(equ_map, 20, asm_line_array[i].offset_identifier_0, &value);
-                asm_line_array[i].offset_0 = value;
-            }
-            if (contains_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_identifier_0)) {
-                int value = 0;
-                retrieve_by_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_identifier_0, &value);
-                asm_line_array[i].offset_0 = value;
-            }
+            printf("offset_identifier_0 found: %s\n", asm_line_array[i].offset_identifier_0);
 
-            memset(asm_line_array[i].offset_identifier_0, 0, 100);
+            // if (contains_key_trivial_map(equ_map, 20, asm_line_array[i].offset_identifier_0)) {
+            //     int value = 0;
+            //     retrieve_by_key_trivial_map(equ_map, 20, asm_line_array[i].offset_identifier_0, &value);
+            //     asm_line_array[i].offset_0 = value;
+            // }
+            // if (contains_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_identifier_0)) {
+            //     int value = 0;
+            //     retrieve_by_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_identifier_0, &value);
+            //     asm_line_array[i].offset_0 = value;
+            // }
+
+            // memset(asm_line_array[i].offset_identifier_0, 0, 100);
         }
         if (asm_line_array[i].offset_1_used && strnlen(asm_line_array[i].offset_identifier_1, 100) > 0) {
-            //printf("offset_identifier_1 found: %s\n", asm_line_array[i].offset_identifier_1);
 
-            if (contains_key_trivial_map(equ_map, 20, asm_line_array[i].offset_identifier_1)) {
-                int value = 0;
-                retrieve_by_key_trivial_map(equ_map, 20, asm_line_array[i].offset_identifier_1, &value);
-                asm_line_array[i].offset_1 = value;
-            }
-            if (contains_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_identifier_1)) {
-                int value = 0;
-                retrieve_by_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_identifier_1, &value);
-                asm_line_array[i].offset_1 = value;
-            }
+            printf("offset_identifier_1 found: %s\n", asm_line_array[i].offset_identifier_1);
 
-            memset(asm_line_array[i].offset_identifier_1, 0, 100);
+            // if (contains_key_trivial_map(equ_map, 20, asm_line_array[i].offset_identifier_1)) {
+            //     int value = 0;
+            //     retrieve_by_key_trivial_map(equ_map, 20, asm_line_array[i].offset_identifier_1, &value);
+            //     asm_line_array[i].offset_1 = value;
+            // }
+            // if (contains_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_identifier_1)) {
+            //     int value = 0;
+            //     retrieve_by_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_identifier_1, &value);
+            //     asm_line_array[i].offset_1 = value;
+            // }
+
+            // memset(asm_line_array[i].offset_identifier_1, 0, 100);
         }
         if (asm_line_array[i].offset_2_used && strnlen(asm_line_array[i].offset_identifier_2, 100) > 0) {
-            //printf("offset_identifier_2 found: %s\n", asm_line_array[i].offset_identifier_2);
 
-            if (contains_key_trivial_map(equ_map, 20, asm_line_array[i].offset_identifier_2)) {
-                int value = 0;
-                retrieve_by_key_trivial_map(equ_map, 20, asm_line_array[i].offset_identifier_2, &value);
-                asm_line_array[i].offset_2 = value;
-            }
-            if (contains_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_identifier_2)) {
-                int value = 0;
-                retrieve_by_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_identifier_2, &value);
-                asm_line_array[i].offset_2 = value;
-            }
+            printf("offset_identifier_2 found: %s\n", asm_line_array[i].offset_identifier_2);
 
-            memset(asm_line_array[i].offset_identifier_2, 0, 100);
+            // if (contains_key_trivial_map(equ_map, 20, asm_line_array[i].offset_identifier_2)) {
+            //     int value = 0;
+            //     retrieve_by_key_trivial_map(equ_map, 20, asm_line_array[i].offset_identifier_2, &value);
+            //     asm_line_array[i].offset_2 = value;
+            // }
+            // if (contains_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_identifier_2)) {
+            //     int value = 0;
+            //     retrieve_by_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_identifier_2, &value);
+            //     asm_line_array[i].offset_2 = value;
+            // }
+
+            // memset(asm_line_array[i].offset_identifier_2, 0, 100);
         }
 
         if (asm_line_array[i].offset_0_expression != NULL && strnlen(asm_line_array[i].offset_0_expression->string_val, 100) > 0) {
-            //printf("offset_0_expression found: %s\n", asm_line_array[i].offset_0_expression->string_val);
 
-            asm_line_array[i].offset_0_used = 1;
+            printf("offset_0_expression found: %s\n", asm_line_array[i].offset_0_expression->string_val);
 
-            if (contains_key_trivial_map(equ_map, 20, asm_line_array[i].offset_0_expression->string_val)) {
-                int value = 0;
-                retrieve_by_key_trivial_map(equ_map, 20, asm_line_array[i].offset_0_expression->string_val, &value);
-                asm_line_array[i].offset_0 = value;
+            uint32_t str_len = strlen(asm_line_array[i].offset_0_expression->string_val);
+            char* last_character = asm_line_array[i].offset_0_expression->string_val + str_len - 1;
+
+            tuple_set_element_t* tuple_set_element;
+
+            if (strncmp(last_character, "f", 1) == 0) {
+                retrieve_by_key_greater_than_value_tuple_set(label_address_map, 20, asm_line_array[i].offset_0_expression->string_val, str_len-1, address, &tuple_set_element);
+                if (tuple_set_element != NULL) {
+                    printf("greater_than: %d\n", tuple_set_element->value);
+                    asm_line_array[i].offset_0 = tuple_set_element->value;
+                    asm_line_array[i].offset_0_used = 1;
+                } else {
+                    printf("greater_than: NotFound\n");
+                }
+            } else if (strncmp(last_character, "b", 1) == 0) {
+                retrieve_by_key_less_than_value_tuple_set(label_address_map, 20, asm_line_array[i].offset_0_expression->string_val, str_len-1, address, &tuple_set_element);
+                if (tuple_set_element != NULL) {
+                    printf("less_than: %d\n", tuple_set_element->value);
+                    asm_line_array[i].offset_0 = tuple_set_element->value;
+                    asm_line_array[i].offset_0_used = 1;
+                } else {
+                    printf("less_than: NotFound\n");
+                }
+            } else {
+                retrieve_by_key_tuple_set(label_address_map, 20, asm_line_array[i].offset_0_expression->string_val, &tuple_set_element);
+                if (tuple_set_element != NULL) {
+                    printf("direct_match: %d\n", tuple_set_element->value);
+                    asm_line_array[i].offset_0 = tuple_set_element->value;
+                    asm_line_array[i].offset_0_used = 1;
+                } else {
+                    printf("direct_match: NotFound\n");
+                }
             }
-            if (contains_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_0_expression->string_val)) {
-                int value = 0;
-                retrieve_by_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_0_expression->string_val, &value);
-                asm_line_array[i].offset_0 = value;
-            }
 
-            free(asm_line_array[i].offset_0_expression);
-            asm_line_array[i].offset_0_expression = NULL;
+            // asm_line_array[i].offset_0_used = 1;
+
+            // if (contains_key_trivial_map(equ_map, 20, asm_line_array[i].offset_0_expression->string_val)) {
+            //     int value = 0;
+            //     retrieve_by_key_trivial_map(equ_map, 20, asm_line_array[i].offset_0_expression->string_val, &value);
+            //     asm_line_array[i].offset_0 = value;
+            // }
+            // if (contains_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_0_expression->string_val)) {
+            //     int value = 0;
+            //     retrieve_by_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_0_expression->string_val, &value);
+            //     asm_line_array[i].offset_0 = value;
+            // }
+
+            // free(asm_line_array[i].offset_0_expression);
+            // asm_line_array[i].offset_0_expression = NULL;
         }
         if (asm_line_array[i].offset_1_expression != NULL && strnlen(asm_line_array[i].offset_1_expression->string_val, 100) > 0) {
-            //printf("offset_1_expression found: %s\n", asm_line_array[i].offset_1_expression->string_val);
 
-            asm_line_array[i].offset_1_used = 1;
+            printf("offset_1_expression found: %s\n", asm_line_array[i].offset_1_expression->string_val);
 
-            if (contains_key_trivial_map(equ_map, 20, asm_line_array[i].offset_1_expression->string_val)) {
-                int value = 0;
-                retrieve_by_key_trivial_map(equ_map, 20, asm_line_array[i].offset_1_expression->string_val, &value);
-                asm_line_array[i].offset_1 = value;
+            uint32_t str_len = strlen(asm_line_array[i].offset_1_expression->string_val);
+            char* last_character = asm_line_array[i].offset_1_expression->string_val + str_len - 1;
+
+            tuple_set_element_t* tuple_set_element;
+
+            if (strncmp(last_character, "f", 1) == 0) {
+                retrieve_by_key_greater_than_value_tuple_set(label_address_map, 20, asm_line_array[i].offset_1_expression->string_val, str_len-1, address, &tuple_set_element);
+                if (tuple_set_element != NULL) {
+                    printf("greater_than: %d\n", tuple_set_element->value);
+                    asm_line_array[i].offset_1 = tuple_set_element->value;
+                    asm_line_array[i].offset_1_used = 1;
+                } else {
+                    printf("greater_than: NotFound\n");
+                }
+            } else if (strncmp(last_character, "b", 1) == 0) {
+                retrieve_by_key_less_than_value_tuple_set(label_address_map, 20, asm_line_array[i].offset_1_expression->string_val, str_len-1, address, &tuple_set_element);
+                if (tuple_set_element != NULL) {
+                    printf("less_than: %d\n", tuple_set_element->value);
+                    asm_line_array[i].offset_1 = tuple_set_element->value;
+                    asm_line_array[i].offset_1_used = 1;
+                } else {
+                    printf("less_than: NotFound\n");
+                }
+            } else {
+                retrieve_by_key_tuple_set(label_address_map, 20, asm_line_array[i].offset_1_expression->string_val, &tuple_set_element);
+                if (tuple_set_element != NULL) {
+                    printf("direct_match: %d\n", tuple_set_element->value);
+                    asm_line_array[i].offset_1 = tuple_set_element->value;
+                    asm_line_array[i].offset_1_used = 1;
+                } else {
+                    printf("direct_match: NotFound\n");
+                }
             }
-            if (contains_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_1_expression->string_val)) {
-                int value = 0;
-                retrieve_by_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_1_expression->string_val, &value);
-                asm_line_array[i].offset_1 = value;
-            }
 
-            free(asm_line_array[i].offset_1_expression);
-            asm_line_array[i].offset_1_expression = NULL;
+            // asm_line_array[i].offset_1_used = 1;
+
+            // if (contains_key_trivial_map(equ_map, 20, asm_line_array[i].offset_1_expression->string_val)) {
+            //     int value = 0;
+            //     retrieve_by_key_trivial_map(equ_map, 20, asm_line_array[i].offset_1_expression->string_val, &value);
+            //     asm_line_array[i].offset_1 = value;
+            // }
+            // if (contains_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_1_expression->string_val)) {
+            //     int value = 0;
+            //     retrieve_by_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_1_expression->string_val, &value);
+            //     asm_line_array[i].offset_1 = value;
+            // }
+
+            // free(asm_line_array[i].offset_1_expression);
+            // asm_line_array[i].offset_1_expression = NULL;
         }
         if (asm_line_array[i].offset_2_expression != NULL && strnlen(asm_line_array[i].offset_2_expression->string_val, 100) > 0) {
-            //printf("offset_2_expression found: %s\n", asm_line_array[i].offset_2_expression->string_val);
 
-            asm_line_array[i].offset_2_used = 1;
+            printf("offset_2_expression found: %s\n", asm_line_array[i].offset_2_expression->string_val);
 
-            if (contains_key_trivial_map(equ_map, 20, asm_line_array[i].offset_2_expression->string_val)) {
-                int value = 0;
-                retrieve_by_key_trivial_map(equ_map, 20, asm_line_array[i].offset_2_expression->string_val, &value);
-                asm_line_array[i].offset_2 = value;
+            uint32_t str_len = strlen(asm_line_array[i].offset_2_expression->string_val);
+            char* last_character = asm_line_array[i].offset_2_expression->string_val + str_len - 1;
+
+            tuple_set_element_t* tuple_set_element;
+
+            if (strncmp(last_character, "f", 1) == 0) {
+                retrieve_by_key_greater_than_value_tuple_set(label_address_map, 20, asm_line_array[i].offset_2_expression->string_val, str_len-1, address, &tuple_set_element);
+                if (tuple_set_element != NULL) {
+                    printf("greater_than: %d\n", tuple_set_element->value);
+                    asm_line_array[i].offset_2 = tuple_set_element->value;
+                    asm_line_array[i].offset_2_used = 1;
+                } else {
+                    printf("greater_than: NotFound\n");
+                }
+            } else if (strncmp(last_character, "b", 1) == 0) {
+                retrieve_by_key_less_than_value_tuple_set(label_address_map, 20, asm_line_array[i].offset_2_expression->string_val, str_len-1, address, &tuple_set_element);
+                if (tuple_set_element != NULL) {
+                    printf("less_than: %d\n", tuple_set_element->value);
+                    asm_line_array[i].offset_2 = tuple_set_element->value;
+                    asm_line_array[i].offset_2_used = 1;
+                } else {
+                    printf("less_than: NotFound\n");
+                }
+            } else {
+                retrieve_by_key_tuple_set(label_address_map, 20, asm_line_array[i].offset_2_expression->string_val, &tuple_set_element);
+                if (tuple_set_element != NULL) {
+                    printf("direct_match: %d\n", tuple_set_element->value);
+                    asm_line_array[i].offset_2 = tuple_set_element->value;
+                    asm_line_array[i].offset_2_used = 1;
+                } else {
+                    printf("direct_match: NotFound\n");
+                }
             }
-            if (contains_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_2_expression->string_val)) {
-                int value = 0;
-                retrieve_by_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_2_expression->string_val, &value);
-                asm_line_array[i].offset_2 = value;
-            }
 
-            free(asm_line_array[i].offset_2_expression);
-            asm_line_array[i].offset_2_expression = NULL;
+            // asm_line_array[i].offset_2_used = 1;
+
+            // if (contains_key_trivial_map(equ_map, 20, asm_line_array[i].offset_2_expression->string_val)) {
+            //     int value = 0;
+            //     retrieve_by_key_trivial_map(equ_map, 20, asm_line_array[i].offset_2_expression->string_val, &value);
+            //     asm_line_array[i].offset_2 = value;
+            // }
+            // if (contains_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_2_expression->string_val)) {
+            //     int value = 0;
+            //     retrieve_by_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_2_expression->string_val, &value);
+            //     asm_line_array[i].offset_2 = value;
+            // }
+
+            // free(asm_line_array[i].offset_2_expression);
+            // asm_line_array[i].offset_2_expression = NULL;
         }
     }
 
@@ -279,12 +398,28 @@ int main(int argc, char **argv)
         }
     }
 
+    // print code
     printf("\n\n");
     printf("code:\n");
     for (int i = 0; i < 100; i++) {
         //printf("line %d\n", i);
         if (asm_line_array[i].used != 0) {
             serialize_asm_line(&asm_line_array[i]);
+        }
+    }
+
+    // encode all lines
+    printf("\n\n");
+    printf("machine code:\n");
+    for (int i = 0; i < 100; i++) {
+        //printf("line %d\n", i);
+        if (asm_line_array[i].used != 0) {
+            //printf("%d\n", encode(&asm_line_array[i]));
+
+            uint32_t machine_code = encode(&asm_line_array[i]);
+            if (machine_code != 0) {
+                printf("%08" PRIx64 "\n", machine_code);
+            }
         }
     }
 

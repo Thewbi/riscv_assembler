@@ -196,11 +196,11 @@ void retrieve_by_key_less_than_value_tuple_set_test(void **state) {
 
     const uint32_t start_value_first = 150;
     tuple_set_element_t* result_element_first;
-    int result_first = retrieve_by_key_less_than_value_tuple_set(tuple_set, 20, "key_1", start_value_first, &result_element_first);
+    int result_first = retrieve_by_key_less_than_value_tuple_set(tuple_set, 20, "key_1", 5, start_value_first, &result_element_first);
 
     const uint32_t start_value_second = 250;
     tuple_set_element_t* result_element_second;
-    int result_second = retrieve_by_key_less_than_value_tuple_set(tuple_set, 20, "key_1", start_value_second, &result_element_second);
+    int result_second = retrieve_by_key_less_than_value_tuple_set(tuple_set, 20, "key_1", 5, start_value_second, &result_element_second);
 
     // Assert
 
@@ -245,11 +245,11 @@ void retrieve_by_key_greater_than_value_tuple_set_test(void **state) {
 
     const uint32_t start_value_first = 25;
     tuple_set_element_t* result_element_first;
-    int result_first = retrieve_by_key_greater_than_value_tuple_set(tuple_set, 20, "key_1", start_value_first, &result_element_first);
+    int result_first = retrieve_by_key_greater_than_value_tuple_set(tuple_set, 20, "key_1", 5, start_value_first, &result_element_first);
 
     const uint32_t start_value_second = 75;
     tuple_set_element_t* result_element_second;
-    int result_second = retrieve_by_key_greater_than_value_tuple_set(tuple_set, 20, "key_1", start_value_second, &result_element_second);
+    int result_second = retrieve_by_key_greater_than_value_tuple_set(tuple_set, 20, "key_1", 5, start_value_second, &result_element_second);
 
     // Assert
 

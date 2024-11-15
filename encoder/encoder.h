@@ -16,6 +16,8 @@
  */
 void encoder_callback(asm_line_t* asm_line);
 
+uint32_t encode(asm_line_t* asm_line);
+
 /**
  * https://www.eg.bucknell.edu/~csci206/riscv-converter/
  *
@@ -36,6 +38,8 @@ uint32_t encode_bnez(asm_line_t* asm_line);
 void encode_call(asm_line_t* asm_line, uint32_t* output_buffer);
 
 void encode_j(asm_line_t* asm_line, uint32_t* output_buffer);
+
+uint32_t encode_lb(asm_line_t* asm_line);
 
 uint32_t encode_lw(asm_line_t* asm_line);
 
@@ -63,8 +67,10 @@ uint32_t encode_i_type(uint16_t imm, uint8_t rs1, uint8_t funct3, uint8_t rd, ui
 
 uint32_t encode_s_type(uint16_t imm, uint8_t rs2, uint8_t rs1, uint8_t funct3, uint8_t opcode);
 
+uint32_t encode_u_type(uint32_t imm, uint8_t rd, uint8_t opcode);
+
 uint32_t encode_b_type(uint16_t imm, uint8_t rs2, uint8_t rs1, uint8_t funct3, uint8_t opcode);
 
-uint32_t encode_u_type(uint32_t imm, uint8_t rd, uint8_t opcode);
+uint32_t encode_j_type(uint32_t imm, uint8_t rd, uint8_t opcode);
 
 #endif
