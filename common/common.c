@@ -8,6 +8,14 @@ uint16_t sign_extend_uint16_t(uint16_t data) {
     return data;
 }
 
+uint32_t sign_extend_8_bit_to_uint32_t(const uint8_t data) {
+    uint32_t most_significant_bit = data & 0b10000000;
+    if (most_significant_bit) {
+        return 0xFFFFFF00 | data;
+    }
+    return data;
+}
+
 uint32_t sign_extend_12_bit_to_uint32_t(const uint16_t data) {
     uint32_t most_significant_bit = data & 0b100000000000;
     if (most_significant_bit) {

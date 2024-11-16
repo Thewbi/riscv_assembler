@@ -165,14 +165,16 @@ void print_asm_line(const asm_line_t *data) {
         print_expression(data->offset_1_expression, buffer_1);
         print_expression(data->offset_2_expression, buffer_2);
 
-        printf("[(%d) Instr: %s Size: %d\n\
-    0:{offset_used:%d offset:%d offset_ident:%s register:%s offset_expr:%s}\n\
-    1:{offset_used:%d offset:%d offset_ident:%s register:%s offset_expr:%s}\n\
-    2:{offset_used:%d offset:%d offset_ident:%s register:%s offset_expr:%s}\n\
+        printf("[(%d) Instr: %s Size: %d Imm: %d Used: %d \n \
+    0:{offset_used:%d offset:%d offset_ident:%s register:%s offset_expr:%s}\n \
+    1:{offset_used:%d offset:%d offset_ident:%s register:%s offset_expr:%s}\n \
+    2:{offset_used:%d offset:%d offset_ident:%s register:%s offset_expr:%s}\n \
 ]\n",
             data->line_nr,
             instruction_to_string(data->instruction),
             data->size_in_bytes,
+            data->imm,
+            data->used,
             data->offset_0_used, data->offset_0, data->offset_identifier_0, register_to_string(data->reg_rd), buffer_0,
             data->offset_1_used, data->offset_1, data->offset_identifier_1, register_to_string(data->reg_rs1), buffer_1,
             data->offset_2_used, data->offset_2, data->offset_identifier_2, register_to_string(data->reg_rs2), buffer_2);
@@ -246,9 +248,9 @@ void serialize_asm_line(const asm_line_t *data) {
                 printf("%s, ", register_to_string(data->reg_rd));
                 printf("%s, ", register_to_string(data->reg_rs1));
                 if (data->offset_2_expression != NULL) {
-                    printf("%08" PRIx32 "", data->offset_2_expression->int_val);
+                    printf("0x%08" PRIx32 "", data->offset_2_expression->int_val);
                 } else {
-                    printf("%08" PRIx32 "", data->imm);
+                    printf("0x%08" PRIx32 "", data->imm);
                 }
                 break;
 
@@ -259,7 +261,7 @@ void serialize_asm_line(const asm_line_t *data) {
             case I_LBU:
             case I_LHU:
                 printf("%s, ", register_to_string(data->reg_rd));
-                printf("%08" PRIx32 "", data->imm);
+                printf("0x%08" PRIx32 "", data->imm);
                 printf("(%s)", register_to_string(data->reg_rs1));
                 break;
 
@@ -279,18 +281,18 @@ void serialize_asm_line(const asm_line_t *data) {
                 }
 
                 if (data->offset_0_used) {
-                    printf("%08" PRIx32 "", data->offset_0);
+                    printf("0x%08" PRIx32 "", data->offset_0);
                 }
                 else if (data->offset_1_used) {
-                    printf("%08" PRIx32 "", data->offset_1);
+                    printf("0x%08" PRIx32 "", data->offset_1);
                 }
                 else if (data->offset_2_used) {
-                    printf("%08" PRIx32 "", data->offset_2);
+                    printf("0x%08" PRIx32 "", data->offset_2);
                 }
                 else if (data->offset_2_expression != NULL) {
-                    printf("%08" PRIx32 "", data->offset_2_expression->int_val);
+                    printf("0x%08" PRIx32 "", data->offset_2_expression->int_val);
                 } else {
-                    printf("%08" PRIx32 "", data->imm);
+                    printf("0x%08" PRIx32 "", data->imm);
                 }
                 break;
 
@@ -306,7 +308,7 @@ void serialize_asm_line(const asm_line_t *data) {
             case  I_SW: // store word
                 printf("%s, ", register_to_string(data->reg_rs1));
                 printf("%s(", register_to_string(data->reg_rs2));
-                printf("%08" PRIx32 "", data->imm);
+                printf("0x%08" PRIx32 "", data->imm);
                 printf(")");
                 break;
 
@@ -315,22 +317,22 @@ void serialize_asm_line(const asm_line_t *data) {
             case I_LUI:
                 printf("%s, ", register_to_string(data->reg_rd));
                 if (data->offset_1_expression != NULL) {
-                    printf("%08" PRIx32 "", data->offset_1_expression->int_val);
+                    printf("0x%08" PRIx32 "", data->offset_1_expression->int_val);
                 } else {
-                    printf("%08" PRIx32 "", data->imm);
+                    printf("0x%08" PRIx32 "", data->imm);
                 }
                 break;
 
             // // J-Type
             case I_JAL: // jump and link (pseudo instruction j is implemented via jal)
                 printf("%s, ", register_to_string(data->reg_rd));
-                printf("%08" PRIx32 "", data->imm);
+                printf("0x%08" PRIx32 "", data->imm);
                 break;
             case I_JALR:
                 printf("%s, ", register_to_string(data->reg_rd));
                 //printf("%s, ", register_to_string(data->reg_rs1));
                 //printf("%08" PRIx32 "", data->imm);
-                printf("%08" PRIx32 "", data->imm);
+                printf("0x%08" PRIx32 "", data->imm);
                 printf("(%s)", register_to_string(data->reg_rs1));
                 break;
 
@@ -702,7 +704,7 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
 
         case I_J: {
 
-            int line_nr = asm_line_array[index].line_nr;
+            int line_nr = data->line_nr;
 
             uint32_t imm_int_val = 0;
             if (data->offset_0_used) {
@@ -727,18 +729,24 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             jal.offset_2_used = data->offset_2_used;
             jal.offset_2 = data->offset_2;
 
-            reset_asm_line(&asm_line_array[index]);
-            copy_asm_line(&asm_line_array[index], &jal);
+            reset_asm_line(data);
+            copy_asm_line(data, &jal);
         }
         break;
 
         case I_BEQZ: {
 
-            int line_nr = asm_line_array[index].line_nr;
+            int line_nr = data->line_nr;
 
             uint32_t imm_int_val = 0;
             if (data->offset_0_used) {
                 imm_int_val = data->offset_0;
+            }
+            if (data->offset_1_used) {
+                imm_int_val = data->offset_1;
+            }
+            if (data->offset_2_used) {
+                imm_int_val = data->offset_2;
             }
 
             asm_line_t beq;
@@ -747,27 +755,19 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             beq.line_nr = line_nr;
             beq.instruction = I_BEQ;
             beq.instruction_type = IT_B;
-            //beq.reg_rd = data->reg_rd;
             beq.reg_rs1 = data->reg_rd;
             beq.reg_rs2 = R_ZERO;
             beq.imm = imm_int_val;
 
-            // beq.offset_0_used = data->offset_0_used;
-            // beq.offset_0 = data->offset_0;
-            // beq.offset_1_used = data->offset_1_used;
-            // beq.offset_1 = data->offset_1;
-            // beq.offset_2_used = data->offset_2_used;
-            // beq.offset_2 = data->offset_2;
-
-            reset_asm_line(&asm_line_array[index]);
-            copy_asm_line(&asm_line_array[index], &beq);
+            reset_asm_line(data);
+            copy_asm_line(data, &beq);
 
         }
         break;
 
         case I_CALL: {
 
-            int line_nr = asm_line_array[index].line_nr;
+            int line_nr = data->line_nr;
 
             // if (data->offset_0_expression == NULL) {
             //     printf("error\n");
@@ -823,32 +823,30 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             jalr.reg_rs1 = free_temp_register;
             jalr.imm = imm;
 
-            reset_asm_line(&asm_line_array[index]);
+            reset_asm_line(data);
 
             for (int i = size-1; i > index; i--) {
                 copy_asm_line(&asm_line_array[i+1], &asm_line_array[i]);
                 asm_line_array[i+1].line_nr++;
             }
 
-            copy_asm_line(&asm_line_array[index], &auipc);
+            copy_asm_line(data, &auipc);
             copy_asm_line(&asm_line_array[index+1], &jalr);
         }
         break;
 
         case I_LI: {
 
-            int line_nr = asm_line_array[index].line_nr;
+            int line_nr = data->line_nr;
 
             // take the 32 bit value (data_0)
-            //uint32_t data_0 = asm_line->imm;
-            //uint32_t data_0 = data->offset_1_expression->int_val;
             uint32_t data_0 = data->offset_1;
 
             // split it into a 20 bit (data_1) and a twelve bit part (is ignored)
             uint32_t data_1 = ((data_0 & 0b11111111111111111111000000000000) >> 12);
 
             // the 20 bit part is incremented by 1, (then shifted left by 12 bits to get (data_2))
-            data_1 = data_1 + 1;
+            //data_1 = data_1 + 1;
 
             //
             // lui
@@ -904,17 +902,17 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
 
             //printf("index: %d\n", index);
 
-            reset_asm_line(&asm_line_array[index]);
+            reset_asm_line(data);
 
             for (int i = size-1; i > index; i--) {
                 //printf("index: %d\n", (i > index));
                 //printf("copy %d <- %d\n", i+1, i);
-                copy_asm_line(&asm_line_array[i+1], &asm_line_array[i]);
+                copy_asm_line(&asm_line_array[i + 1], &asm_line_array[i]);
                 asm_line_array[i + 1].line_nr++;
             }
 
-            copy_asm_line(&asm_line_array[index], &lui);
-            copy_asm_line(&asm_line_array[index+1], &addi);
+            copy_asm_line(data, &lui);
+            copy_asm_line(&asm_line_array[index + 1], &addi);
         }
         break;
 

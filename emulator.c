@@ -85,6 +85,9 @@ int main(int argc, char **argv)
     cpu_init(&cpu);
     cpu.pc = 0x00;
 
+    std::map<uint32_t, uint32_t*> segments;
+    cpu.segments = &segments;
+
 #endif
 
     // // DEBUG
@@ -113,7 +116,12 @@ int main(int argc, char **argv)
         decode(encoded_instruction, &asm_line);
 #endif
 
+        if (asm_line_ptr->used == 0) {
+            printf("Unused line encountered! Aborting CPU\n");
+            break;
+        }
         if (cpu_step(&cpu, asm_line_ptr)) {
+            printf("CPU could not execute instruction! Aborting CPU\n");
             break;
         }
 

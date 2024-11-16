@@ -52,6 +52,39 @@ uint32_t execute_instruction(cpu_t* cpu, const asm_line_t* asm_line) {
         }
         break;
 
+        case I_BEQ:
+        {
+            printf("CPU BEQ\n");
+
+            if (cpu->reg[asm_line->reg_rs1] == cpu->reg[asm_line->reg_rs2]) {
+
+                int32_t imm_temp = sign_extend_12_bit_to_uint32_t(asm_line->imm);
+                //cpu->pc += (imm_temp  / 4);
+                //cpu->pc = (imm_temp  / 4);
+                cpu->pc = imm_temp;
+            } else {
+                cpu->pc += PC_INCREMENT;
+            }
+        }
+        break;
+
+        case I_BGE:
+        {
+            printf("CPU BGE\n");
+            // printf("CPU JAL rd: %s (%d), imm: %d\n", register_to_string(asm_line->reg_rd), cpu->reg[asm_line->reg_rd],
+            //     sign_extend_12_bit_to_uint32_t(asm_line->imm));
+
+            if (cpu->reg[asm_line->reg_rs1] >= cpu->reg[asm_line->reg_rs2]) {
+                //cpu->pc += (sign_extend_12_bit_to_uint32_t(asm_line->imm)/4);
+
+                int32_t imm_temp = sign_extend_12_bit_to_uint32_t(asm_line->imm);
+                cpu->pc += imm_temp;
+            } else {
+                cpu->pc += PC_INCREMENT;
+            }
+        }
+        break;
+
         // SW = Store Word
         //
         // Description:
@@ -90,6 +123,7 @@ uint32_t execute_instruction(cpu_t* cpu, const asm_line_t* asm_line) {
             std::map<uint32_t, uint32_t *>::iterator it = cpu->segments->find(segment_address);
             if (it == cpu->segments->end()) {
                 uint32_t* segment_ptr = new uint32_t[16384];
+                memset(segment_ptr, 0, 16384);
                 cpu->segments->insert(std::pair<uint32_t, uint32_t*>(segment_address, segment_ptr));
             }
 
@@ -102,9 +136,46 @@ uint32_t execute_instruction(cpu_t* cpu, const asm_line_t* asm_line) {
         }
         break;
 
+        // LB = Load Byte
+        //
+        // The LW instruction loads a 32-bit value from memory into rd.
+        // LH loads a 16-bit value from memory, then sign-extends to 32-bits before storing in rd.
+        // LHU loads a 16-bit value from memory but then zero extends to 32-bits before storing in rd.
+        //
+        // LB and LBU are defined analogously for 8-bit values
+        // LB loads a 8-bit value from memory, then sign-extends to 32-bits before storing in rd.
+        // LBU loads a 8-bit value from memory but then zero extends to 32-bits before storing in rd.
+        //
+        // Format:      lb rd, imm12(rs1)
+        // Example:     lb t1, 123(t1)
         case I_LB:
         {
+            printf("CPU LB\n");
+
+            uint32_t address = cpu->reg[asm_line->reg_rs1] + asm_line->imm;
+
+            // DEBUG
+            printf("address: 0x%08x\n", address);
+
+            uint32_t segment_address = address & 0xFFFF0000;
+            uint32_t instr_address = address & 0x0000FFFF;
+
+            // check if the segment is created already otherwise create it
+            std::map<uint32_t, uint32_t *>::iterator it = cpu->segments->find(segment_address);
+            if (it == cpu->segments->end()) {
+                uint32_t* segment_ptr = new uint32_t[16384];
+                memset(segment_ptr, 0, 16384);
+                cpu->segments->insert(std::pair<uint32_t, uint32_t*>(segment_address, segment_ptr));
+            }
+
+            uint32_t temp_value = cpu->segments->at(segment_address)[instr_address/4];
+            uint8_t temp_value_as_uint8_t = (uint8_t) temp_value & 0xFF;
+
+            cpu->reg[asm_line->reg_rd] = sign_extend_8_bit_to_uint32_t(temp_value_as_uint8_t);
+
+            cpu->pc += PC_INCREMENT;
         }
+        break;
 
         // LW = Load Word
         //
@@ -151,6 +222,8 @@ uint32_t execute_instruction(cpu_t* cpu, const asm_line_t* asm_line) {
             printf("CPU JALR rd: %s (%d), rs1: %s (%d), imm: %d\n", register_to_string(asm_line->reg_rd), cpu->reg[asm_line->reg_rd],
                 register_to_string(asm_line->reg_rs1), cpu->reg[asm_line->reg_rs1],
                 sign_extend_12_bit_to_uint32_t(asm_line->imm));
+
+            // TODO implement this!!!!!
         }
         break;
 
@@ -168,26 +241,10 @@ uint32_t execute_instruction(cpu_t* cpu, const asm_line_t* asm_line) {
                 sign_extend_12_bit_to_uint32_t(asm_line->imm));
 
             //cpu->pc += (asm_line->imm/4);
-            cpu->pc += (asm_line->imm);
+            //cpu->pc += (asm_line->imm / 4);
+            cpu->pc += asm_line->imm;
 
             //cpu->pc += PC_INCREMENT;
-        }
-        break;
-
-        case I_BGE:
-        {
-            printf("CPU BGE\n");
-            // printf("CPU JAL rd: %s (%d), imm: %d\n", register_to_string(asm_line->reg_rd), cpu->reg[asm_line->reg_rd],
-            //     sign_extend_12_bit_to_uint32_t(asm_line->imm));
-
-            if (cpu->reg[asm_line->reg_rs1] >= cpu->reg[asm_line->reg_rs2]) {
-                //cpu->pc += (sign_extend_12_bit_to_uint32_t(asm_line->imm)/4);
-
-                int32_t imm_temp = sign_extend_12_bit_to_uint32_t(asm_line->imm);
-                cpu->pc += imm_temp;
-            } else {
-                cpu->pc += PC_INCREMENT;
-            }
         }
         break;
 
@@ -208,7 +265,7 @@ uint32_t execute_instruction(cpu_t* cpu, const asm_line_t* asm_line) {
         break;
 
         default:
-            printf("cpu::cpu_step() - Unknown instruction!\n");
+            printf("cpu::cpu_step() - Unknown instruction: %s\n", instruction_to_string(asm_line->instruction));
             return -1;
 
     }

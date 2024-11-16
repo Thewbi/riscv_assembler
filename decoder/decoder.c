@@ -7,6 +7,8 @@ void decode(uint32_t data, asm_line_t* asm_line) {
     uint8_t funct7 = data & 0b1111111;
     uint8_t funct3 = (data >> (7+5)) & 0b111;
 
+    uint8_t decoded = 1;
+
     switch (funct7) {
 
         case 0b0110011: // ADD, MUL
@@ -37,8 +39,11 @@ void decode(uint32_t data, asm_line_t* asm_line) {
 
         default:
             printf("decode() - Unknown instruction!\n");
+            decoded = 0;
             break;
     }
+
+    asm_line->used = decoded;
 }
 
 void decode_r_type(uint32_t data, asm_line_t* asm_line) {
@@ -75,13 +80,13 @@ void decode_r_type(uint32_t data, asm_line_t* asm_line) {
                     break;
 
                 default:
-                    printf("Unknown funct3 %d\n", data); 
+                    printf("Unknown funct3 %d\n", data);
                     return;
             }
             break;
 
         default:
-            printf("Unknown funct7 %d\n", data); 
+            printf("Unknown funct7 %d\n", data);
             return;
     }
 }
@@ -122,7 +127,7 @@ void decode_i_type(uint32_t data, asm_line_t* asm_line, uint8_t funct7, uint8_t 
                 case 0b100:
                     asm_line->instruction = I_LBU;
                     break;
-                    
+
                 case 0b101:
                     asm_line->instruction = I_LHU;
                     break;
@@ -155,7 +160,7 @@ void decode_i_type(uint32_t data, asm_line_t* asm_line, uint8_t funct7, uint8_t 
                 case 0b101:
                     asm_line->instruction = I_SRLI;
                     break;
-                    
+
                 case 0b110:
                     asm_line->instruction = I_ORI;
                     break;
@@ -212,7 +217,7 @@ void decode_b_type(uint32_t data, asm_line_t* asm_line) {
             break;
 
         default:
-            printf("unknown instruction %d\n", data); 
+            printf("unknown instruction %d\n", data);
             return;
     }
 }
@@ -239,7 +244,7 @@ void decode_s_type(uint32_t data, asm_line_t* asm_line) {
             break;
 
         default:
-            printf("unknown instruction %d\n", data); 
+            printf("unknown instruction %d\n", data);
             return;
     }
 }
@@ -290,7 +295,7 @@ enum register_ decode_register(uint8_t data) {
         case 0b00100: // 4, Thread pointer
             return R_TP;
 
-        // ABI Name: t0, Register: x5 - encoded: 0101 (= 5 decimal) 
+        // ABI Name: t0, Register: x5 - encoded: 0101 (= 5 decimal)
         case 0b00101: // 5, Temporary/alternate link register
             return R_T0;
 
@@ -366,7 +371,7 @@ enum register_ decode_register(uint8_t data) {
 
         case 0b11101: // 29, Temporary
             return R_T4;
-            
+
         case 0b11110: // 30, Temporary
             return R_T5;
 
@@ -374,7 +379,7 @@ enum register_ decode_register(uint8_t data) {
             return R_T6;
 
         default:
-            //printf("unknown register %d\n", data); 
+            //printf("unknown register %d\n", data);
             return R_UNDEFINED_REGISTER;
     }
 }
