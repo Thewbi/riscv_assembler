@@ -36,7 +36,7 @@ typedef struct cpu {
 
 void cpu_init(cpu_t* cpu);
 
-uint32_t cpu_step(cpu_t* cpu);
+uint32_t cpu_step(cpu_t* cpu, asm_line_t* asm_line);
 
 uint32_t fetch_instruction_at_pc(cpu_t* cpu);
 

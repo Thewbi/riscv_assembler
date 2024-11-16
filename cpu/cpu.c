@@ -12,25 +12,15 @@ void cpu_init(cpu_t* cpu) {
 
     // set the stackpointer to 0x880000
     cpu->reg[2] = 0x880000;
+
+    cpu->segments = NULL;
 }
 
-uint32_t cpu_step(cpu_t* cpu) {
+uint32_t cpu_step(cpu_t* cpu, asm_line_t* asm_line) {
 
-    printf("[cpu_step()] pc: 0x%08x\n", cpu->pc);
-
-    uint32_t encoded_instruction = fetch_instruction_at_pc(cpu);
-
-    asm_line_t asm_line;
-    reset_asm_line(&asm_line);
-    decode(encoded_instruction, &asm_line);
-
-    if (execute_instruction(cpu, &asm_line)) {
+    if (execute_instruction(cpu, asm_line)) {
         return -1;
     }
-
-    //cpu->pc += 0x04;
-    //cpu->pc += 0x01;
-
     return 0;
 }
 
@@ -39,24 +29,28 @@ uint32_t execute_instruction(cpu_t* cpu, const asm_line_t* asm_line) {
     switch (asm_line->instruction) {
 
         case I_ADD:
+        {
             //printf("CPU ADD detected\n");
-            printf("CPU ADD rd: %s (%d), rs1: %s (%d), rs2: %s (%d)\n", register_to_string(asm_line->reg_rd), cpu->reg[asm_line->reg_rd], 
-                register_to_string(asm_line->reg_rs1), cpu->reg[asm_line->reg_rs1], 
+            printf("CPU ADD rd: %s (%d), rs1: %s (%d), rs2: %s (%d)\n", register_to_string(asm_line->reg_rd), cpu->reg[asm_line->reg_rd],
+                register_to_string(asm_line->reg_rs1), cpu->reg[asm_line->reg_rs1],
                 register_to_string(asm_line->reg_rs2), cpu->reg[asm_line->reg_rs2]);
 
             cpu->reg[asm_line->reg_rd] = cpu->reg[asm_line->reg_rs1] + cpu->reg[asm_line->reg_rs2];
 
             cpu->pc += PC_INCREMENT;
-            break;
+        }
+        break;
 
         case I_ADDI:
+        {
             //printf("CPU ADDI detected\n");
             printf("CPU ADDI rd: %s (%d), rs1: %s (%d), imm: %d\n", register_to_string(asm_line->reg_rd), cpu->reg[asm_line->reg_rd], register_to_string(asm_line->reg_rs1), cpu->reg[asm_line->reg_rs1], sign_extend_12_bit_to_uint32_t(asm_line->imm));
-            
+
             cpu->reg[asm_line->reg_rd] = cpu->reg[asm_line->reg_rs1] + sign_extend_12_bit_to_uint32_t(asm_line->imm);
 
             cpu->pc += PC_INCREMENT;
-            break;
+        }
+        break;
 
         // SW = Store Word
         //
@@ -64,10 +58,10 @@ uint32_t execute_instruction(cpu_t* cpu, const asm_line_t* asm_line) {
         // Store 32-bit value located in rs2 into the memory location at base+offset where
         // base is rs1 and offset is the immediate value
         //
-        // Documentation: 
+        // Documentation:
         // https://riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf - page 19
         //
-        // Format: 
+        // Format:
         // SW rs2, imm(rs1)
         // @param rs1 - base
         // @param rs2 - source
@@ -79,9 +73,9 @@ uint32_t execute_instruction(cpu_t* cpu, const asm_line_t* asm_line) {
         case I_SW:
         {
             // DEBUG
-            printf("CPU SW rs1: Idx:%d, ABI-Name:%s (%d), rs2: Idx:%d, ABI-Name:%s (%d), imm: %d\n", 
-                asm_line->reg_rs1, register_to_string(asm_line->reg_rs1), sign_extend_12_bit_to_uint32_t(cpu->reg[asm_line->reg_rs1]), 
-                asm_line->reg_rs2, register_to_string(asm_line->reg_rs2), sign_extend_12_bit_to_uint32_t(cpu->reg[asm_line->reg_rs2]), 
+            printf("CPU SW rs1: Idx:%d, ABI-Name:%s (%d), rs2: Idx:%d, ABI-Name:%s (%d), imm: %d\n",
+                asm_line->reg_rs1, register_to_string(asm_line->reg_rs1), sign_extend_12_bit_to_uint32_t(cpu->reg[asm_line->reg_rs1]),
+                asm_line->reg_rs2, register_to_string(asm_line->reg_rs2), sign_extend_12_bit_to_uint32_t(cpu->reg[asm_line->reg_rs2]),
                 sign_extend_12_bit_to_uint32_t(asm_line->imm));
 
             uint32_t address = cpu->reg[asm_line->reg_rs1] + asm_line->imm;
@@ -108,15 +102,19 @@ uint32_t execute_instruction(cpu_t* cpu, const asm_line_t* asm_line) {
         }
         break;
 
+        case I_LB:
+        {
+        }
+
         // LW = Load Word
         //
         // Description:
         // The LW instruction loads a 32-bit value from memory into rd.
         //
-        // Documentation: 
+        // Documentation:
         // https://riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf - page 19
         //
-        // Format: 
+        // Format:
         // LW rd, imm(rs1)
         // @param rd  - dest
         // @param rs1 - base
@@ -149,10 +147,12 @@ uint32_t execute_instruction(cpu_t* cpu, const asm_line_t* asm_line) {
         break;
 
         case I_JALR:
-            printf("CPU JALR rd: %s (%d), rs1: %s (%d), imm: %d\n", register_to_string(asm_line->reg_rd), cpu->reg[asm_line->reg_rd], 
-                register_to_string(asm_line->reg_rs1), cpu->reg[asm_line->reg_rs1], 
+        {
+            printf("CPU JALR rd: %s (%d), rs1: %s (%d), imm: %d\n", register_to_string(asm_line->reg_rd), cpu->reg[asm_line->reg_rd],
+                register_to_string(asm_line->reg_rs1), cpu->reg[asm_line->reg_rs1],
                 sign_extend_12_bit_to_uint32_t(asm_line->imm));
-            break;
+        }
+        break;
 
         // Description:
         // The jump and link (JAL) instruction uses the J-type format, where the J-immediate encodes a
@@ -163,17 +163,21 @@ uint32_t execute_instruction(cpu_t* cpu, const asm_line_t* asm_line) {
         // j 40000030
         // jal x0, 28
         case I_JAL:
-            printf("CPU JAL rd: %s (%d), imm: %d\n", register_to_string(asm_line->reg_rd), cpu->reg[asm_line->reg_rd], 
+        {
+            printf("CPU JAL rd: %s (%d), imm: %d\n", register_to_string(asm_line->reg_rd), cpu->reg[asm_line->reg_rd],
                 sign_extend_12_bit_to_uint32_t(asm_line->imm));
 
             //cpu->pc += (asm_line->imm/4);
             cpu->pc += (asm_line->imm);
 
             //cpu->pc += PC_INCREMENT;
-            break;
+        }
+        break;
 
         case I_BGE:
-            // printf("CPU JAL rd: %s (%d), imm: %d\n", register_to_string(asm_line->reg_rd), cpu->reg[asm_line->reg_rd], 
+        {
+            printf("CPU BGE\n");
+            // printf("CPU JAL rd: %s (%d), imm: %d\n", register_to_string(asm_line->reg_rd), cpu->reg[asm_line->reg_rd],
             //     sign_extend_12_bit_to_uint32_t(asm_line->imm));
 
             if (cpu->reg[asm_line->reg_rs1] >= cpu->reg[asm_line->reg_rs2]) {
@@ -184,9 +188,24 @@ uint32_t execute_instruction(cpu_t* cpu, const asm_line_t* asm_line) {
             } else {
                 cpu->pc += PC_INCREMENT;
             }
+        }
+        break;
 
-            //
-            break;
+        case I_LUI:
+        {
+            printf("CPU LUI\n");
+
+            // LUI (load upper immediate) places the U-immediate value in the
+            // top 20 bits of the destination register rd, filling in the lowest
+            // 12 bits with zeros.
+
+            cpu->reg[asm_line->reg_rd] = 0x00;
+            cpu->reg[asm_line->reg_rd] |= asm_line->imm << 12;
+
+            cpu->pc += PC_INCREMENT;
+
+        }
+        break;
 
         default:
             printf("cpu::cpu_step() - Unknown instruction!\n");
@@ -203,7 +222,7 @@ uint32_t fetch_instruction_at_pc(cpu_t* cpu) {
     // printf("1: %d\n", (cpu->pc + 1));
     // printf("2: %d\n", (cpu->pc + 2));
     // printf("3: %d\n", (cpu->pc + 3));
-    
+
     // printf("0: %d\n", (uint8_t)cpu->memory[(size_t)(cpu->pc + 0)]);
     // printf("1: %d\n", (uint8_t)cpu->memory[(size_t)(cpu->pc + 1)]);
     // printf("2: %d\n", (uint8_t)cpu->memory[(size_t)(cpu->pc + 2)]);
@@ -228,7 +247,7 @@ uint32_t fetch_instruction_at_pc(cpu_t* cpu) {
 
     uint32_t encoded_instruction = text_segment[instr_address/4];
 
-    encoded_instruction = (((encoded_instruction >> 24) & 0xFF) << 0) | 
+    encoded_instruction = (((encoded_instruction >> 24) & 0xFF) << 0) |
         (((encoded_instruction >> 16) & 0xFF) << 8) |
         (((encoded_instruction >> 8) & 0xFF) << 16) |
         (((encoded_instruction >> 0) & 0xFF) << 24);

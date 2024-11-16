@@ -1,5 +1,5 @@
 .PHONY: all
-all: parser.h lex.yy.c assembler emulator
+all: parser.h lex.yy.c emulator
 
 # to user the parser as a standalone executable (without a driver application),
 # edit parser.y and activate the #define USE_INTERNAL_DRIVER 1 line
@@ -46,7 +46,13 @@ emulator: common/common.c \
 	common/register.c \
 	common/node.h \
 	common/node.c \
+	container\trivial_map\trivial_map.h \
+	container\trivial_map\trivial_map.c \
+	container\tuple_set\tuple_set.h \
+	container\tuple_set\tuple_set.c \
 	emulator.c \
+	assembler.h \
+	assembler.c \
 	parser.h \
 	parser.c \
 	lex.yy.c \
@@ -64,14 +70,17 @@ emulator: common/common.c \
 	common/common.c \
 	common/register.c \
 	common/node.c \
+	container\trivial_map\trivial_map.c \
+	container\tuple_set\tuple_set.c \
 	emulator.c \
+	assembler.c \
 	parser.c \
 	lex.yy.c \
 	data/asm_line.c \
 	encoder/encoder.c \
 	decoder/decoder.c \
 	ihex_loader/ihex_loader.cpp \
-	cpu/cpu.c -I common -I data -I encoder -I decoder -I cpu -I ihex_loader
+	cpu/cpu.c -I ./ -I common -I container -I data -I encoder -I decoder -I cpu -I ihex_loader
 
 lex.yy.c: lexer.l
 	flex -d lexer.l

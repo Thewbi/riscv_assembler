@@ -43,17 +43,17 @@ extern void (*fp_emit)(asm_line_t*);
 extern int asm_line_array_index;
 extern asm_line_t asm_line_array[100];
 
-int main(int argc, char **argv)
-{
+int assemble(const char* filename, uint32_t* machine_code) {
+
     reset_asm_line(&parser_asm_line);
 
     reset_asm_lines(asm_line_array, 100);
 
     fp_emit = &encoder_callback;
 
-    yyin = fopen(argv[1], "r");
+    yyin = fopen(filename, "r");
     if (!yyin) {
-        printf("Cannot open '%s'. Aborting.\n", argv[1]);
+        printf("Cannot open '%s'. Aborting.\n", filename);
     }
 
     yy_flex_debug = 0;
@@ -411,14 +411,19 @@ int main(int argc, char **argv)
     // encode all lines
     printf("\n\n");
     printf("machine code:\n");
+
+    size_t instruction_index = 0;
     for (int i = 0; i < 100; i++) {
         //printf("line %d\n", i);
         if (asm_line_array[i].used != 0) {
             //printf("%d\n", encode(&asm_line_array[i]));
 
-            uint32_t machine_code = encode(&asm_line_array[i]);
-            if (machine_code != 0) {
-                printf("%08" PRIx64 "\n", machine_code);
+            uint32_t machine_code_for_instruction = encode(&asm_line_array[i]);
+            if (machine_code_for_instruction != 0) {
+                printf("%08" PRIx64 "\n", machine_code_for_instruction);
+
+                machine_code[instruction_index] = machine_code_for_instruction;
+                instruction_index++;
             }
         }
     }
@@ -447,4 +452,20 @@ int main(int argc, char **argv)
 */
 
     return 0;
+
 }
+
+// //#define DBUILD_ASSEMBLER 1
+// #ifdef DBUILD_ASSEMBLER
+
+// int main(int argc, char **argv)
+// {
+//     uint32_t machine_code[100];
+//     memset(machine_code, 0, 100);
+
+//     assemble(argv[1], machine_code);
+
+//     return 0;
+// }
+
+// #endif
