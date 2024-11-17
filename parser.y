@@ -297,12 +297,13 @@ assembler_instruction :
         current_node = NULL;
     }
     |
-    SECTION IDENTIFIER {
+    SECTION TEXT {
 
         parser_asm_line.asm_instruction = AI_SECTION;
 
         memset(parser_asm_line.asm_instruction_symbol, 0, 100);
-        memcpy(parser_asm_line.asm_instruction_symbol, $2, strlen($2));
+        //memcpy(parser_asm_line.asm_instruction_symbol, $2, strlen($2));
+        memcpy(parser_asm_line.asm_instruction_symbol, ".text", strlen(".text"));
 
         current_node = NULL;
     }

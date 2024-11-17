@@ -166,9 +166,9 @@ void print_asm_line(const asm_line_t *data) {
         print_expression(data->offset_2_expression, buffer_2);
 
         printf("[(%d) Instr: %s Size: %d Imm: %d Used: %d \n \
-    0:{offset_used:%d offset:%d offset_ident:%s register:%s offset_expr:%s}\n \
-    1:{offset_used:%d offset:%d offset_ident:%s register:%s offset_expr:%s}\n \
-    2:{offset_used:%d offset:%d offset_ident:%s register:%s offset_expr:%s}\n \
+    0:{offset_0_used:%d offset:%d offset_ident:%s register:%s offset_0_expr:%s}\n \
+    1:{offset_1_used:%d offset:%d offset_ident:%s register:%s offset_1_expr:%s}\n \
+    2:{offset_2_used:%d offset:%d offset_ident:%s register:%s offset_2_expr:%s}\n \
 ]\n",
             data->line_nr,
             instruction_to_string(data->instruction),

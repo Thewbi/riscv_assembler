@@ -75,7 +75,8 @@ int main(int argc, char **argv)
 #if USE_ASSEMBLER_SOURCE_FILE
 
     //std::string source_file = "test/resources/string_length.s";
-    std::string source_file = "test/resources/add3.s";
+    //std::string source_file = "test/resources/add3.s";
+    std::string source_file = "test/resources/blinker.s";
 
     uint32_t machine_code[100];
     memset(machine_code, 0, 100);

@@ -140,6 +140,38 @@ int assemble(const char* filename, uint32_t* machine_code) {
     print_trivial_map(equ_map, 20);
 
     //
+    // Replace .equ
+    //
+    // In each line, check if there is a offset_?_expr, where a symbol is used
+    //
+
+    for (int i = 0; i < asm_line_array_index; i++) {
+
+        asm_line_t* asm_line_ptr = &asm_line_array[i];
+
+        if (asm_line_ptr->offset_0_expression != NULL) {
+            printf("%s\n", asm_line_ptr->offset_0_expression->string_val);
+        } else if (asm_line_ptr->offset_1_expression != NULL) {
+            printf("%s\n", asm_line_ptr->offset_1_expression->string_val);
+
+            if (contains_key_trivial_map(equ_map, 20, asm_line_ptr->offset_1_expression->string_val)) {
+
+                int val = 0;
+                retrieve_by_key_trivial_map(equ_map, 20, asm_line_ptr->offset_1_expression->string_val, &val);
+                asm_line_ptr->offset_1_expression->int_val = val;
+            } else {
+                printf("Cannot resolve symbol %s!\n", asm_line_ptr->offset_1_expression->string_val);
+            }
+
+            memset(asm_line_ptr->offset_1_expression->string_val, 0, 100);
+
+        } else if (asm_line_ptr->offset_2_expression != NULL) {
+            printf("%s\n", asm_line_ptr->offset_2_expression->string_val);
+        }
+
+    }
+
+    //
     // replace labels in lines
     //
 
@@ -210,7 +242,7 @@ int assemble(const char* filename, uint32_t* machine_code) {
             uint32_t str_len = strlen(asm_line_array[i].offset_0_expression->string_val);
             char* last_character = asm_line_array[i].offset_0_expression->string_val + str_len - 1;
 
-            tuple_set_element_t* tuple_set_element;
+            tuple_set_element_t* tuple_set_element = NULL;
 
             if (strncmp(last_character, "f", 1) == 0) {
                 retrieve_by_key_greater_than_value_tuple_set(label_address_map, 20, asm_line_array[i].offset_0_expression->string_val, str_len-1, address, &tuple_set_element);
@@ -264,7 +296,7 @@ int assemble(const char* filename, uint32_t* machine_code) {
             uint32_t str_len = strlen(asm_line_array[i].offset_1_expression->string_val);
             char* last_character = asm_line_array[i].offset_1_expression->string_val + str_len - 1;
 
-            tuple_set_element_t* tuple_set_element;
+            tuple_set_element_t* tuple_set_element = NULL;
 
             if (strncmp(last_character, "f", 1) == 0) {
                 retrieve_by_key_greater_than_value_tuple_set(label_address_map, 20, asm_line_array[i].offset_1_expression->string_val, str_len-1, address, &tuple_set_element);
@@ -318,7 +350,7 @@ int assemble(const char* filename, uint32_t* machine_code) {
             uint32_t str_len = strlen(asm_line_array[i].offset_2_expression->string_val);
             char* last_character = asm_line_array[i].offset_2_expression->string_val + str_len - 1;
 
-            tuple_set_element_t* tuple_set_element;
+            tuple_set_element_t* tuple_set_element = NULL;
 
             if (strncmp(last_character, "f", 1) == 0) {
                 retrieve_by_key_greater_than_value_tuple_set(label_address_map, 20, asm_line_array[i].offset_2_expression->string_val, str_len-1, address, &tuple_set_element);
