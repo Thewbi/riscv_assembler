@@ -54,7 +54,7 @@ void (*fp_emit)(asm_line_t*);
   node_t* expr_ptr;
 };
 
-%token <sym> EQU SECTION GLOBL GLOBAL
+%token <sym> EQU SECTION GLOBL GLOBAL TEXT
 %token <sym> ADD ADDI AUIPC BEQ BEQZ BNE BNEZ CALL J JALR LB LI LW LUI MUL MV RET SRLI SLLI SW
 %token <sym> NEW_LINE
 %token <int_val> NUMERIC
@@ -327,6 +327,12 @@ assembler_instruction :
 
         current_node = NULL;
 
+    }
+    |
+    TEXT {
+        parser_asm_line.asm_instruction = AI_TEXT;
+
+        current_node = NULL;
     }
 
 mnemonic : ADD { /*printf("Parser-ADD: %d\n", I_ADD);*/ /*parser_asm_line.instruction = I_ADD; parser_asm_line.instruction_type = IT_R;*/ set_instruction(&parser_asm_line, I_ADD, IT_R); }

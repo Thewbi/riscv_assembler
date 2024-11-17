@@ -74,7 +74,8 @@ int main(int argc, char **argv)
 
 #if USE_ASSEMBLER_SOURCE_FILE
 
-    std::string source_file = "test/resources/string_length.s";
+    //std::string source_file = "test/resources/string_length.s";
+    std::string source_file = "test/resources/add3.s";
 
     uint32_t machine_code[100];
     memset(machine_code, 0, 100);
@@ -93,6 +94,9 @@ int main(int argc, char **argv)
     // // DEBUG
     // cpu.reg[R_T0] = 2;
     // cpu.reg[R_A0] = 3;
+
+    cpu.reg[R_A1] = 2;
+    cpu.reg[R_A2] = 3;
 
     asm_line_t* asm_line_ptr = NULL;
 
@@ -129,6 +133,8 @@ int main(int argc, char **argv)
 
     //printf("REG R_T0: %d\n", cpu.reg[R_T0]);
     //printf("REG R_T1: %d\n", cpu.reg[R_T1]);
+
+    printf("REG R_T1: %d\n", cpu.reg[R_A0]);
 
     return 0;
 

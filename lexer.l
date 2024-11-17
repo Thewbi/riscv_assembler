@@ -20,6 +20,7 @@
 ".section"  { /*printf(".section\n");*/ return SECTION; }
 ".globl"    { /*printf(".globl\n");*/ return GLOBL; }
 ".global"    { /*printf(".global\n");*/ return GLOBAL; }
+".text"    { /*printf(".text\n");*/ return TEXT; }
 
 "add"	{ /*printf("ADD\n");*/ return ADD; }
 "addi"	{ /*printf("ADDI\n");*/ return ADDI; }

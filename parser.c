@@ -108,7 +108,7 @@ int yyerror(const char *p) { printf("yyerror() - Error! '%s' | Line: %d \n", p, 
 void (*fp_emit)(asm_line_t*);
 
 
-#line 112 "y.tab.c"
+#line 112 "parser.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -131,204 +131,7 @@ void (*fp_emit)(asm_line_t*);
 #  endif
 # endif
 
-
-/* Debug traces.  */
-#ifndef YYDEBUG
-# define YYDEBUG 0
-#endif
-#if YYDEBUG
-extern int yydebug;
-#endif
-
-/* Token kinds.  */
-#ifndef YYTOKENTYPE
-# define YYTOKENTYPE
-  enum yytokentype
-  {
-    YYEMPTY = -2,
-    YYEOF = 0,                     /* "end of file"  */
-    YYerror = 256,                 /* error  */
-    YYUNDEF = 257,                 /* "invalid token"  */
-    EQU = 258,                     /* EQU  */
-    SECTION = 259,                 /* SECTION  */
-    GLOBL = 260,                   /* GLOBL  */
-    GLOBAL = 261,                  /* GLOBAL  */
-    ADD = 262,                     /* ADD  */
-    ADDI = 263,                    /* ADDI  */
-    AUIPC = 264,                   /* AUIPC  */
-    BEQ = 265,                     /* BEQ  */
-    BEQZ = 266,                    /* BEQZ  */
-    BNE = 267,                     /* BNE  */
-    BNEZ = 268,                    /* BNEZ  */
-    CALL = 269,                    /* CALL  */
-    J = 270,                       /* J  */
-    JALR = 271,                    /* JALR  */
-    LB = 272,                      /* LB  */
-    LI = 273,                      /* LI  */
-    LW = 274,                      /* LW  */
-    LUI = 275,                     /* LUI  */
-    MUL = 276,                     /* MUL  */
-    MV = 277,                      /* MV  */
-    RET = 278,                     /* RET  */
-    SRLI = 279,                    /* SRLI  */
-    SLLI = 280,                    /* SLLI  */
-    SW = 281,                      /* SW  */
-    NEW_LINE = 282,                /* NEW_LINE  */
-    NUMERIC = 283,                 /* NUMERIC  */
-    IDENTIFIER = 284,              /* IDENTIFIER  */
-    DOT = 285,                     /* DOT  */
-    COLON = 286,                   /* COLON  */
-    COMMA = 287,                   /* COMMA  */
-    OPENING_BRACKET = 288,         /* OPENING_BRACKET  */
-    CLOSING_BRACKET = 289,         /* CLOSING_BRACKET  */
-    REG_ZERO = 290,                /* REG_ZERO  */
-    REG_RA = 291,                  /* REG_RA  */
-    REG_SP = 292,                  /* REG_SP  */
-    REG_GP = 293,                  /* REG_GP  */
-    REG_TP = 294,                  /* REG_TP  */
-    REG_T0 = 295,                  /* REG_T0  */
-    REG_T1 = 296,                  /* REG_T1  */
-    REG_T2 = 297,                  /* REG_T2  */
-    REG_T3 = 298,                  /* REG_T3  */
-    REG_T4 = 299,                  /* REG_T4  */
-    REG_T5 = 300,                  /* REG_T5  */
-    REG_T6 = 301,                  /* REG_T6  */
-    REG_FP = 302,                  /* REG_FP  */
-    REG_A0 = 303,                  /* REG_A0  */
-    REG_A1 = 304,                  /* REG_A1  */
-    REG_A2 = 305,                  /* REG_A2  */
-    REG_A3 = 306,                  /* REG_A3  */
-    REG_A4 = 307,                  /* REG_A4  */
-    REG_A5 = 308,                  /* REG_A5  */
-    REG_A6 = 309,                  /* REG_A6  */
-    REG_A7 = 310,                  /* REG_A7  */
-    REG_S0 = 311,                  /* REG_S0  */
-    REG_S1 = 312,                  /* REG_S1  */
-    REG_S2 = 313,                  /* REG_S2  */
-    REG_S3 = 314,                  /* REG_S3  */
-    REG_S4 = 315,                  /* REG_S4  */
-    REG_S5 = 316,                  /* REG_S5  */
-    REG_S6 = 317,                  /* REG_S6  */
-    REG_S7 = 318,                  /* REG_S7  */
-    REG_S8 = 319,                  /* REG_S8  */
-    REG_S9 = 320,                  /* REG_S9  */
-    REG_S10 = 321,                 /* REG_S10  */
-    REG_S11 = 322                  /* REG_S11  */
-  };
-  typedef enum yytokentype yytoken_kind_t;
-#endif
-/* Token kinds.  */
-#define YYEMPTY -2
-#define YYEOF 0
-#define YYerror 256
-#define YYUNDEF 257
-#define EQU 258
-#define SECTION 259
-#define GLOBL 260
-#define GLOBAL 261
-#define ADD 262
-#define ADDI 263
-#define AUIPC 264
-#define BEQ 265
-#define BEQZ 266
-#define BNE 267
-#define BNEZ 268
-#define CALL 269
-#define J 270
-#define JALR 271
-#define LB 272
-#define LI 273
-#define LW 274
-#define LUI 275
-#define MUL 276
-#define MV 277
-#define RET 278
-#define SRLI 279
-#define SLLI 280
-#define SW 281
-#define NEW_LINE 282
-#define NUMERIC 283
-#define IDENTIFIER 284
-#define DOT 285
-#define COLON 286
-#define COMMA 287
-#define OPENING_BRACKET 288
-#define CLOSING_BRACKET 289
-#define REG_ZERO 290
-#define REG_RA 291
-#define REG_SP 292
-#define REG_GP 293
-#define REG_TP 294
-#define REG_T0 295
-#define REG_T1 296
-#define REG_T2 297
-#define REG_T3 298
-#define REG_T4 299
-#define REG_T5 300
-#define REG_T6 301
-#define REG_FP 302
-#define REG_A0 303
-#define REG_A1 304
-#define REG_A2 305
-#define REG_A3 306
-#define REG_A4 307
-#define REG_A5 308
-#define REG_A6 309
-#define REG_A7 310
-#define REG_S0 311
-#define REG_S1 312
-#define REG_S2 313
-#define REG_S3 314
-#define REG_S4 315
-#define REG_S5 316
-#define REG_S6 317
-#define REG_S7 318
-#define REG_S8 319
-#define REG_S9 320
-#define REG_S10 321
-#define REG_S11 322
-
-/* Value type.  */
-#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-union YYSTYPE
-{
-#line 50 "parser.y"
-
-  int int_val;
-  char string_val[100];
-  char sym;
-  node_t* expr_ptr;
-
-#line 303 "y.tab.c"
-
-};
-typedef union YYSTYPE YYSTYPE;
-# define YYSTYPE_IS_TRIVIAL 1
-# define YYSTYPE_IS_DECLARED 1
-#endif
-
-/* Location type.  */
-#if ! defined YYLTYPE && ! defined YYLTYPE_IS_DECLARED
-typedef struct YYLTYPE YYLTYPE;
-struct YYLTYPE
-{
-  int first_line;
-  int first_column;
-  int last_line;
-  int last_column;
-};
-# define YYLTYPE_IS_DECLARED 1
-# define YYLTYPE_IS_TRIVIAL 1
-#endif
-
-
-extern YYSTYPE yylval;
-extern YYLTYPE yylloc;
-
-int yyparse (void);
-
-
-
+#include "parser.h"
 /* Symbol kind.  */
 enum yysymbol_kind_t
 {
@@ -340,86 +143,87 @@ enum yysymbol_kind_t
   YYSYMBOL_SECTION = 4,                    /* SECTION  */
   YYSYMBOL_GLOBL = 5,                      /* GLOBL  */
   YYSYMBOL_GLOBAL = 6,                     /* GLOBAL  */
-  YYSYMBOL_ADD = 7,                        /* ADD  */
-  YYSYMBOL_ADDI = 8,                       /* ADDI  */
-  YYSYMBOL_AUIPC = 9,                      /* AUIPC  */
-  YYSYMBOL_BEQ = 10,                       /* BEQ  */
-  YYSYMBOL_BEQZ = 11,                      /* BEQZ  */
-  YYSYMBOL_BNE = 12,                       /* BNE  */
-  YYSYMBOL_BNEZ = 13,                      /* BNEZ  */
-  YYSYMBOL_CALL = 14,                      /* CALL  */
-  YYSYMBOL_J = 15,                         /* J  */
-  YYSYMBOL_JALR = 16,                      /* JALR  */
-  YYSYMBOL_LB = 17,                        /* LB  */
-  YYSYMBOL_LI = 18,                        /* LI  */
-  YYSYMBOL_LW = 19,                        /* LW  */
-  YYSYMBOL_LUI = 20,                       /* LUI  */
-  YYSYMBOL_MUL = 21,                       /* MUL  */
-  YYSYMBOL_MV = 22,                        /* MV  */
-  YYSYMBOL_RET = 23,                       /* RET  */
-  YYSYMBOL_SRLI = 24,                      /* SRLI  */
-  YYSYMBOL_SLLI = 25,                      /* SLLI  */
-  YYSYMBOL_SW = 26,                        /* SW  */
-  YYSYMBOL_NEW_LINE = 27,                  /* NEW_LINE  */
-  YYSYMBOL_NUMERIC = 28,                   /* NUMERIC  */
-  YYSYMBOL_IDENTIFIER = 29,                /* IDENTIFIER  */
-  YYSYMBOL_DOT = 30,                       /* DOT  */
-  YYSYMBOL_COLON = 31,                     /* COLON  */
-  YYSYMBOL_COMMA = 32,                     /* COMMA  */
-  YYSYMBOL_OPENING_BRACKET = 33,           /* OPENING_BRACKET  */
-  YYSYMBOL_CLOSING_BRACKET = 34,           /* CLOSING_BRACKET  */
-  YYSYMBOL_REG_ZERO = 35,                  /* REG_ZERO  */
-  YYSYMBOL_REG_RA = 36,                    /* REG_RA  */
-  YYSYMBOL_REG_SP = 37,                    /* REG_SP  */
-  YYSYMBOL_REG_GP = 38,                    /* REG_GP  */
-  YYSYMBOL_REG_TP = 39,                    /* REG_TP  */
-  YYSYMBOL_REG_T0 = 40,                    /* REG_T0  */
-  YYSYMBOL_REG_T1 = 41,                    /* REG_T1  */
-  YYSYMBOL_REG_T2 = 42,                    /* REG_T2  */
-  YYSYMBOL_REG_T3 = 43,                    /* REG_T3  */
-  YYSYMBOL_REG_T4 = 44,                    /* REG_T4  */
-  YYSYMBOL_REG_T5 = 45,                    /* REG_T5  */
-  YYSYMBOL_REG_T6 = 46,                    /* REG_T6  */
-  YYSYMBOL_REG_FP = 47,                    /* REG_FP  */
-  YYSYMBOL_REG_A0 = 48,                    /* REG_A0  */
-  YYSYMBOL_REG_A1 = 49,                    /* REG_A1  */
-  YYSYMBOL_REG_A2 = 50,                    /* REG_A2  */
-  YYSYMBOL_REG_A3 = 51,                    /* REG_A3  */
-  YYSYMBOL_REG_A4 = 52,                    /* REG_A4  */
-  YYSYMBOL_REG_A5 = 53,                    /* REG_A5  */
-  YYSYMBOL_REG_A6 = 54,                    /* REG_A6  */
-  YYSYMBOL_REG_A7 = 55,                    /* REG_A7  */
-  YYSYMBOL_REG_S0 = 56,                    /* REG_S0  */
-  YYSYMBOL_REG_S1 = 57,                    /* REG_S1  */
-  YYSYMBOL_REG_S2 = 58,                    /* REG_S2  */
-  YYSYMBOL_REG_S3 = 59,                    /* REG_S3  */
-  YYSYMBOL_REG_S4 = 60,                    /* REG_S4  */
-  YYSYMBOL_REG_S5 = 61,                    /* REG_S5  */
-  YYSYMBOL_REG_S6 = 62,                    /* REG_S6  */
-  YYSYMBOL_REG_S7 = 63,                    /* REG_S7  */
-  YYSYMBOL_REG_S8 = 64,                    /* REG_S8  */
-  YYSYMBOL_REG_S9 = 65,                    /* REG_S9  */
-  YYSYMBOL_REG_S10 = 66,                   /* REG_S10  */
-  YYSYMBOL_REG_S11 = 67,                   /* REG_S11  */
-  YYSYMBOL_YYACCEPT = 68,                  /* $accept  */
-  YYSYMBOL_asm_file = 69,                  /* asm_file  */
-  YYSYMBOL_line_end = 70,                  /* line_end  */
-  YYSYMBOL_asm_line = 71,                  /* asm_line  */
-  YYSYMBOL_params = 72,                    /* params  */
-  YYSYMBOL_param_1 = 73,                   /* param_1  */
-  YYSYMBOL_74_1 = 74,                      /* $@1  */
-  YYSYMBOL_75_2 = 75,                      /* $@2  */
-  YYSYMBOL_param_2 = 76,                   /* param_2  */
-  YYSYMBOL_77_3 = 77,                      /* $@3  */
-  YYSYMBOL_78_4 = 78,                      /* $@4  */
-  YYSYMBOL_param_3 = 79,                   /* param_3  */
-  YYSYMBOL_80_5 = 80,                      /* $@5  */
-  YYSYMBOL_81_6 = 81,                      /* $@6  */
-  YYSYMBOL_label = 82,                     /* label  */
-  YYSYMBOL_expr = 83,                      /* expr  */
-  YYSYMBOL_assembler_instruction = 84,     /* assembler_instruction  */
-  YYSYMBOL_mnemonic = 85,                  /* mnemonic  */
-  YYSYMBOL_register = 86                   /* register  */
+  YYSYMBOL_TEXT = 7,                       /* TEXT  */
+  YYSYMBOL_ADD = 8,                        /* ADD  */
+  YYSYMBOL_ADDI = 9,                       /* ADDI  */
+  YYSYMBOL_AUIPC = 10,                     /* AUIPC  */
+  YYSYMBOL_BEQ = 11,                       /* BEQ  */
+  YYSYMBOL_BEQZ = 12,                      /* BEQZ  */
+  YYSYMBOL_BNE = 13,                       /* BNE  */
+  YYSYMBOL_BNEZ = 14,                      /* BNEZ  */
+  YYSYMBOL_CALL = 15,                      /* CALL  */
+  YYSYMBOL_J = 16,                         /* J  */
+  YYSYMBOL_JALR = 17,                      /* JALR  */
+  YYSYMBOL_LB = 18,                        /* LB  */
+  YYSYMBOL_LI = 19,                        /* LI  */
+  YYSYMBOL_LW = 20,                        /* LW  */
+  YYSYMBOL_LUI = 21,                       /* LUI  */
+  YYSYMBOL_MUL = 22,                       /* MUL  */
+  YYSYMBOL_MV = 23,                        /* MV  */
+  YYSYMBOL_RET = 24,                       /* RET  */
+  YYSYMBOL_SRLI = 25,                      /* SRLI  */
+  YYSYMBOL_SLLI = 26,                      /* SLLI  */
+  YYSYMBOL_SW = 27,                        /* SW  */
+  YYSYMBOL_NEW_LINE = 28,                  /* NEW_LINE  */
+  YYSYMBOL_NUMERIC = 29,                   /* NUMERIC  */
+  YYSYMBOL_IDENTIFIER = 30,                /* IDENTIFIER  */
+  YYSYMBOL_DOT = 31,                       /* DOT  */
+  YYSYMBOL_COLON = 32,                     /* COLON  */
+  YYSYMBOL_COMMA = 33,                     /* COMMA  */
+  YYSYMBOL_OPENING_BRACKET = 34,           /* OPENING_BRACKET  */
+  YYSYMBOL_CLOSING_BRACKET = 35,           /* CLOSING_BRACKET  */
+  YYSYMBOL_REG_ZERO = 36,                  /* REG_ZERO  */
+  YYSYMBOL_REG_RA = 37,                    /* REG_RA  */
+  YYSYMBOL_REG_SP = 38,                    /* REG_SP  */
+  YYSYMBOL_REG_GP = 39,                    /* REG_GP  */
+  YYSYMBOL_REG_TP = 40,                    /* REG_TP  */
+  YYSYMBOL_REG_T0 = 41,                    /* REG_T0  */
+  YYSYMBOL_REG_T1 = 42,                    /* REG_T1  */
+  YYSYMBOL_REG_T2 = 43,                    /* REG_T2  */
+  YYSYMBOL_REG_T3 = 44,                    /* REG_T3  */
+  YYSYMBOL_REG_T4 = 45,                    /* REG_T4  */
+  YYSYMBOL_REG_T5 = 46,                    /* REG_T5  */
+  YYSYMBOL_REG_T6 = 47,                    /* REG_T6  */
+  YYSYMBOL_REG_FP = 48,                    /* REG_FP  */
+  YYSYMBOL_REG_A0 = 49,                    /* REG_A0  */
+  YYSYMBOL_REG_A1 = 50,                    /* REG_A1  */
+  YYSYMBOL_REG_A2 = 51,                    /* REG_A2  */
+  YYSYMBOL_REG_A3 = 52,                    /* REG_A3  */
+  YYSYMBOL_REG_A4 = 53,                    /* REG_A4  */
+  YYSYMBOL_REG_A5 = 54,                    /* REG_A5  */
+  YYSYMBOL_REG_A6 = 55,                    /* REG_A6  */
+  YYSYMBOL_REG_A7 = 56,                    /* REG_A7  */
+  YYSYMBOL_REG_S0 = 57,                    /* REG_S0  */
+  YYSYMBOL_REG_S1 = 58,                    /* REG_S1  */
+  YYSYMBOL_REG_S2 = 59,                    /* REG_S2  */
+  YYSYMBOL_REG_S3 = 60,                    /* REG_S3  */
+  YYSYMBOL_REG_S4 = 61,                    /* REG_S4  */
+  YYSYMBOL_REG_S5 = 62,                    /* REG_S5  */
+  YYSYMBOL_REG_S6 = 63,                    /* REG_S6  */
+  YYSYMBOL_REG_S7 = 64,                    /* REG_S7  */
+  YYSYMBOL_REG_S8 = 65,                    /* REG_S8  */
+  YYSYMBOL_REG_S9 = 66,                    /* REG_S9  */
+  YYSYMBOL_REG_S10 = 67,                   /* REG_S10  */
+  YYSYMBOL_REG_S11 = 68,                   /* REG_S11  */
+  YYSYMBOL_YYACCEPT = 69,                  /* $accept  */
+  YYSYMBOL_asm_file = 70,                  /* asm_file  */
+  YYSYMBOL_line_end = 71,                  /* line_end  */
+  YYSYMBOL_asm_line = 72,                  /* asm_line  */
+  YYSYMBOL_params = 73,                    /* params  */
+  YYSYMBOL_param_1 = 74,                   /* param_1  */
+  YYSYMBOL_75_1 = 75,                      /* $@1  */
+  YYSYMBOL_76_2 = 76,                      /* $@2  */
+  YYSYMBOL_param_2 = 77,                   /* param_2  */
+  YYSYMBOL_78_3 = 78,                      /* $@3  */
+  YYSYMBOL_79_4 = 79,                      /* $@4  */
+  YYSYMBOL_param_3 = 80,                   /* param_3  */
+  YYSYMBOL_81_5 = 81,                      /* $@5  */
+  YYSYMBOL_82_6 = 82,                      /* $@6  */
+  YYSYMBOL_label = 83,                     /* label  */
+  YYSYMBOL_expr = 84,                      /* expr  */
+  YYSYMBOL_assembler_instruction = 85,     /* assembler_instruction  */
+  YYSYMBOL_mnemonic = 86,                  /* mnemonic  */
+  YYSYMBOL_register = 87                   /* register  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -748,21 +552,21 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  40
+#define YYFINAL  41
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   238
+#define YYLAST   239
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  68
+#define YYNTOKENS  69
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  19
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  93
+#define YYNRULES  94
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  123
+#define YYNSTATES  124
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   322
+#define YYMAXUTOK   323
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -808,7 +612,7 @@ static const yytype_int8 yytranslate[] =
       35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
       45,    46,    47,    48,    49,    50,    51,    52,    53,    54,
       55,    56,    57,    58,    59,    60,    61,    62,    63,    64,
-      65,    66,    67
+      65,    66,    67,    68
 };
 
 #if YYDEBUG
@@ -819,12 +623,12 @@ static const yytype_int16 yyrline[] =
      113,   122,   131,   146,   155,   158,   161,   166,   166,   171,
      171,   176,   183,   183,   188,   188,   193,   200,   200,   205,
      205,   210,   217,   221,   230,   257,   262,   283,   300,   310,
-     321,   332,   333,   334,   335,   336,   337,   338,   339,   340,
-     341,   342,   343,   344,   345,   346,   347,   348,   349,   350,
-     351,   353,   354,   355,   356,   357,   358,   359,   360,   361,
-     362,   363,   364,   365,   366,   367,   368,   369,   370,   371,
-     372,   373,   374,   375,   376,   377,   378,   379,   380,   381,
-     382,   383,   384,   385
+     321,   332,   338,   339,   340,   341,   342,   343,   344,   345,
+     346,   347,   348,   349,   350,   351,   352,   353,   354,   355,
+     356,   357,   359,   360,   361,   362,   363,   364,   365,   366,
+     367,   368,   369,   370,   371,   372,   373,   374,   375,   376,
+     377,   378,   379,   380,   381,   382,   383,   384,   385,   386,
+     387,   388,   389,   390,   391
 };
 #endif
 
@@ -841,18 +645,18 @@ static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
 static const char *const yytname[] =
 {
   "\"end of file\"", "error", "\"invalid token\"", "EQU", "SECTION",
-  "GLOBL", "GLOBAL", "ADD", "ADDI", "AUIPC", "BEQ", "BEQZ", "BNE", "BNEZ",
-  "CALL", "J", "JALR", "LB", "LI", "LW", "LUI", "MUL", "MV", "RET", "SRLI",
-  "SLLI", "SW", "NEW_LINE", "NUMERIC", "IDENTIFIER", "DOT", "COLON",
-  "COMMA", "OPENING_BRACKET", "CLOSING_BRACKET", "REG_ZERO", "REG_RA",
-  "REG_SP", "REG_GP", "REG_TP", "REG_T0", "REG_T1", "REG_T2", "REG_T3",
-  "REG_T4", "REG_T5", "REG_T6", "REG_FP", "REG_A0", "REG_A1", "REG_A2",
-  "REG_A3", "REG_A4", "REG_A5", "REG_A6", "REG_A7", "REG_S0", "REG_S1",
-  "REG_S2", "REG_S3", "REG_S4", "REG_S5", "REG_S6", "REG_S7", "REG_S8",
-  "REG_S9", "REG_S10", "REG_S11", "$accept", "asm_file", "line_end",
-  "asm_line", "params", "param_1", "$@1", "$@2", "param_2", "$@3", "$@4",
-  "param_3", "$@5", "$@6", "label", "expr", "assembler_instruction",
-  "mnemonic", "register", YY_NULLPTR
+  "GLOBL", "GLOBAL", "TEXT", "ADD", "ADDI", "AUIPC", "BEQ", "BEQZ", "BNE",
+  "BNEZ", "CALL", "J", "JALR", "LB", "LI", "LW", "LUI", "MUL", "MV", "RET",
+  "SRLI", "SLLI", "SW", "NEW_LINE", "NUMERIC", "IDENTIFIER", "DOT",
+  "COLON", "COMMA", "OPENING_BRACKET", "CLOSING_BRACKET", "REG_ZERO",
+  "REG_RA", "REG_SP", "REG_GP", "REG_TP", "REG_T0", "REG_T1", "REG_T2",
+  "REG_T3", "REG_T4", "REG_T5", "REG_T6", "REG_FP", "REG_A0", "REG_A1",
+  "REG_A2", "REG_A3", "REG_A4", "REG_A5", "REG_A6", "REG_A7", "REG_S0",
+  "REG_S1", "REG_S2", "REG_S3", "REG_S4", "REG_S5", "REG_S6", "REG_S7",
+  "REG_S8", "REG_S9", "REG_S10", "REG_S11", "$accept", "asm_file",
+  "line_end", "asm_line", "params", "param_1", "$@1", "$@2", "param_2",
+  "$@3", "$@4", "param_3", "$@5", "$@6", "label", "expr",
+  "assembler_instruction", "mnemonic", "register", YY_NULLPTR
 };
 
 static const char *
@@ -862,7 +666,7 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#define YYPACT_NINF (-29)
+#define YYPACT_NINF (-30)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -876,19 +680,19 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int16 yypact[] =
 {
-     189,   -27,   -26,   -25,   -24,   -29,   -29,   -29,   -29,   -29,
-     -29,   -29,   -29,   -29,   -29,   -29,   -29,   -29,   -29,   -29,
-     -29,   -29,   -29,   -29,   -29,   -29,    11,    13,     6,   189,
-      16,   212,   -29,   -28,    14,   -29,   -29,   -29,   -29,   -29,
-     -29,   -29,   189,   -28,    49,    50,   -29,   -29,   -29,   -29,
-     -29,   -29,   -29,   -29,   -29,   -29,   -29,   -29,   -29,   -29,
-     -29,   -29,   -29,   -29,   -29,   -29,   -29,   -29,   -29,   -29,
-     -29,   -29,   -29,   -29,   -29,   -29,   -29,   -29,   -29,   -29,
-      53,   -29,   -29,    12,   -29,   -29,    12,    12,    52,   -29,
-     -29,   -29,   -29,   -29,    51,    89,    54,   -29,    90,    91,
-      12,    12,    92,   -29,   -29,   -29,   -29,    93,   129,   -29,
-     -29,   133,   134,    12,    12,   -29,   -29,   -29,   -29,   135,
-     136,   -29,   -29
+     189,   -28,   -27,   -26,   -25,   -30,   -30,   -30,   -30,   -30,
+     -30,   -30,   -30,   -30,   -30,   -30,   -30,   -30,   -30,   -30,
+     -30,   -30,   -30,   -30,   -30,   -30,   -30,    10,    12,     6,
+     189,    15,   212,   -30,   -29,    13,   -30,   -30,   -30,   -30,
+     -30,   -30,   -30,   189,   -29,    48,    49,   -30,   -30,   -30,
+     -30,   -30,   -30,   -30,   -30,   -30,   -30,   -30,   -30,   -30,
+     -30,   -30,   -30,   -30,   -30,   -30,   -30,   -30,   -30,   -30,
+     -30,   -30,   -30,   -30,   -30,   -30,   -30,   -30,   -30,   -30,
+     -30,    52,   -30,   -30,    11,   -30,   -30,    11,    11,    51,
+     -30,   -30,   -30,   -30,   -30,    50,    88,    53,   -30,    89,
+      90,    11,    11,    91,   -30,   -30,   -30,   -30,    92,   128,
+     -30,   -30,   132,   133,    11,    11,   -30,   -30,   -30,   -30,
+     134,   135,   -30,   -30
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -898,31 +702,31 @@ static const yytype_int8 yydefact[] =
 {
        0,     0,     0,     0,     0,    41,    42,    43,    44,    45,
       46,    47,    48,    49,    50,    51,    52,    53,    54,    55,
-      56,    57,    58,    59,    60,     7,     0,     0,     0,     3,
-       6,    12,    13,    11,     0,    38,    39,    40,    33,    32,
-       1,     2,     5,    10,    34,    36,    61,    62,    63,    64,
+      56,    57,    58,    59,    60,    61,     7,     0,     0,     0,
+       3,     6,    12,    13,    11,     0,    38,    39,    40,    33,
+      32,     1,     2,     5,    10,    34,    36,    62,    63,    64,
       65,    66,    67,    68,    69,    70,    71,    72,    73,    74,
       75,    76,    77,    78,    79,    80,    81,    82,    83,    84,
-      85,    86,    87,    88,    89,    90,    91,    92,    93,     9,
-      16,    21,    35,     0,     4,     8,     0,     0,     0,    34,
-      36,    37,    19,    17,    34,    36,    15,    26,     0,     0,
-       0,     0,     0,    20,    18,    24,    22,    34,    36,    14,
-      31,     0,     0,     0,     0,    25,    23,    29,    27,     0,
-       0,    30,    28
+      85,    86,    87,    88,    89,    90,    91,    92,    93,    94,
+       9,    16,    21,    35,     0,     4,     8,     0,     0,     0,
+      34,    36,    37,    19,    17,    34,    36,    15,    26,     0,
+       0,     0,     0,     0,    20,    18,    24,    22,    34,    36,
+      14,    31,     0,     0,     0,     0,    25,    23,    29,    27,
+       0,     0,    30,    28
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int16 yypgoto[] =
 {
-     -29,   132,    15,   -29,    80,   -29,   -29,   -29,   -29,   -29,
-     -29,   -29,   -29,   -29,   -29,    77,   -29,   140,   -29
+     -30,   131,    14,   -30,    79,   -30,   -30,   -30,   -30,   -30,
+     -30,   -30,   -30,   -30,   -30,    76,   -30,   139,   -30
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-       0,    28,    29,    30,    79,    80,    99,    98,    96,   112,
-     111,   109,   120,   119,    31,    81,    32,    33,    82
+       0,    29,    30,    31,    80,    81,   100,    99,    97,   113,
+     112,   110,   121,   120,    32,    82,    33,    34,    83
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -930,58 +734,58 @@ static const yytype_int8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-      44,    45,    34,    35,    36,    37,    40,    46,    47,    48,
-      49,    50,    51,    52,    53,    54,    55,    56,    57,    58,
-      59,    60,    61,    62,    63,    64,    65,    66,    67,    68,
-      69,    70,    71,    72,    73,    74,    75,    76,    77,    78,
-      89,    90,    38,    25,    39,    42,    83,    46,    47,    48,
-      49,    50,    51,    52,    53,    54,    55,    56,    57,    58,
-      59,    60,    61,    62,    63,    64,    65,    66,    67,    68,
-      69,    70,    71,    72,    73,    74,    75,    76,    77,    78,
-      94,    95,    86,    87,   100,    88,   102,    46,    47,    48,
-      49,    50,    51,    52,    53,    54,    55,    56,    57,    58,
-      59,    60,    61,    62,    63,    64,    65,    66,    67,    68,
-      69,    70,    71,    72,    73,    74,    75,    76,    77,    78,
-     107,   108,   101,    85,   103,   104,   113,    46,    47,    48,
-      49,    50,    51,    52,    53,    54,    55,    56,    57,    58,
-      59,    60,    61,    62,    63,    64,    65,    66,    67,    68,
-      69,    70,    71,    72,    73,    74,    75,    76,    77,    78,
-      91,    41,   114,    92,    93,    97,     0,   115,   116,   121,
-     122,    43,     0,     0,    84,     0,     0,   105,   106,   110,
+      45,    46,    35,    36,    37,    38,    41,    47,    48,    49,
+      50,    51,    52,    53,    54,    55,    56,    57,    58,    59,
+      60,    61,    62,    63,    64,    65,    66,    67,    68,    69,
+      70,    71,    72,    73,    74,    75,    76,    77,    78,    79,
+      90,    91,    39,    26,    40,    43,    84,    47,    48,    49,
+      50,    51,    52,    53,    54,    55,    56,    57,    58,    59,
+      60,    61,    62,    63,    64,    65,    66,    67,    68,    69,
+      70,    71,    72,    73,    74,    75,    76,    77,    78,    79,
+      95,    96,    87,    88,   101,    89,   103,    47,    48,    49,
+      50,    51,    52,    53,    54,    55,    56,    57,    58,    59,
+      60,    61,    62,    63,    64,    65,    66,    67,    68,    69,
+      70,    71,    72,    73,    74,    75,    76,    77,    78,    79,
+     108,   109,   102,    86,   104,   105,   114,    47,    48,    49,
+      50,    51,    52,    53,    54,    55,    56,    57,    58,    59,
+      60,    61,    62,    63,    64,    65,    66,    67,    68,    69,
+      70,    71,    72,    73,    74,    75,    76,    77,    78,    79,
+      92,    42,   115,    93,    94,    98,     0,   116,   117,   122,
+     123,    44,     0,     0,    85,     0,     0,   106,   107,   111,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-     117,   118,     1,     2,     3,     4,     5,     6,     7,     8,
+     118,   119,     1,     2,     3,     4,     5,     6,     7,     8,
        9,    10,    11,    12,    13,    14,    15,    16,    17,    18,
-      19,    20,    21,    22,    23,    24,    25,    26,    27,     5,
+      19,    20,    21,    22,    23,    24,    25,    26,    27,    28,
        6,     7,     8,     9,    10,    11,    12,    13,    14,    15,
-      16,    17,    18,    19,    20,    21,    22,    23,    24
+      16,    17,    18,    19,    20,    21,    22,    23,    24,    25
 };
 
 static const yytype_int8 yycheck[] =
 {
-      28,    29,    29,    29,    29,    29,     0,    35,    36,    37,
-      38,    39,    40,    41,    42,    43,    44,    45,    46,    47,
-      48,    49,    50,    51,    52,    53,    54,    55,    56,    57,
-      58,    59,    60,    61,    62,    63,    64,    65,    66,    67,
-      28,    29,    31,    27,    31,    30,    32,    35,    36,    37,
-      38,    39,    40,    41,    42,    43,    44,    45,    46,    47,
-      48,    49,    50,    51,    52,    53,    54,    55,    56,    57,
-      58,    59,    60,    61,    62,    63,    64,    65,    66,    67,
-      28,    29,    33,    33,    33,    32,    32,    35,    36,    37,
-      38,    39,    40,    41,    42,    43,    44,    45,    46,    47,
-      48,    49,    50,    51,    52,    53,    54,    55,    56,    57,
-      58,    59,    60,    61,    62,    63,    64,    65,    66,    67,
-      28,    29,    33,    43,    34,    34,    33,    35,    36,    37,
-      38,    39,    40,    41,    42,    43,    44,    45,    46,    47,
-      48,    49,    50,    51,    52,    53,    54,    55,    56,    57,
-      58,    59,    60,    61,    62,    63,    64,    65,    66,    67,
-      83,    29,    33,    86,    87,    88,    -1,    34,    34,    34,
-      34,    31,    -1,    -1,    42,    -1,    -1,   100,   101,   102,
+      29,    30,    30,    30,    30,    30,     0,    36,    37,    38,
+      39,    40,    41,    42,    43,    44,    45,    46,    47,    48,
+      49,    50,    51,    52,    53,    54,    55,    56,    57,    58,
+      59,    60,    61,    62,    63,    64,    65,    66,    67,    68,
+      29,    30,    32,    28,    32,    31,    33,    36,    37,    38,
+      39,    40,    41,    42,    43,    44,    45,    46,    47,    48,
+      49,    50,    51,    52,    53,    54,    55,    56,    57,    58,
+      59,    60,    61,    62,    63,    64,    65,    66,    67,    68,
+      29,    30,    34,    34,    34,    33,    33,    36,    37,    38,
+      39,    40,    41,    42,    43,    44,    45,    46,    47,    48,
+      49,    50,    51,    52,    53,    54,    55,    56,    57,    58,
+      59,    60,    61,    62,    63,    64,    65,    66,    67,    68,
+      29,    30,    34,    44,    35,    35,    34,    36,    37,    38,
+      39,    40,    41,    42,    43,    44,    45,    46,    47,    48,
+      49,    50,    51,    52,    53,    54,    55,    56,    57,    58,
+      59,    60,    61,    62,    63,    64,    65,    66,    67,    68,
+      84,    30,    34,    87,    88,    89,    -1,    35,    35,    35,
+      35,    32,    -1,    -1,    43,    -1,    -1,   101,   102,   103,
       -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-     113,   114,     3,     4,     5,     6,     7,     8,     9,    10,
+     114,   115,     3,     4,     5,     6,     7,     8,     9,    10,
       11,    12,    13,    14,    15,    16,    17,    18,    19,    20,
-      21,    22,    23,    24,    25,    26,    27,    28,    29,     7,
+      21,    22,    23,    24,    25,    26,    27,    28,    29,    30,
        8,     9,    10,    11,    12,    13,    14,    15,    16,    17,
-      18,    19,    20,    21,    22,    23,    24,    25,    26
+      18,    19,    20,    21,    22,    23,    24,    25,    26,    27
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
@@ -990,32 +794,32 @@ static const yytype_int8 yystos[] =
 {
        0,     3,     4,     5,     6,     7,     8,     9,    10,    11,
       12,    13,    14,    15,    16,    17,    18,    19,    20,    21,
-      22,    23,    24,    25,    26,    27,    28,    29,    69,    70,
-      71,    82,    84,    85,    29,    29,    29,    29,    31,    31,
-       0,    69,    70,    85,    28,    29,    35,    36,    37,    38,
+      22,    23,    24,    25,    26,    27,    28,    29,    30,    70,
+      71,    72,    83,    85,    86,    30,    30,    30,    30,    32,
+      32,     0,    70,    71,    86,    29,    30,    36,    37,    38,
       39,    40,    41,    42,    43,    44,    45,    46,    47,    48,
       49,    50,    51,    52,    53,    54,    55,    56,    57,    58,
-      59,    60,    61,    62,    63,    64,    65,    66,    67,    72,
-      73,    83,    86,    32,    69,    72,    33,    33,    32,    28,
-      29,    83,    83,    83,    28,    29,    76,    83,    75,    74,
-      33,    33,    32,    34,    34,    83,    83,    28,    29,    79,
-      83,    78,    77,    33,    33,    34,    34,    83,    83,    81,
-      80,    34,    34
+      59,    60,    61,    62,    63,    64,    65,    66,    67,    68,
+      73,    74,    84,    87,    33,    70,    73,    34,    34,    33,
+      29,    30,    84,    84,    84,    29,    30,    77,    84,    76,
+      75,    34,    34,    33,    35,    35,    84,    84,    29,    30,
+      80,    84,    79,    78,    34,    34,    35,    35,    84,    84,
+      82,    81,    35,    35
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    68,    69,    69,    69,    69,    69,    70,    71,    71,
-      71,    71,    71,    71,    72,    72,    72,    74,    73,    75,
-      73,    73,    77,    76,    78,    76,    76,    80,    79,    81,
-      79,    79,    82,    82,    83,    83,    83,    84,    84,    84,
-      84,    85,    85,    85,    85,    85,    85,    85,    85,    85,
-      85,    85,    85,    85,    85,    85,    85,    85,    85,    85,
-      85,    86,    86,    86,    86,    86,    86,    86,    86,    86,
+       0,    69,    70,    70,    70,    70,    70,    71,    72,    72,
+      72,    72,    72,    72,    73,    73,    73,    75,    74,    76,
+      74,    74,    78,    77,    79,    77,    77,    81,    80,    82,
+      80,    80,    83,    83,    84,    84,    84,    85,    85,    85,
+      85,    85,    86,    86,    86,    86,    86,    86,    86,    86,
       86,    86,    86,    86,    86,    86,    86,    86,    86,    86,
-      86,    86,    86,    86,    86,    86,    86,    86,    86,    86,
-      86,    86,    86,    86
+      86,    86,    87,    87,    87,    87,    87,    87,    87,    87,
+      87,    87,    87,    87,    87,    87,    87,    87,    87,    87,
+      87,    87,    87,    87,    87,    87,    87,    87,    87,    87,
+      87,    87,    87,    87,    87
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
@@ -1030,7 +834,7 @@ static const yytype_int8 yyr2[] =
        1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
        1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
        1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
-       1,     1,     1,     1
+       1,     1,     1,     1,     1
 };
 
 
@@ -1617,7 +1421,7 @@ yyreduce:
 
         if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
     }
-#line 1621 "y.tab.c"
+#line 1425 "parser.c"
     break;
 
   case 9: /* asm_line: mnemonic params  */
@@ -1631,7 +1435,7 @@ yyreduce:
 
         if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
     }
-#line 1635 "y.tab.c"
+#line 1439 "parser.c"
     break;
 
   case 10: /* asm_line: label mnemonic  */
@@ -1644,7 +1448,7 @@ yyreduce:
 
         if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
     }
-#line 1648 "y.tab.c"
+#line 1452 "parser.c"
     break;
 
   case 11: /* asm_line: mnemonic  */
@@ -1657,7 +1461,7 @@ yyreduce:
 
         if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
     }
-#line 1661 "y.tab.c"
+#line 1465 "parser.c"
     break;
 
   case 12: /* asm_line: label  */
@@ -1676,7 +1480,7 @@ yyreduce:
 
         if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
     }
-#line 1680 "y.tab.c"
+#line 1484 "parser.c"
     break;
 
   case 13: /* asm_line: assembler_instruction  */
@@ -1689,7 +1493,7 @@ yyreduce:
 
         if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
     }
-#line 1693 "y.tab.c"
+#line 1497 "parser.c"
     break;
 
   case 14: /* params: param_1 COMMA param_2 COMMA param_3  */
@@ -1697,7 +1501,7 @@ yyreduce:
                                              {
         //printf("param_1 COMMA param_2 COMMA param_3\n");
     }
-#line 1701 "y.tab.c"
+#line 1505 "parser.c"
     break;
 
   case 15: /* params: param_1 COMMA param_2  */
@@ -1705,7 +1509,7 @@ yyreduce:
                             {
         //printf("param_1 COMMA param_2\n");
     }
-#line 1709 "y.tab.c"
+#line 1513 "parser.c"
     break;
 
   case 16: /* params: param_1  */
@@ -1713,7 +1517,7 @@ yyreduce:
               {
         //printf("param_1\n");
     }
-#line 1717 "y.tab.c"
+#line 1521 "parser.c"
     break;
 
   case 17: /* $@1: %empty  */
@@ -1722,7 +1526,7 @@ yyreduce:
         //printf("identifier OFFSET 1\n");
         insert_identifier_offset(&parser_asm_line, (char *)(yyvsp[-2].string_val), 0);
     }
-#line 1726 "y.tab.c"
+#line 1530 "parser.c"
     break;
 
   case 19: /* $@2: %empty  */
@@ -1731,7 +1535,7 @@ yyreduce:
         //printf("numeric OFFSET 1\n");
         insert_offset(&parser_asm_line, (yyvsp[-1].sym), 0);
     }
-#line 1735 "y.tab.c"
+#line 1539 "parser.c"
     break;
 
   case 21: /* param_1: expr  */
@@ -1741,7 +1545,7 @@ yyreduce:
         insert_expr(&parser_asm_line, current_node, 0);
         current_node = NULL;
     }
-#line 1745 "y.tab.c"
+#line 1549 "parser.c"
     break;
 
   case 22: /* $@3: %empty  */
@@ -1750,7 +1554,7 @@ yyreduce:
         //printf("identifier OFFSET 2: %s\n", $1);
         insert_identifier_offset(&parser_asm_line, (char *)(yyvsp[-2].string_val), 1);
     }
-#line 1754 "y.tab.c"
+#line 1558 "parser.c"
     break;
 
   case 24: /* $@4: %empty  */
@@ -1759,7 +1563,7 @@ yyreduce:
         //printf("numeric OFFSET 2\n");
         insert_offset(&parser_asm_line, (yyvsp[-1].sym), 1);
     }
-#line 1763 "y.tab.c"
+#line 1567 "parser.c"
     break;
 
   case 26: /* param_2: expr  */
@@ -1769,7 +1573,7 @@ yyreduce:
         insert_expr(&parser_asm_line, current_node, 1);
         current_node = NULL;
     }
-#line 1773 "y.tab.c"
+#line 1577 "parser.c"
     break;
 
   case 27: /* $@5: %empty  */
@@ -1778,7 +1582,7 @@ yyreduce:
         //printf("identifier OFFSET 3\n");
         insert_identifier_offset(&parser_asm_line, (char *)(yyvsp[-2].string_val), 2);
     }
-#line 1782 "y.tab.c"
+#line 1586 "parser.c"
     break;
 
   case 29: /* $@6: %empty  */
@@ -1787,7 +1591,7 @@ yyreduce:
         //printf("numeric OFFSET 3\n");
         insert_offset(&parser_asm_line, (yyvsp[-1].sym), 2);
     }
-#line 1791 "y.tab.c"
+#line 1595 "parser.c"
     break;
 
   case 31: /* param_3: expr  */
@@ -1797,7 +1601,7 @@ yyreduce:
         insert_expr(&parser_asm_line, current_node, 2);
         current_node = NULL;
     }
-#line 1801 "y.tab.c"
+#line 1605 "parser.c"
     break;
 
   case 32: /* label: IDENTIFIER COLON  */
@@ -1805,7 +1609,7 @@ yyreduce:
                      {
         strncpy((yyval.string_val), (yyvsp[-1].string_val), 100);
     }
-#line 1809 "y.tab.c"
+#line 1613 "parser.c"
     break;
 
   case 33: /* label: NUMERIC COLON  */
@@ -1816,7 +1620,7 @@ yyreduce:
         snprintf(buffer, 100, "%d", (yyvsp[-1].int_val));
         strncpy((yyval.string_val), buffer, 100);
     }
-#line 1820 "y.tab.c"
+#line 1624 "parser.c"
     break;
 
   case 34: /* expr: NUMERIC  */
@@ -1847,7 +1651,7 @@ yyreduce:
             printf("PARSER-NUMERIC: not null!\n");
         }
     }
-#line 1851 "y.tab.c"
+#line 1655 "parser.c"
     break;
 
   case 35: /* expr: register  */
@@ -1856,7 +1660,7 @@ yyreduce:
         //printf("expr - register\n");
         (yyval.expr_ptr) = current_node;
     }
-#line 1860 "y.tab.c"
+#line 1664 "parser.c"
     break;
 
   case 36: /* expr: IDENTIFIER  */
@@ -1880,7 +1684,7 @@ yyreduce:
             printf("expr - IDENTIFIER: not null!\n");
         }
     }
-#line 1884 "y.tab.c"
+#line 1688 "parser.c"
     break;
 
   case 37: /* assembler_instruction: EQU IDENTIFIER COMMA expr  */
@@ -1901,7 +1705,7 @@ yyreduce:
         //parser_asm_line.asm_instruction_expr = NULL;
         current_node = NULL;
     }
-#line 1905 "y.tab.c"
+#line 1709 "parser.c"
     break;
 
   case 38: /* assembler_instruction: SECTION IDENTIFIER  */
@@ -1915,7 +1719,7 @@ yyreduce:
 
         current_node = NULL;
     }
-#line 1919 "y.tab.c"
+#line 1723 "parser.c"
     break;
 
   case 39: /* assembler_instruction: GLOBL IDENTIFIER  */
@@ -1930,7 +1734,7 @@ yyreduce:
         current_node = NULL;
 
     }
-#line 1934 "y.tab.c"
+#line 1738 "parser.c"
     break;
 
   case 40: /* assembler_instruction: GLOBAL IDENTIFIER  */
@@ -1945,329 +1749,339 @@ yyreduce:
         current_node = NULL;
 
     }
-#line 1949 "y.tab.c"
+#line 1753 "parser.c"
     break;
 
-  case 41: /* mnemonic: ADD  */
+  case 41: /* assembler_instruction: TEXT  */
 #line 332 "parser.y"
-               { /*printf("Parser-ADD: %d\n", I_ADD);*/ /*parser_asm_line.instruction = I_ADD; parser_asm_line.instruction_type = IT_R;*/ set_instruction(&parser_asm_line, I_ADD, IT_R); }
-#line 1955 "y.tab.c"
+         {
+        parser_asm_line.asm_instruction = AI_TEXT;
+
+        current_node = NULL;
+    }
+#line 1763 "parser.c"
     break;
 
-  case 42: /* mnemonic: ADDI  */
-#line 333 "parser.y"
-           { /*printf("Parser-ADDI: %d\n", I_ADDI);*/ /*parser_asm_line.instruction = I_ADDI; parser_asm_line.instruction_type = IT_R;*/ set_instruction(&parser_asm_line, I_ADDI, IT_R); }
-#line 1961 "y.tab.c"
-    break;
-
-  case 43: /* mnemonic: AUIPC  */
-#line 334 "parser.y"
-            { /*printf("Parser-AUIPC: %d\n", I_AUIPC);*/ /*parser_asm_line.instruction = I_AUIPC; parser_asm_line.instruction_type = IT_U;*/ set_instruction(&parser_asm_line, I_AUIPC, IT_U); }
-#line 1967 "y.tab.c"
-    break;
-
-  case 44: /* mnemonic: BEQ  */
-#line 335 "parser.y"
-          { /*printf("Parser-BEQ: %d\n", I_BEQ);*/ /*parser_asm_line.instruction = I_BEQ; parser_asm_line.instruction_type = IT_B;*/ set_instruction(&parser_asm_line, I_BEQ, IT_B); }
-#line 1973 "y.tab.c"
-    break;
-
-  case 45: /* mnemonic: BEQZ  */
-#line 336 "parser.y"
-           { /*printf("Parser-BEQZ: %d\n", I_BEQZ);*/ /*parser_asm_line.instruction = I_BEQZ; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_BEQZ, IT_P); }
-#line 1979 "y.tab.c"
-    break;
-
-  case 46: /* mnemonic: BNE  */
-#line 337 "parser.y"
-          { /*printf("Parser-BNE: %d\n", I_BNE);*/ /*parser_asm_line.instruction = I_BNE; parser_asm_line.instruction_type = IT_B;*/ set_instruction(&parser_asm_line, I_BNE, IT_B); }
-#line 1985 "y.tab.c"
-    break;
-
-  case 47: /* mnemonic: BNEZ  */
+  case 42: /* mnemonic: ADD  */
 #line 338 "parser.y"
-           { /*printf("Parser-BNEZ: %d\n", I_BNEZ);*/ /*parser_asm_line.instruction = I_BNEZ; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_BNEZ, IT_P); }
-#line 1991 "y.tab.c"
+               { /*printf("Parser-ADD: %d\n", I_ADD);*/ /*parser_asm_line.instruction = I_ADD; parser_asm_line.instruction_type = IT_R;*/ set_instruction(&parser_asm_line, I_ADD, IT_R); }
+#line 1769 "parser.c"
     break;
 
-  case 48: /* mnemonic: CALL  */
+  case 43: /* mnemonic: ADDI  */
 #line 339 "parser.y"
-           { /*printf("Parser-CALL: %d\n", I_CALL);*/ /*parser_asm_line.instruction = I_CALL; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_CALL, IT_P); }
-#line 1997 "y.tab.c"
+           { /*printf("Parser-ADDI: %d\n", I_ADDI);*/ /*parser_asm_line.instruction = I_ADDI; parser_asm_line.instruction_type = IT_R;*/ set_instruction(&parser_asm_line, I_ADDI, IT_R); }
+#line 1775 "parser.c"
     break;
 
-  case 49: /* mnemonic: J  */
+  case 44: /* mnemonic: AUIPC  */
 #line 340 "parser.y"
-        { /*printf("Parser-J: %d\n", I_J);*/ /*parser_asm_line.instruction = I_J; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_J, IT_P); }
-#line 2003 "y.tab.c"
+            { /*printf("Parser-AUIPC: %d\n", I_AUIPC);*/ /*parser_asm_line.instruction = I_AUIPC; parser_asm_line.instruction_type = IT_U;*/ set_instruction(&parser_asm_line, I_AUIPC, IT_U); }
+#line 1781 "parser.c"
     break;
 
-  case 50: /* mnemonic: JALR  */
+  case 45: /* mnemonic: BEQ  */
 #line 341 "parser.y"
-           { /*printf("Parser-JALR: %d\n", I_JALR);*/ /*parser_asm_line.instruction = I_JALR; parser_asm_line.instruction_type = IT_J;*/ set_instruction(&parser_asm_line, I_JALR, IT_J); }
-#line 2009 "y.tab.c"
+          { /*printf("Parser-BEQ: %d\n", I_BEQ);*/ /*parser_asm_line.instruction = I_BEQ; parser_asm_line.instruction_type = IT_B;*/ set_instruction(&parser_asm_line, I_BEQ, IT_B); }
+#line 1787 "parser.c"
     break;
 
-  case 51: /* mnemonic: LB  */
+  case 46: /* mnemonic: BEQZ  */
 #line 342 "parser.y"
-         { /*printf("Parser-LB: %d\n", I_LB);*/ /*parser_asm_line.instruction = I_LB; parser_asm_line.instruction_type = IT_I;*/ set_instruction(&parser_asm_line, I_LB, IT_I); }
-#line 2015 "y.tab.c"
+           { /*printf("Parser-BEQZ: %d\n", I_BEQZ);*/ /*parser_asm_line.instruction = I_BEQZ; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_BEQZ, IT_P); }
+#line 1793 "parser.c"
     break;
 
-  case 52: /* mnemonic: LI  */
+  case 47: /* mnemonic: BNE  */
 #line 343 "parser.y"
-         { /*printf("Parser-LI: %d\n", I_LI);*/ /*parser_asm_line.instruction = I_LI; parser_asm_line.instruction_type = IT_I;*/ set_instruction(&parser_asm_line, I_LI, IT_P); }
-#line 2021 "y.tab.c"
+          { /*printf("Parser-BNE: %d\n", I_BNE);*/ /*parser_asm_line.instruction = I_BNE; parser_asm_line.instruction_type = IT_B;*/ set_instruction(&parser_asm_line, I_BNE, IT_B); }
+#line 1799 "parser.c"
     break;
 
-  case 53: /* mnemonic: LW  */
+  case 48: /* mnemonic: BNEZ  */
 #line 344 "parser.y"
-         { /*printf("Parser-LW: %d\n", I_LW);*/ /*parser_asm_line.instruction = I_LW; parser_asm_line.instruction_type = IT_I;*/ set_instruction(&parser_asm_line, I_LW, IT_I); }
-#line 2027 "y.tab.c"
+           { /*printf("Parser-BNEZ: %d\n", I_BNEZ);*/ /*parser_asm_line.instruction = I_BNEZ; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_BNEZ, IT_P); }
+#line 1805 "parser.c"
     break;
 
-  case 54: /* mnemonic: LUI  */
+  case 49: /* mnemonic: CALL  */
 #line 345 "parser.y"
-          { /*printf("Parser-LUI: %d\n", I_LUI);*/ /*parser_asm_line.instruction = I_LUI; parser_asm_line.instruction_type = IT_U;*/ set_instruction(&parser_asm_line, I_LUI, IT_U); }
-#line 2033 "y.tab.c"
+           { /*printf("Parser-CALL: %d\n", I_CALL);*/ /*parser_asm_line.instruction = I_CALL; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_CALL, IT_P); }
+#line 1811 "parser.c"
     break;
 
-  case 55: /* mnemonic: MUL  */
+  case 50: /* mnemonic: J  */
 #line 346 "parser.y"
-          { /*printf("Parser-LW: %d\n", I_MUL);*/ /*parser_asm_line.instruction = I_MUL; parser_asm_line.instruction_type = IT_R;*/ set_instruction(&parser_asm_line, I_MUL, IT_R); }
-#line 2039 "y.tab.c"
+        { /*printf("Parser-J: %d\n", I_J);*/ /*parser_asm_line.instruction = I_J; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_J, IT_P); }
+#line 1817 "parser.c"
     break;
 
-  case 56: /* mnemonic: MV  */
+  case 51: /* mnemonic: JALR  */
 #line 347 "parser.y"
-         { /*printf("Parser-LW: %d\n", I_MV);*/ /*parser_asm_line.instruction = I_MV; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_MV, IT_P); }
-#line 2045 "y.tab.c"
+           { /*printf("Parser-JALR: %d\n", I_JALR);*/ /*parser_asm_line.instruction = I_JALR; parser_asm_line.instruction_type = IT_J;*/ set_instruction(&parser_asm_line, I_JALR, IT_J); }
+#line 1823 "parser.c"
     break;
 
-  case 57: /* mnemonic: RET  */
+  case 52: /* mnemonic: LB  */
 #line 348 "parser.y"
-          { /*printf("Parser-RET: %d\n", I_RET);*/ /*parser_asm_line.instruction = I_RET; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_RET, IT_P); }
-#line 2051 "y.tab.c"
+         { /*printf("Parser-LB: %d\n", I_LB);*/ /*parser_asm_line.instruction = I_LB; parser_asm_line.instruction_type = IT_I;*/ set_instruction(&parser_asm_line, I_LB, IT_I); }
+#line 1829 "parser.c"
     break;
 
-  case 58: /* mnemonic: SRLI  */
+  case 53: /* mnemonic: LI  */
 #line 349 "parser.y"
-           { /*printf("Parser-SRLI: %d\n", I_SRLI);*/ /*parser_asm_line.instruction = I_SRLI; parser_asm_line.instruction_type = IT_I;*/ set_instruction(&parser_asm_line, I_SRLI, IT_I); }
-#line 2057 "y.tab.c"
+         { /*printf("Parser-LI: %d\n", I_LI);*/ /*parser_asm_line.instruction = I_LI; parser_asm_line.instruction_type = IT_I;*/ set_instruction(&parser_asm_line, I_LI, IT_P); }
+#line 1835 "parser.c"
     break;
 
-  case 59: /* mnemonic: SLLI  */
+  case 54: /* mnemonic: LW  */
 #line 350 "parser.y"
-           { /*printf("Parser-SLLI: %d\n", I_SLLI);*/ /*parser_asm_line.instruction = I_SLLI; parser_asm_line.instruction_type = IT_I;*/ set_instruction(&parser_asm_line, I_SLLI, IT_I); }
-#line 2063 "y.tab.c"
+         { /*printf("Parser-LW: %d\n", I_LW);*/ /*parser_asm_line.instruction = I_LW; parser_asm_line.instruction_type = IT_I;*/ set_instruction(&parser_asm_line, I_LW, IT_I); }
+#line 1841 "parser.c"
     break;
 
-  case 60: /* mnemonic: SW  */
+  case 55: /* mnemonic: LUI  */
 #line 351 "parser.y"
-         { /*printf("Parser-SW: %d\n", I_SW);*/ /*parser_asm_line.instruction = I_SW; parser_asm_line.instruction_type = IT_S;*/ set_instruction(&parser_asm_line, I_SW, IT_S); }
-#line 2069 "y.tab.c"
+          { /*printf("Parser-LUI: %d\n", I_LUI);*/ /*parser_asm_line.instruction = I_LUI; parser_asm_line.instruction_type = IT_U;*/ set_instruction(&parser_asm_line, I_LUI, IT_U); }
+#line 1847 "parser.c"
     break;
 
-  case 61: /* register: REG_ZERO  */
+  case 56: /* mnemonic: MUL  */
+#line 352 "parser.y"
+          { /*printf("Parser-LW: %d\n", I_MUL);*/ /*parser_asm_line.instruction = I_MUL; parser_asm_line.instruction_type = IT_R;*/ set_instruction(&parser_asm_line, I_MUL, IT_R); }
+#line 1853 "parser.c"
+    break;
+
+  case 57: /* mnemonic: MV  */
 #line 353 "parser.y"
-                    { /*printf("REG_ZERO\n");*/ insert_register(&parser_asm_line, R_ZERO); }
-#line 2075 "y.tab.c"
+         { /*printf("Parser-LW: %d\n", I_MV);*/ /*parser_asm_line.instruction = I_MV; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_MV, IT_P); }
+#line 1859 "parser.c"
     break;
 
-  case 62: /* register: REG_RA  */
+  case 58: /* mnemonic: RET  */
 #line 354 "parser.y"
-             { /*printf("REG_RA\n");*/ insert_register(&parser_asm_line, R_RA); }
-#line 2081 "y.tab.c"
+          { /*printf("Parser-RET: %d\n", I_RET);*/ /*parser_asm_line.instruction = I_RET; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_RET, IT_P); }
+#line 1865 "parser.c"
     break;
 
-  case 63: /* register: REG_SP  */
+  case 59: /* mnemonic: SRLI  */
 #line 355 "parser.y"
-             { /*printf("REG_SP\n");*/ insert_register(&parser_asm_line, R_SP); }
-#line 2087 "y.tab.c"
+           { /*printf("Parser-SRLI: %d\n", I_SRLI);*/ /*parser_asm_line.instruction = I_SRLI; parser_asm_line.instruction_type = IT_I;*/ set_instruction(&parser_asm_line, I_SRLI, IT_I); }
+#line 1871 "parser.c"
     break;
 
-  case 64: /* register: REG_GP  */
+  case 60: /* mnemonic: SLLI  */
 #line 356 "parser.y"
-             { /*printf("REG_GP\n");*/ insert_register(&parser_asm_line, R_GP); }
-#line 2093 "y.tab.c"
+           { /*printf("Parser-SLLI: %d\n", I_SLLI);*/ /*parser_asm_line.instruction = I_SLLI; parser_asm_line.instruction_type = IT_I;*/ set_instruction(&parser_asm_line, I_SLLI, IT_I); }
+#line 1877 "parser.c"
     break;
 
-  case 65: /* register: REG_TP  */
+  case 61: /* mnemonic: SW  */
 #line 357 "parser.y"
-             { /*printf("REG_TP\n");*/ insert_register(&parser_asm_line, R_TP); }
-#line 2099 "y.tab.c"
+         { /*printf("Parser-SW: %d\n", I_SW);*/ /*parser_asm_line.instruction = I_SW; parser_asm_line.instruction_type = IT_S;*/ set_instruction(&parser_asm_line, I_SW, IT_S); }
+#line 1883 "parser.c"
     break;
 
-  case 66: /* register: REG_T0  */
-#line 358 "parser.y"
-             { /*printf("REG_T0\n");*/ insert_register(&parser_asm_line, R_T0); }
-#line 2105 "y.tab.c"
-    break;
-
-  case 67: /* register: REG_T1  */
+  case 62: /* register: REG_ZERO  */
 #line 359 "parser.y"
-             { /*printf("REG_T1\n");*/ insert_register(&parser_asm_line, R_T1); }
-#line 2111 "y.tab.c"
+                    { /*printf("REG_ZERO\n");*/ insert_register(&parser_asm_line, R_ZERO); }
+#line 1889 "parser.c"
     break;
 
-  case 68: /* register: REG_T2  */
+  case 63: /* register: REG_RA  */
 #line 360 "parser.y"
-             { /*printf("REG_T2\n");*/ insert_register(&parser_asm_line, R_T2); }
-#line 2117 "y.tab.c"
+             { /*printf("REG_RA\n");*/ insert_register(&parser_asm_line, R_RA); }
+#line 1895 "parser.c"
     break;
 
-  case 69: /* register: REG_T3  */
+  case 64: /* register: REG_SP  */
 #line 361 "parser.y"
-             { /*printf("REG_T3\n");*/ insert_register(&parser_asm_line, R_T3); }
-#line 2123 "y.tab.c"
+             { /*printf("REG_SP\n");*/ insert_register(&parser_asm_line, R_SP); }
+#line 1901 "parser.c"
     break;
 
-  case 70: /* register: REG_T4  */
+  case 65: /* register: REG_GP  */
 #line 362 "parser.y"
-             { /*printf("REG_T4\n");*/ insert_register(&parser_asm_line, R_T4); }
-#line 2129 "y.tab.c"
+             { /*printf("REG_GP\n");*/ insert_register(&parser_asm_line, R_GP); }
+#line 1907 "parser.c"
     break;
 
-  case 71: /* register: REG_T5  */
+  case 66: /* register: REG_TP  */
 #line 363 "parser.y"
-             { /*printf("REG_T5\n");*/ insert_register(&parser_asm_line, R_T5); }
-#line 2135 "y.tab.c"
+             { /*printf("REG_TP\n");*/ insert_register(&parser_asm_line, R_TP); }
+#line 1913 "parser.c"
     break;
 
-  case 72: /* register: REG_T6  */
+  case 67: /* register: REG_T0  */
 #line 364 "parser.y"
-             { /*printf("REG_T6\n");*/ insert_register(&parser_asm_line, R_T6); }
-#line 2141 "y.tab.c"
+             { /*printf("REG_T0\n");*/ insert_register(&parser_asm_line, R_T0); }
+#line 1919 "parser.c"
     break;
 
-  case 73: /* register: REG_FP  */
+  case 68: /* register: REG_T1  */
 #line 365 "parser.y"
-             { /*printf("REG_FP\n");*/ insert_register(&parser_asm_line, R_S0); }
-#line 2147 "y.tab.c"
+             { /*printf("REG_T1\n");*/ insert_register(&parser_asm_line, R_T1); }
+#line 1925 "parser.c"
     break;
 
-  case 74: /* register: REG_A0  */
+  case 69: /* register: REG_T2  */
 #line 366 "parser.y"
-             { /*printf("REG_A0\n");*/ insert_register(&parser_asm_line, R_A0); }
-#line 2153 "y.tab.c"
+             { /*printf("REG_T2\n");*/ insert_register(&parser_asm_line, R_T2); }
+#line 1931 "parser.c"
     break;
 
-  case 75: /* register: REG_A1  */
+  case 70: /* register: REG_T3  */
 #line 367 "parser.y"
-             { /*printf("REG_A1\n");*/ insert_register(&parser_asm_line, R_A1); }
-#line 2159 "y.tab.c"
+             { /*printf("REG_T3\n");*/ insert_register(&parser_asm_line, R_T3); }
+#line 1937 "parser.c"
     break;
 
-  case 76: /* register: REG_A2  */
+  case 71: /* register: REG_T4  */
 #line 368 "parser.y"
-             { /*printf("REG_A2\n");*/ insert_register(&parser_asm_line, R_A2); }
-#line 2165 "y.tab.c"
+             { /*printf("REG_T4\n");*/ insert_register(&parser_asm_line, R_T4); }
+#line 1943 "parser.c"
     break;
 
-  case 77: /* register: REG_A3  */
+  case 72: /* register: REG_T5  */
 #line 369 "parser.y"
-             { /*printf("REG_A3\n");*/ insert_register(&parser_asm_line, R_A3); }
-#line 2171 "y.tab.c"
+             { /*printf("REG_T5\n");*/ insert_register(&parser_asm_line, R_T5); }
+#line 1949 "parser.c"
     break;
 
-  case 78: /* register: REG_A4  */
+  case 73: /* register: REG_T6  */
 #line 370 "parser.y"
-             { /*printf("REG_A4\n");*/ insert_register(&parser_asm_line, R_A4); }
-#line 2177 "y.tab.c"
+             { /*printf("REG_T6\n");*/ insert_register(&parser_asm_line, R_T6); }
+#line 1955 "parser.c"
     break;
 
-  case 79: /* register: REG_A5  */
+  case 74: /* register: REG_FP  */
 #line 371 "parser.y"
-             { /*printf("REG_A5\n");*/ insert_register(&parser_asm_line, R_A5); }
-#line 2183 "y.tab.c"
+             { /*printf("REG_FP\n");*/ insert_register(&parser_asm_line, R_S0); }
+#line 1961 "parser.c"
     break;
 
-  case 80: /* register: REG_A6  */
+  case 75: /* register: REG_A0  */
 #line 372 "parser.y"
-             { /*printf("REG_A6\n");*/ insert_register(&parser_asm_line, R_A6); }
-#line 2189 "y.tab.c"
+             { /*printf("REG_A0\n");*/ insert_register(&parser_asm_line, R_A0); }
+#line 1967 "parser.c"
     break;
 
-  case 81: /* register: REG_A7  */
+  case 76: /* register: REG_A1  */
 #line 373 "parser.y"
-             { /*printf("REG_A7\n");*/ insert_register(&parser_asm_line, R_A7); }
-#line 2195 "y.tab.c"
+             { /*printf("REG_A1\n");*/ insert_register(&parser_asm_line, R_A1); }
+#line 1973 "parser.c"
     break;
 
-  case 82: /* register: REG_S0  */
+  case 77: /* register: REG_A2  */
 #line 374 "parser.y"
-             { /*printf("REG_S0\n");*/ insert_register(&parser_asm_line, R_S0); }
-#line 2201 "y.tab.c"
+             { /*printf("REG_A2\n");*/ insert_register(&parser_asm_line, R_A2); }
+#line 1979 "parser.c"
     break;
 
-  case 83: /* register: REG_S1  */
+  case 78: /* register: REG_A3  */
 #line 375 "parser.y"
-             { /*printf("REG_S1\n");*/ insert_register(&parser_asm_line, R_S1); }
-#line 2207 "y.tab.c"
+             { /*printf("REG_A3\n");*/ insert_register(&parser_asm_line, R_A3); }
+#line 1985 "parser.c"
     break;
 
-  case 84: /* register: REG_S2  */
+  case 79: /* register: REG_A4  */
 #line 376 "parser.y"
-             { /*printf("REG_S2\n");*/ insert_register(&parser_asm_line, R_S2); }
-#line 2213 "y.tab.c"
+             { /*printf("REG_A4\n");*/ insert_register(&parser_asm_line, R_A4); }
+#line 1991 "parser.c"
     break;
 
-  case 85: /* register: REG_S3  */
+  case 80: /* register: REG_A5  */
 #line 377 "parser.y"
-             { /*printf("REG_S3\n");*/ insert_register(&parser_asm_line, R_S3); }
-#line 2219 "y.tab.c"
+             { /*printf("REG_A5\n");*/ insert_register(&parser_asm_line, R_A5); }
+#line 1997 "parser.c"
     break;
 
-  case 86: /* register: REG_S4  */
+  case 81: /* register: REG_A6  */
 #line 378 "parser.y"
-             { /*printf("REG_S4\n");*/ insert_register(&parser_asm_line, R_S4); }
-#line 2225 "y.tab.c"
+             { /*printf("REG_A6\n");*/ insert_register(&parser_asm_line, R_A6); }
+#line 2003 "parser.c"
     break;
 
-  case 87: /* register: REG_S5  */
+  case 82: /* register: REG_A7  */
 #line 379 "parser.y"
-             { /*printf("REG_S5\n");*/ insert_register(&parser_asm_line, R_S5); }
-#line 2231 "y.tab.c"
+             { /*printf("REG_A7\n");*/ insert_register(&parser_asm_line, R_A7); }
+#line 2009 "parser.c"
     break;
 
-  case 88: /* register: REG_S6  */
+  case 83: /* register: REG_S0  */
 #line 380 "parser.y"
-             { /*printf("REG_S6\n");*/ insert_register(&parser_asm_line, R_S6); }
-#line 2237 "y.tab.c"
+             { /*printf("REG_S0\n");*/ insert_register(&parser_asm_line, R_S0); }
+#line 2015 "parser.c"
     break;
 
-  case 89: /* register: REG_S7  */
+  case 84: /* register: REG_S1  */
 #line 381 "parser.y"
-             { /*printf("REG_S7\n");*/ insert_register(&parser_asm_line, R_S7); }
-#line 2243 "y.tab.c"
+             { /*printf("REG_S1\n");*/ insert_register(&parser_asm_line, R_S1); }
+#line 2021 "parser.c"
     break;
 
-  case 90: /* register: REG_S8  */
+  case 85: /* register: REG_S2  */
 #line 382 "parser.y"
-             { /*printf("REG_S8\n");*/ insert_register(&parser_asm_line, R_S8); }
-#line 2249 "y.tab.c"
+             { /*printf("REG_S2\n");*/ insert_register(&parser_asm_line, R_S2); }
+#line 2027 "parser.c"
     break;
 
-  case 91: /* register: REG_S9  */
+  case 86: /* register: REG_S3  */
 #line 383 "parser.y"
-             { /*printf("REG_S9\n");*/ insert_register(&parser_asm_line, R_S9); }
-#line 2255 "y.tab.c"
+             { /*printf("REG_S3\n");*/ insert_register(&parser_asm_line, R_S3); }
+#line 2033 "parser.c"
     break;
 
-  case 92: /* register: REG_S10  */
+  case 87: /* register: REG_S4  */
 #line 384 "parser.y"
-              { /*printf("REG_S10\n");*/ insert_register(&parser_asm_line, R_S10); }
-#line 2261 "y.tab.c"
+             { /*printf("REG_S4\n");*/ insert_register(&parser_asm_line, R_S4); }
+#line 2039 "parser.c"
     break;
 
-  case 93: /* register: REG_S11  */
+  case 88: /* register: REG_S5  */
 #line 385 "parser.y"
+             { /*printf("REG_S5\n");*/ insert_register(&parser_asm_line, R_S5); }
+#line 2045 "parser.c"
+    break;
+
+  case 89: /* register: REG_S6  */
+#line 386 "parser.y"
+             { /*printf("REG_S6\n");*/ insert_register(&parser_asm_line, R_S6); }
+#line 2051 "parser.c"
+    break;
+
+  case 90: /* register: REG_S7  */
+#line 387 "parser.y"
+             { /*printf("REG_S7\n");*/ insert_register(&parser_asm_line, R_S7); }
+#line 2057 "parser.c"
+    break;
+
+  case 91: /* register: REG_S8  */
+#line 388 "parser.y"
+             { /*printf("REG_S8\n");*/ insert_register(&parser_asm_line, R_S8); }
+#line 2063 "parser.c"
+    break;
+
+  case 92: /* register: REG_S9  */
+#line 389 "parser.y"
+             { /*printf("REG_S9\n");*/ insert_register(&parser_asm_line, R_S9); }
+#line 2069 "parser.c"
+    break;
+
+  case 93: /* register: REG_S10  */
+#line 390 "parser.y"
+              { /*printf("REG_S10\n");*/ insert_register(&parser_asm_line, R_S10); }
+#line 2075 "parser.c"
+    break;
+
+  case 94: /* register: REG_S11  */
+#line 391 "parser.y"
               { /*printf("REG_S11\n");*/ insert_register(&parser_asm_line, R_S11); }
-#line 2267 "y.tab.c"
+#line 2081 "parser.c"
     break;
 
 
-#line 2271 "y.tab.c"
+#line 2085 "parser.c"
 
       default: break;
     }
@@ -2465,7 +2279,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 409 "parser.y"
+#line 415 "parser.y"
 
 
 //-- SECTION 4: FUNCTION DEFINITIONS ---------------------------------

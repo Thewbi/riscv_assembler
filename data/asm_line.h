@@ -92,6 +92,7 @@ enum assembler_instruction {
     AI_EQU,
     AI_SECTION,
     AI_GLOBL,
+    AI_TEXT,
 
     AI_UNDEFINED
 
