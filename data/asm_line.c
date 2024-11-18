@@ -130,11 +130,13 @@ void print_asm_line(const asm_line_t *data) {
     //printf("print_asm_line\n");
     //printf("print_asm_line label: %s \n", data->label);
 
-    if (strlen(data->label) != 0) {
+    // if (strlen(data->label) != 0) {
 
-        printf("[(%d) Label: %s]\n", data->line_nr, data->label);
+    //     printf("[(%d) Label: %s]\n", data->line_nr, data->label);
 
-    } else if (data->asm_instruction != AI_UNDEFINED) {
+    // } else
+
+    if (data->asm_instruction != AI_UNDEFINED) {
 
         char buffer_3[100];
 
@@ -165,12 +167,13 @@ void print_asm_line(const asm_line_t *data) {
         print_expression(data->offset_1_expression, buffer_1);
         print_expression(data->offset_2_expression, buffer_2);
 
-        printf("[(%d) Instr: %s Size: %d Imm: %d Used: %d \n \
+        printf("[(%d) Label: %s, Instr: %s Size: %d Imm: %d Used: %d \n \
     0:{offset_0_used:%d offset:%d offset_ident:%s register:%s offset_0_expr:%s}\n \
     1:{offset_1_used:%d offset:%d offset_ident:%s register:%s offset_1_expr:%s}\n \
     2:{offset_2_used:%d offset:%d offset_ident:%s register:%s offset_2_expr:%s}\n \
 ]\n",
             data->line_nr,
+            data->label,
             instruction_to_string(data->instruction),
             data->size_in_bytes,
             data->imm,
@@ -185,11 +188,13 @@ void print_asm_line(const asm_line_t *data) {
 
 void serialize_asm_line(const asm_line_t *data) {
 
-    if (strlen(data->label) != 0) {
+    // if (strlen(data->label) != 0) {
 
-        //printf("[(%d) Label: %s]\n", data->line_nr, data->label);
+    //     //printf("[(%d) Label: %s]\n", data->line_nr, data->label);
 
-    } else if (data->asm_instruction != AI_UNDEFINED) {
+    // } else
+
+    if (data->asm_instruction != AI_UNDEFINED) {
 
         // char buffer_3[100];
 
@@ -307,9 +312,11 @@ void serialize_asm_line(const asm_line_t *data) {
             // S-Type
             case  I_SW: // store word
                 printf("%s, ", register_to_string(data->reg_rs1));
-                printf("%s(", register_to_string(data->reg_rs2));
+                // printf("%s(", register_to_string(data->reg_rs2));
+                // printf("0x%08" PRIx32 "", data->imm);
+                // printf(")");
                 printf("0x%08" PRIx32 "", data->imm);
-                printf(")");
+                printf("(%s)", register_to_string(data->reg_rs2));
                 break;
 
             // U-Type
@@ -579,6 +586,12 @@ const char* assembler_instruction_to_string(enum assembler_instruction data) {
         case AI_EQU: return "EQU";
         case AI_SECTION: return "SECTION";
         case AI_GLOBL: return "GLOBL";
+        case AI_TEXT: return "TEXT";
+        case AI_DATA: return "DATA";
+        case AI_BYTE: return "BYTE";
+        case AI_HALF: return "HALF";
+        case AI_WORD: return "WORD";
+        case AI_DWORD: return "DWORD";
 
         default: return "UNKNOWN ASSEMBLER INSTRUCTION!";
     }
@@ -790,7 +803,7 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             //
 
             uint8_t opcode = 0b0010111;
-            uint8_t rd = encode_register(free_temp_register);
+            //uint8_t rd = encode_register(free_temp_register);
             uint32_t imm = data_0;
 
             asm_line_t auipc;
@@ -799,7 +812,8 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             auipc.line_nr = line_nr;
             auipc.instruction = I_AUIPC;
             auipc.instruction_type = IT_U;
-            auipc.reg_rd = data->reg_rd;
+            //auipc.reg_rd = data->reg_rd;
+            auipc.reg_rd = free_temp_register;
             auipc.imm = imm;
 
             //
@@ -809,7 +823,7 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             uint8_t funct3 = 0b000;
             opcode = 0b1100111;
 
-            rd = encode_register(R_ZERO);
+            //rd = encode_register(R_ZERO);
             uint8_t rs1 = encode_register(free_temp_register);
             imm = data_1;
 
@@ -840,7 +854,13 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             int line_nr = data->line_nr;
 
             // take the 32 bit value (data_0)
-            uint32_t data_0 = data->offset_1;
+            uint32_t data_0 = 0;
+
+            if (data->offset_0_used) {
+                data_0 = data->offset_1;
+            } else {
+                data_0 = data->offset_1_expression->int_val;
+            }
 
             // split it into a 20 bit (data_1) and a twelve bit part (is ignored)
             uint32_t data_1 = ((data_0 & 0b11111111111111111111000000000000) >> 12);
@@ -922,8 +942,10 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             // see: https://riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf
             data->instruction = I_BNE;
             data->instruction_type = IT_I;
-            data->reg_rd = data->reg_rd;
+            // data->reg_rd = data->reg_rd;
+            // data->reg_rs1 = data->reg_rd;
             data->reg_rs1 = data->reg_rd;
+            data->reg_rs2 = data->reg_rd;
             data->imm = 0;
         }
         break;

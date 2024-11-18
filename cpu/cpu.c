@@ -46,7 +46,8 @@ uint32_t execute_instruction(cpu_t* cpu, const asm_line_t* asm_line) {
             //printf("CPU ADDI detected\n");
             printf("CPU ADDI rd: %s (%d), rs1: %s (%d), imm: %d\n", register_to_string(asm_line->reg_rd), cpu->reg[asm_line->reg_rd], register_to_string(asm_line->reg_rs1), cpu->reg[asm_line->reg_rs1], sign_extend_12_bit_to_uint32_t(asm_line->imm));
 
-            cpu->reg[asm_line->reg_rd] = cpu->reg[asm_line->reg_rs1] + sign_extend_12_bit_to_uint32_t(asm_line->imm);
+            //cpu->reg[asm_line->reg_rd] = cpu->reg[asm_line->reg_rs1] + sign_extend_12_bit_to_uint32_t(asm_line->imm);
+            cpu->reg[asm_line->reg_rd] = cpu->reg[asm_line->reg_rs1] + asm_line->imm;
 
             cpu->pc += PC_INCREMENT;
         }

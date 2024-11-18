@@ -93,6 +93,11 @@ enum assembler_instruction {
     AI_SECTION,
     AI_GLOBL,
     AI_TEXT,
+    AI_DATA,
+    AI_BYTE,
+    AI_HALF,
+    AI_WORD,
+    AI_DWORD,
 
     AI_UNDEFINED
 

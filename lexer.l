@@ -21,6 +21,11 @@
 ".globl"    { /*printf(".globl\n");*/ return GLOBL; }
 ".global"    { /*printf(".global\n");*/ return GLOBAL; }
 ".text"    { /*printf(".text\n");*/ return TEXT; }
+".data"    { /*printf(".data\n");*/ return DATA; }
+".byte"    { /*printf(".byte\n");*/ return BYTE; }
+".half"    { /*printf(".half\n");*/ return HALF; }
+".word"    { /*printf(".word\n");*/ return WORD; }
+".dword"    { /*printf(".dword\n");*/ return DWORD; }
 
 "add"	{ /*printf("ADD\n");*/ return ADD; }
 "addi"	{ /*printf("ADDI\n");*/ return ADDI; }

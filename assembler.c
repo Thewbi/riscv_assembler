@@ -151,22 +151,37 @@ int assemble(const char* filename, uint32_t* machine_code) {
 
         if (asm_line_ptr->offset_0_expression != NULL) {
             printf("%s\n", asm_line_ptr->offset_0_expression->string_val);
+            if (contains_key_trivial_map(equ_map, 20, asm_line_ptr->offset_0_expression->string_val)) {
+                int val = 0;
+                retrieve_by_key_trivial_map(equ_map, 20, asm_line_ptr->offset_0_expression->string_val, &val);
+                asm_line_ptr->offset_0_expression->int_val = val;
+                // erase the replaced string
+                memset(asm_line_ptr->offset_0_expression->string_val, 0, 100);
+            } else {
+                printf("Cannot resolve symbol %s!\n", asm_line_ptr->offset_0_expression->string_val);
+            }
         } else if (asm_line_ptr->offset_1_expression != NULL) {
             printf("%s\n", asm_line_ptr->offset_1_expression->string_val);
-
             if (contains_key_trivial_map(equ_map, 20, asm_line_ptr->offset_1_expression->string_val)) {
-
                 int val = 0;
                 retrieve_by_key_trivial_map(equ_map, 20, asm_line_ptr->offset_1_expression->string_val, &val);
                 asm_line_ptr->offset_1_expression->int_val = val;
+                // erase the replaced string
+                memset(asm_line_ptr->offset_1_expression->string_val, 0, 100);
             } else {
                 printf("Cannot resolve symbol %s!\n", asm_line_ptr->offset_1_expression->string_val);
             }
-
-            memset(asm_line_ptr->offset_1_expression->string_val, 0, 100);
-
         } else if (asm_line_ptr->offset_2_expression != NULL) {
             printf("%s\n", asm_line_ptr->offset_2_expression->string_val);
+            if (contains_key_trivial_map(equ_map, 20, asm_line_ptr->offset_2_expression->string_val)) {
+                int val = 0;
+                retrieve_by_key_trivial_map(equ_map, 20, asm_line_ptr->offset_2_expression->string_val, &val);
+                asm_line_ptr->offset_2_expression->int_val = val;
+                // erase the replaced string
+                memset(asm_line_ptr->offset_2_expression->string_val, 0, 100);
+            } else {
+                printf("Cannot resolve symbol %s!\n", asm_line_ptr->offset_2_expression->string_val);
+            }
         }
 
     }
@@ -414,9 +429,6 @@ int assemble(const char* filename, uint32_t* machine_code) {
     //
 
     for (int i = 0; i < 100; i++) {
-        if (i == 43) {
-            printf("\n");
-        }
         resolve_pseudo_instructions_asm_line(asm_line_array, 100, i);
     }
 
@@ -435,7 +447,8 @@ int assemble(const char* filename, uint32_t* machine_code) {
     printf("code:\n");
     for (int i = 0; i < 100; i++) {
         //printf("line %d\n", i);
-        if (asm_line_array[i].used != 0) {
+        if ((asm_line_array[i].used != 0) && (asm_line_array[i].instruction != I_UNDEFINED_INSTRUCTION)) {
+            printf("%d) ", i);
             serialize_asm_line(&asm_line_array[i]);
         }
     }
@@ -447,12 +460,12 @@ int assemble(const char* filename, uint32_t* machine_code) {
     size_t instruction_index = 0;
     for (int i = 0; i < 100; i++) {
         //printf("line %d\n", i);
-        if (asm_line_array[i].used != 0) {
+        if ((asm_line_array[i].used != 0) && (asm_line_array[i].instruction != I_UNDEFINED_INSTRUCTION)) {
             //printf("%d\n", encode(&asm_line_array[i]));
 
             uint32_t machine_code_for_instruction = encode(&asm_line_array[i]);
             if (machine_code_for_instruction != 0) {
-                printf("%08" PRIx64 "\n", machine_code_for_instruction);
+                printf("%d) %08" PRIx64 "\n", i, machine_code_for_instruction);
 
                 machine_code[instruction_index] = machine_code_for_instruction;
                 instruction_index++;

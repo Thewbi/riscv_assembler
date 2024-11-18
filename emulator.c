@@ -74,9 +74,12 @@ int main(int argc, char **argv)
 
 #if USE_ASSEMBLER_SOURCE_FILE
 
+    //std::string source_file = "test/resources/label_and_instruction.s";
     //std::string source_file = "test/resources/string_length.s";
     //std::string source_file = "test/resources/add3.s";
-    std::string source_file = "test/resources/blinker.s";
+    //std::string source_file = "test/resources/blinker.s";
+    //std::string source_file = "test/resources/loads.s";
+    std::string source_file = "test/resources/scratchpad.s";
 
     uint32_t machine_code[100];
     memset(machine_code, 0, 100);
@@ -135,7 +138,10 @@ int main(int argc, char **argv)
     //printf("REG R_T0: %d\n", cpu.reg[R_T0]);
     //printf("REG R_T1: %d\n", cpu.reg[R_T1]);
 
-    printf("REG R_T1: %d\n", cpu.reg[R_A0]);
+    //printf("REG R_T1: %d\n", cpu.reg[R_A0]);
+    printf("REG R_GP: %d\n", cpu.reg[R_GP]);
+    printf("REG R_GP: 0x%08" PRIx64 "\n", cpu.reg[R_GP]);
+    printf("REG R_SP: 0x%08" PRIx64 "\n", cpu.reg[R_SP]);
 
     return 0;
 

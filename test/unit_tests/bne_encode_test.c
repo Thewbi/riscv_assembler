@@ -24,7 +24,7 @@ void bne_encode_valid_input_test(void **state)
 
     reset_asm_line(&parser_asm_line);
 
-    // printf("encode_b_type opcode: %d \n", parser_asm_line.instruction);    
+    // printf("encode_b_type opcode: %d \n", parser_asm_line.instruction);
     // printf("encode_b_type rs1: %d \n", parser_asm_line.reg_rs1);
     // printf("encode_b_type rs2: %d \n", parser_asm_line.reg_rs2);
     // printf("encode_b_type rd: %d \n", parser_asm_line.reg_rd);
@@ -46,7 +46,7 @@ void bne_encode_valid_input_test(void **state)
     // The parser will load data into the variable parser_asm_line
     yyparse();
 
-    // printf("encode_b_type opcode: %d \n", parser_asm_line.instruction);    
+    // printf("encode_b_type opcode: %d \n", parser_asm_line.instruction);
     // printf("encode_b_type rs1: %d \n", parser_asm_line.reg_rs1);
     // printf("encode_b_type rs2: %d \n", parser_asm_line.reg_rs2);
     // printf("encode_b_type rd: %d \n", parser_asm_line.reg_rd);

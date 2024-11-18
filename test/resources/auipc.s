@@ -8,3 +8,4 @@
 
 //auipc x5, 0x03000
 auipc t0, 0x03000
+//auipc x6, 0

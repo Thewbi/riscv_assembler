@@ -14,7 +14,7 @@ void initialize_trivial_map(trivial_map_element_t* map, int size) {
 
 int contains_key_trivial_map(const trivial_map_element_t* map, int size, const char* key) {
     for (int i = 0; i < size; i++) {
-        if (strncmp(map[i].key, key, 100) == 0) {
+        if ((map[i].used == 1) && (strncmp(map[i].key, key, 100) == 0)) {
             return 1;
         }
     }

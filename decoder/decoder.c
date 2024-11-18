@@ -100,10 +100,11 @@ void decode_i_type(uint32_t data, asm_line_t* asm_line, uint8_t funct7, uint8_t 
     // uint8_t funct3 = (data >> (7+5)) & 0b111;
     uint8_t rs1 = (data >> (7+5+3)) & 0b11111;
     uint16_t imm = (data >> (7+5+3+5)) & 0b111111111111;
-    imm = sign_extend_uint16_t(imm);
 
     asm_line->reg_rd = decode_register(rd);
     asm_line->reg_rs1 = decode_register(rs1);
+
+    imm = sign_extend_uint16_t(imm); // required for lw a5, -20(s0)
     asm_line->imm = imm;
 
     switch (funct7) {

@@ -48,13 +48,13 @@ void (*fp_emit)(asm_line_t*);
 %locations
 
 %union {
-  int int_val;
-  char string_val[100];
-  char sym;
-  node_t* expr_ptr;
+    int int_val;
+    char string_val[100];
+    char sym;
+    node_t* expr_ptr;
 };
 
-%token <sym> EQU SECTION GLOBL GLOBAL TEXT
+%token <sym> EQU SECTION GLOBL GLOBAL TEXT DATA BYTE HALF WORD DWORD
 %token <sym> ADD ADDI AUIPC BEQ BEQZ BNE BNEZ CALL J JALR LB LI LW LUI MUL MV RET SRLI SLLI SW
 %token <sym> NEW_LINE
 %token <int_val> NUMERIC
@@ -68,6 +68,7 @@ void (*fp_emit)(asm_line_t*);
 
 %type <expr_ptr> expr; // the expr rule will return a node_t pointer
 %type <string_val> label;
+%type <string_val> csv_identifier_list;
 
 //-- SECTION 3: GRAMMAR RULES ---------------------------------------
 
@@ -97,6 +98,9 @@ asm_line :
 
         parser_asm_line.line_nr = (yylineno -1);
 
+        memset(parser_asm_line.label, 0, 100);
+        memcpy(parser_asm_line.label, $1, strlen($1));
+
         if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
     }
 	|
@@ -115,6 +119,9 @@ asm_line :
         //printf("Line: %d\n", (yylineno -1));
 
         parser_asm_line.line_nr = (yylineno - 1);
+
+        memset(parser_asm_line.label, 0, 100);
+        memcpy(parser_asm_line.label, $1, strlen($1));
 
         if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
     }
@@ -215,10 +222,12 @@ param_3 :
 
 label :
     IDENTIFIER COLON {
+        printf("label A detected!\n");
         strncpy($$, $1, 100);
     }
     |
     NUMERIC COLON {
+        printf("label B detected!\n");
         char buffer[100];
         memset(buffer, 0, 100);
         snprintf(buffer, 100, "%d", $1);
@@ -279,6 +288,11 @@ expr:
         }
     }
 
+csv_identifier_list :
+    IDENTIFIER
+    |
+    IDENTIFIER COMMA csv_identifier_list
+
 assembler_instruction :
     EQU IDENTIFIER COMMA expr {
 
@@ -295,6 +309,7 @@ assembler_instruction :
         parser_asm_line.asm_instruction_expr = $4;
         //parser_asm_line.asm_instruction_expr = NULL;
         current_node = NULL;
+
     }
     |
     SECTION TEXT {
@@ -306,9 +321,10 @@ assembler_instruction :
         memcpy(parser_asm_line.asm_instruction_symbol, ".text", strlen(".text"));
 
         current_node = NULL;
+
     }
     |
-    GLOBL IDENTIFIER {
+    GLOBL csv_identifier_list {
 
         parser_asm_line.asm_instruction = AI_GLOBL;
 
@@ -319,7 +335,7 @@ assembler_instruction :
 
     }
     |
-    GLOBAL IDENTIFIER {
+    GLOBAL csv_identifier_list {
 
         parser_asm_line.asm_instruction = AI_GLOBL;
 
@@ -331,9 +347,51 @@ assembler_instruction :
     }
     |
     TEXT {
+
         parser_asm_line.asm_instruction = AI_TEXT;
 
         current_node = NULL;
+
+    }
+    |
+    DATA {
+
+        parser_asm_line.asm_instruction = AI_DATA;
+
+        current_node = NULL;
+
+    }
+    |
+    BYTE {
+
+        parser_asm_line.asm_instruction = AI_BYTE;
+
+        current_node = NULL;
+
+    }
+    |
+    HALF {
+
+        parser_asm_line.asm_instruction = AI_HALF;
+
+        current_node = NULL;
+
+    }
+    |
+    WORD {
+
+        parser_asm_line.asm_instruction = AI_WORD;
+
+        current_node = NULL;
+
+    }
+    |
+    DWORD {
+
+        parser_asm_line.asm_instruction = AI_DWORD;
+
+        current_node = NULL;
+
     }
 
 mnemonic : ADD { /*printf("Parser-ADD: %d\n", I_ADD);*/ /*parser_asm_line.instruction = I_ADD; parser_asm_line.instruction_type = IT_R;*/ set_instruction(&parser_asm_line, I_ADD, IT_R); }
