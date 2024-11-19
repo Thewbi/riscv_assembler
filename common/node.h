@@ -11,7 +11,7 @@ typedef struct node {
     struct node* right;
 
     char string_val[100];
-    int int_val;
+    int64_t int_val;
 } node_t;
 
 void reset_node(node_t* node);

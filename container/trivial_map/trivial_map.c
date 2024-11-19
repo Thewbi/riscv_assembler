@@ -71,7 +71,7 @@ int retrieve_by_key_trivial_map(const trivial_map_element_t* map, const int size
 void print_trivial_map(trivial_map_element_t* map, int size) {
     for (int i = 0; i < size; i++) {
         if (map[i].used) {
-            printf("%d) %s <-> %d \n", i, map[i].key, map[i].value);
+            printf("%d) %s <-> %08" PRIx64 "\n", i, map[i].key, map[i].value);
         } else {
             printf("%d) empty\n", i);
         }

@@ -21,6 +21,8 @@
 #include <trivial_map/trivial_map.h>
 #include <tuple_set/tuple_set.h>
 
+#include "assembler.h"
+
 asm_line_t parser_asm_line;
 
 extern FILE* yyin;
@@ -43,7 +45,55 @@ extern void (*fp_emit)(asm_line_t*);
 extern int asm_line_array_index;
 extern asm_line_t asm_line_array[100];
 
-int assemble(const char* filename, uint32_t* machine_code) {
+int mem_preload_value(std::map<uint32_t, uint32_t*>* segments,
+    trivial_map_element_t* equ_map, asm_line_t* asm_line,
+    uint32_t& constants_address, uint32_t value, bool replace_address) {
+
+    // DEBUG
+    printf("address: 0x%08x\n", constants_address);
+
+    uint32_t segment_address = constants_address & 0xFFFF0000;
+    uint32_t instr_address = constants_address & 0x0000FFFF;
+
+    uint32_t* segment_ptr = NULL;
+
+    // check if the segment is created already otherwise create it
+    std::map<uint32_t, uint32_t *>::iterator it = segments->find(segment_address);
+    if (it == segments->end()) {
+
+        segment_ptr = new uint32_t[16384];
+        memset(segment_ptr, 0, 16384);
+
+        segments->insert(std::pair<uint32_t, uint32_t*>(segment_address, segment_ptr));
+
+    } else {
+
+        segment_ptr = (*it).second;
+
+    }
+
+    segment_ptr[instr_address] = value;
+
+    //printf("[STORE_WORD] value: %d -> address: 0x%08x\n", cpu->reg[asm_line_array[i].asm_instruction_expr->int_val], constants_address);
+
+    if (replace_address) {
+        if (!insert_or_replace_trivial_map(equ_map, 20,
+                asm_line->label,
+                constants_address)) {
+            printf("Insert .equ failed!\n");
+            return -1;
+        }
+    }
+
+    constants_address += 4;
+
+    return 0;
+}
+
+int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, uint32_t*>* segments) {
+
+    // this is the address where constants defined by assembler instructions .byte, .half, .word, .dword are placed
+    uint32_t constants_address = 0x00CC0000;
 
     reset_asm_line(&parser_asm_line);
 
@@ -80,6 +130,14 @@ int assemble(const char* filename, uint32_t* machine_code) {
     int current_address = 0x0000;
 
     for (int i = 0; i < asm_line_array_index; i++) {
+
+        // the assembler instructions .byte, .half, .word, and .dword
+        // use labels to define constants but these labels do not go into
+        // the label map because they are not used to jump to a specific
+        // address
+        if (asm_line_array[i].asm_instruction != AI_UNDEFINED) {
+            continue;
+        }
 
         if (strnlen(asm_line_array[i].label, 100) > 0) {
 
@@ -127,10 +185,36 @@ int assemble(const char* filename, uint32_t* machine_code) {
     for (int i = 0; i < asm_line_array_index; i++) {
         if (asm_line_array[i].asm_instruction == AI_EQU) {
             //printf("key:%s value:%d\n", asm_line_array[i].asm_instruction_symbol, asm_line_array[i].asm_instruction_expr->int_val);
-            if (!insert_or_replace_trivial_map(equ_map, 20, asm_line_array[i].asm_instruction_symbol, asm_line_array[i].asm_instruction_expr->int_val)) {
+            if (!insert_or_replace_trivial_map(equ_map, 20,
+                    asm_line_array[i].asm_instruction_symbol,
+                    asm_line_array[i].asm_instruction_expr->int_val)) {
                 printf("Insert .equ failed!\n");
                 break;
             }
+        }
+
+        // process assembler instructions: .byte, .half, .word, and .dword
+        //
+        // 1. place constant values into memory
+        // 2. retrieve the address, where the constants have been placed
+        // 3. Insert the label as a key and the address as a value into the
+        //    equ map.
+        if ( (asm_line_array[i].asm_instruction == AI_BYTE) ||
+                (asm_line_array[i].asm_instruction == AI_HALF) ||
+                (asm_line_array[i].asm_instruction == AI_WORD)) {
+
+            //printf("key:%s value:%d\n", asm_line_array[i].asm_instruction_symbol, asm_line_array[i].asm_instruction_expr->int_val);
+
+            mem_preload_value(segments, equ_map, &asm_line_array[i], constants_address, asm_line_array[i].asm_instruction_expr->int_val, true);
+
+        } else if (asm_line_array[i].asm_instruction == AI_DWORD) {
+
+            uint32_t high = (asm_line_array[i].asm_instruction_expr->int_val & 0xFFFFFFFF00000000) >> 32;
+            uint32_t low = (asm_line_array[i].asm_instruction_expr->int_val & 0x00000000FFFFFFFF) >> 0;
+
+            mem_preload_value(segments, equ_map, &asm_line_array[i], constants_address, high, true);
+            mem_preload_value(segments, equ_map, &asm_line_array[i], constants_address, low, false);
+
         }
     }
 

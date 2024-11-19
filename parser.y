@@ -48,7 +48,7 @@ void (*fp_emit)(asm_line_t*);
 %locations
 
 %union {
-    int int_val;
+    uint64_t int_val;
     char string_val[100];
     char sym;
     node_t* expr_ptr;
@@ -135,6 +135,27 @@ asm_line :
         if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
     }
     |
+    assembler_instruction {
+        printf("assembler_instruction without label\n");
+        //printf("Line: %d\n", yylineno);
+
+        parser_asm_line.line_nr = yylineno;
+
+        if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
+    }
+    |
+    label assembler_instruction {
+        printf("assembler_instruction  with label\n");
+        //printf("Line: %d\n", yylineno);
+
+        parser_asm_line.line_nr = yylineno;
+
+        memset(parser_asm_line.label, 0, 100);
+        memcpy(parser_asm_line.label, $1, strlen($1));
+
+        if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
+    }
+    |
     label {
         //printf("label\n");
         //printf("label Line: %d\n", (yylineno-1));
@@ -146,15 +167,6 @@ asm_line :
 
         //printf("Line: %d label: %s \n", parser_asm_line.label, yylineno);
         //printf("Line: %d\n", yylineno);
-
-        if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
-    }
-    |
-    assembler_instruction {
-        //printf("assembler_instruction\n");
-        //printf("Line: %d\n", yylineno);
-
-        parser_asm_line.line_nr = yylineno;
 
         if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
     }
@@ -222,12 +234,12 @@ param_3 :
 
 label :
     IDENTIFIER COLON {
-        printf("label A detected!\n");
+        //printf("label A detected!\n");
         strncpy($$, $1, 100);
     }
     |
     NUMERIC COLON {
-        printf("label B detected!\n");
+        //printf("label B detected!\n");
         char buffer[100];
         memset(buffer, 0, 100);
         snprintf(buffer, 100, "%d", $1);
@@ -237,11 +249,10 @@ label :
 // https://www.gnu.org/software/bison/manual/bison.html
 expr:
     NUMERIC {
-        //printf("PARSER-NUMERIC: %08" PRIx32 "\n", $1);
+        printf("PARSER-NUMERIC: %16" PRIx64 "\n", $1);
         //insert_integer_immediate(&parser_asm_line, $1);
 
-        if (current_node == NULL)
-        {
+        if (current_node == NULL) {
             //current_node = new node_t;
             current_node = (node_t *)malloc(sizeof(node_t));
 
@@ -250,7 +261,7 @@ expr:
             reset_node(current_node);
 
             //printf("PARSER-NUMERIC: creating node: %d\n", $1);
-            //printf("PARSER-NUMERIC: creating node: %08" PRIx32 "\n", $1);
+            printf("PARSER-NUMERIC: creating node: %16" PRIx64 "\n", $1);
             //current_node->int_val = sign_extend_20_bit_to_uint32_t($1);
             current_node->int_val = $1;
             //printf("PARSER-NUMERIC: creating node: %d\n", current_node->int_val);
@@ -362,33 +373,37 @@ assembler_instruction :
 
     }
     |
-    BYTE {
+    BYTE expr {
 
         parser_asm_line.asm_instruction = AI_BYTE;
+        parser_asm_line.asm_instruction_expr = $2;
 
         current_node = NULL;
 
     }
     |
-    HALF {
+    HALF expr {
 
         parser_asm_line.asm_instruction = AI_HALF;
+        parser_asm_line.asm_instruction_expr = $2;
 
         current_node = NULL;
 
     }
     |
-    WORD {
+    WORD expr {
 
         parser_asm_line.asm_instruction = AI_WORD;
+        parser_asm_line.asm_instruction_expr = $2;
 
         current_node = NULL;
 
     }
     |
-    DWORD {
+    DWORD expr {
 
         parser_asm_line.asm_instruction = AI_DWORD;
+        parser_asm_line.asm_instruction_expr = $2;
 
         current_node = NULL;
 

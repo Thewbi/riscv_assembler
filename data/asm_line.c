@@ -146,8 +146,9 @@ void print_asm_line(const asm_line_t *data) {
         print_expression(data->asm_instruction_expr, buffer_3);
         //printf("print_expression done.\n");
 
-        printf("[(%d) AssemblerInstr: Instr:%s Symbol:%s Val: %s]\n",
+        printf("[(%d) AssemblerInstr: Label:%s Instr:%s Symbol:%s Val: %s]\n",
             data->line_nr,
+            data->label,
             assembler_instruction_to_string(data->asm_instruction),
             data->asm_instruction_symbol, buffer_3);
 

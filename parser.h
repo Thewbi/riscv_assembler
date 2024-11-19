@@ -135,7 +135,7 @@ union YYSTYPE
 {
 #line 50 "parser.y"
 
-    int int_val;
+    uint64_t int_val;
     char string_val[100];
     char sym;
     node_t* expr_ptr;

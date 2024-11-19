@@ -1,42 +1,19 @@
-# Simple blinker
-# Code is taken from here: https://github.com/BrunoLevy/learn-fpga/blob/master/FemtoRV/TUTORIALS/FROM_BLINKER_TO_RISCV/README.md
+        .global loadb, loadh, loadw, loadd
 
-# https://michaeljclark.github.io/asm.html
+        .text
+loadb:  lb      a0, byte            # load a byte
+#        ret
+#loadh:  lh      a0, hword           # load half word
+#        ret
+#loadw:  lw      a0, word            # load a word
+#        ret
+#loadd:  lw      a0, dword           # load lower word of dword
+#        lw      a1, dword+4         # load upper word of dword
+#        ret                         # return value in a0
 
-# assemble for testing here: https://riscvasm.lucasteske.dev/#
-
-# 1. Parse all lines into asm_line objects. For each instruction, store the amount of bytes it will take so that
-#    the label addresses can be computed correctly. All instructions take up 4 byte (32 bit) except for
-#    pseudo instructions which are resolved to more than 4 byte (mostly 8 byte)
-#    Do not resolve pseudo instructions just yet because labels and symbols are not replaced by concrete values
-# 2. Build a map from labels and symbols to addresses or values
-# 3. Replace all labels and symbols by numeric values (address or values) in each asm_line
-#    For addresses, remember that not each line is 4 byte long but use the length stored in each asm_line instead of just 4
-# 4. Replace all pseudo instructions by real instruction asm_line objects
-# 5. Encode asm_line objects into 32 bit machine code
-
-.equ IO_BASE, 0x400000
-.equ IO_LEDS, 4
-
-.section .text
-
-.globl start
-
-start:                          #  0
-    li   gp, IO_BASE            #  0 +8
-    li   sp, 0x1800             #  8 +8
-.L0:                            # 16
-    li   t0, 5                  # 16 +8
-    sw   t0, IO_LEDS(gp)        # 24 +4
-    call wait                   # 28 +8
-    li   t0, 10                 # 36 +8
-    sw   t0, IO_LEDS(gp)        # 44 +4
-    call wait                   # 48 +8
-    j    .L0                    # 56 +8
-wait:                           # 64
-    li   t0, 1                  # 64 +8
-    slli t0, t0, 17             # 72 +4
-.L1:                            # 76
-    addi t0, t0, -1             # 76 +4
-    bnez t0, .L1                # 80 +4
-    ret                         # 84 +4
+        .data
+byte:   .byte   0xFF
+hword:  .half   0xF509
+word:   .word   0x0708090A
+dword:  .dword  0xCCBBAA99887766
+byte2:   .byte   0xFF

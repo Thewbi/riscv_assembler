@@ -82,6 +82,7 @@
         "trivial_map.h": "c",
         "xtr1common": "c",
         "node.h": "c",
-        "format": "c"
+        "format": "c",
+        "xmemory": "c"
     }
 }

@@ -74,6 +74,13 @@ int main(int argc, char **argv)
 
 #if USE_ASSEMBLER_SOURCE_FILE
 
+    cpu_t cpu;
+    cpu_init(&cpu);
+    cpu.pc = 0x00;
+
+    std::map<uint32_t, uint32_t*> segments;
+    cpu.segments = &segments;
+
     //std::string source_file = "test/resources/label_and_instruction.s";
     //std::string source_file = "test/resources/string_length.s";
     //std::string source_file = "test/resources/add3.s";
@@ -84,14 +91,9 @@ int main(int argc, char **argv)
     uint32_t machine_code[100];
     memset(machine_code, 0, 100);
 
-    assemble(source_file.c_str(), machine_code);
+    assemble(source_file.c_str(), machine_code, &segments);
 
-    cpu_t cpu;
-    cpu_init(&cpu);
-    cpu.pc = 0x00;
 
-    std::map<uint32_t, uint32_t*> segments;
-    cpu.segments = &segments;
 
 #endif
 
