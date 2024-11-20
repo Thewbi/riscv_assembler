@@ -274,9 +274,31 @@ uint32_t encode_lb(asm_line_t* asm_line) {
     uint8_t funct3 = 0b000;
     uint8_t opcode = 0b0000011;
 
+    if (asm_line->reg_rs1 == R_UNDEFINED_REGISTER) {
+        asm_line->reg_rs1 = R_ZERO;
+    }
+
     uint8_t rs1 = encode_register(asm_line->reg_rs1);
     uint8_t rd = encode_register(asm_line->reg_rd);
-    uint16_t imm = asm_line->offset_1;
+    // uint16_t imm = asm_line->offset_1
+    uint16_t imm = asm_line->offset_1_expression->int_val;
+
+    return encode_i_type(imm, rs1, funct3, rd, opcode);
+}
+
+uint32_t encode_lh(asm_line_t* asm_line) {
+
+    uint8_t funct3 = 0b001;
+    uint8_t opcode = 0b0000011;
+
+    if (asm_line->reg_rs1 == R_UNDEFINED_REGISTER) {
+        asm_line->reg_rs1 = R_ZERO;
+    }
+
+    uint8_t rs1 = encode_register(asm_line->reg_rs1);
+    uint8_t rd = encode_register(asm_line->reg_rd);
+    // uint16_t imm = asm_line->offset_1
+    uint16_t imm = asm_line->offset_1_expression->int_val;
 
     return encode_i_type(imm, rs1, funct3, rd, opcode);
 }
@@ -674,6 +696,10 @@ uint32_t encode(asm_line_t* asm_line) {
 
         case I_LB:
             encoded_asm_line = encode_lb(asm_line);
+            break;
+
+        case I_LH:
+            encoded_asm_line = encode_lh(asm_line);
             break;
 
         // case I_CALL:

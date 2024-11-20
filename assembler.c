@@ -93,7 +93,8 @@ int mem_preload_value(std::map<uint32_t, uint32_t*>* segments,
 int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, uint32_t*>* segments) {
 
     // this is the address where constants defined by assembler instructions .byte, .half, .word, .dword are placed
-    uint32_t constants_address = 0x00CC0000;
+    //uint32_t constants_address = 0x00CC0000;
+    uint32_t constants_address = 0x00010000;
 
     reset_asm_line(&parser_asm_line);
 

@@ -265,10 +265,15 @@ void serialize_asm_line(const asm_line_t *data) {
             case I_LH:
             case I_LW:
             case I_LBU:
-            case I_LHU:
+            case I_LHU: {
                 printf("%s, ", register_to_string(data->reg_rd));
                 printf("0x%08" PRIx32 "", data->imm);
-                printf("(%s)", register_to_string(data->reg_rs1));
+                enum register_ reg = data->reg_rs1;
+                if (reg == R_UNDEFINED_REGISTER) {
+                    reg = R_ZERO;
+                }
+                printf("(%s)", register_to_string(reg));
+                }
                 break;
 
             // B-Type
@@ -600,44 +605,6 @@ const char* assembler_instruction_to_string(enum assembler_instruction data) {
 
 const char* register_to_string(enum register_ data) {
 
-    /*
-    switch(data) {
-        case R_ZERO: return "R_ZERO"; // 0, Hard-wired zero
-        case R_RA: return "R_RA"; // 1, Return address
-        case R_SP: return "R_SP"; // 2, Stack pointer
-        case R_GP: return "R_GP"; // 3, Global pointer
-        case R_TP: return "R_TP"; // 4, Thread pointer
-        case R_T0: return "R_T0"; // 5, Temporary/alternate link register
-        case R_T1: return "R_T1"; // 6, Temporary
-        case R_T2: return "R_T2"; // 7, Temporary
-        case R_S0: return "R_S0"; // 8, Saved register/frame pointer
-        case R_S1: return "R_S1"; // 9, Saved register
-        case R_A0: return "R_A0"; // 10, Function arguments/return values
-        case R_A1: return "R_A1"; // 11, Function arguments/return values
-        case R_A2: return "R_A2"; // 12, Function arguments
-        case R_A3: return "R_A3"; // 13, Function arguments
-        case R_A4: return "R_A4"; // 14, Function arguments
-        case R_A5: return "R_A5"; // 15, Function arguments
-        case R_A6: return "R_A6"; // 16, Function arguments
-        case R_A7: return "R_A7"; // 17, Function arguments
-        case R_S2: return "R_S2"; // 18, Saved registers
-        case R_S3: return "R_S3"; // 19, Saved registers
-        case R_S4: return "R_S4"; // 20, Saved registers
-        case R_S5: return "R_S5"; // 21, Saved registers
-        case R_S6: return "R_S6"; // 22, Saved registers
-        case R_S7: return "R_S7"; // 23, Saved registers
-        case R_S8: return "R_S8"; // 24, Saved registers
-        case R_S9: return "R_S9"; // 25, Saved registers
-        case R_S10: return "R_S10"; // 26, Saved registers
-        case R_S11: return "R_S11"; // 27, Saved registers
-        case R_T3: return "R_T3"; // 28, Temporary
-        case R_T4: return "R_T4"; // 29, Temporary
-        case R_T5: return "R_T5"; // 30, Temporary
-        case R_T6: return "R_T6"; // 31, Temporary
-
-        default: return "R_UNDEFINED_REGISTER";
-    }*/
-
     switch(data) {
         case R_ZERO: return "zero"; // 0, Hard-wired zero
         case R_RA: return "ra"; // 1, Return address
@@ -803,7 +770,7 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             // auipc
             //
 
-            uint8_t opcode = 0b0010111;
+            //uint8_t opcode = 0b0010111;
             //uint8_t rd = encode_register(free_temp_register);
             uint32_t imm = data_0;
 
@@ -813,7 +780,6 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             auipc.line_nr = line_nr;
             auipc.instruction = I_AUIPC;
             auipc.instruction_type = IT_U;
-            //auipc.reg_rd = data->reg_rd;
             auipc.reg_rd = free_temp_register;
             auipc.imm = imm;
 
@@ -821,8 +787,8 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             // jalr
             //
 
-            uint8_t funct3 = 0b000;
-            opcode = 0b1100111;
+            //uint8_t funct3 = 0b000;
+            //opcode = 0b1100111;
 
             //rd = encode_register(R_ZERO);
             uint8_t rs1 = encode_register(free_temp_register);
@@ -850,6 +816,85 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
         }
         break;
 
+        case I_LB:
+        case I_LH: {
+
+            // The lb instruction is not a pseudo instruction but the
+            // assembler contains a convenience feature to make the life
+            // of the developer easier. The assembler ammends an auipc
+            // to take care of immediate values larger than imm12
+            //
+            // The lb instruction natively only works with an imm12 value.
+            // example:
+            // lb t1, 123(t1) --> lb t1, 123(t1)
+            //
+            // if the imm value is larger than 0xFFF the assembler can generate
+            // a sequence of auipc and lb
+            // example:
+            // lb a0, 0xcc0000 --> lb a0, 0xcc0000(zero) --> auipc a0, 0xcc0
+            //                                               lb	a0, 0x0000(a0)
+            //
+            // Remember: auipc rd, imm <=> rd <-- pc + (imm << 12)
+            //
+            // this sequence loads part of the immediate into the rs1 register
+            // if the entire immediate value does not fit into 12 bits.
+            if (data->offset_1_expression->int_val > 0xFFF) {
+                printf("boink");
+
+                int line_nr = data->line_nr;
+
+                //
+                // auipc
+                //
+
+                asm_line_t auipc;
+                reset_asm_line(&auipc);
+                auipc.used = 1;
+                auipc.line_nr = line_nr;
+                auipc.instruction = I_AUIPC;
+                auipc.instruction_type = IT_U;
+                auipc.reg_rd = data->reg_rd;
+                auipc.imm = (data->offset_1_expression->int_val >> 12);
+
+                //reset_asm_line(data);
+
+                // modify rs1 register
+                data->reg_rs1 = data->reg_rd;
+
+                for (int i = (size-1); i >= index; i--) {
+
+                    copy_asm_line(&asm_line_array[i + 1], &asm_line_array[i]);
+                    asm_line_array[i + 1].line_nr++;
+
+                    // printf("%d: ", i);
+                    // print_asm_line(&asm_line_array[i]);
+                    // printf(" %d: ", i+1);
+                    // print_asm_line(&asm_line_array[i + i]);
+                }
+
+                // for (int i = 0; i < 100; i++) {
+                //     //printf("line %d\n", i);
+                //     if (asm_line_array[i].used != 0) {
+                //         print_asm_line(&asm_line_array[i]);
+                //     }
+                // }
+
+                asm_line_t* next_data = &asm_line_array[index + 1];
+
+                //data->offset_1_expression->int_val = data->offset_1_expression->int_val & 0xFFF;
+                next_data->imm = next_data->offset_1_expression->int_val & 0xFFF;
+
+                // adjust the immediate value of the lb instruction
+                next_data->offset_1_expression->int_val = 0x00;
+
+
+                reset_asm_line(data);
+                copy_asm_line(data, &auipc);
+                //copy_asm_line(&asm_line_array[index+1], &jalr);
+            }
+        }
+        break;
+
         case I_LI: {
 
             int line_nr = data->line_nr;
@@ -873,7 +918,7 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             // lui
             //
 
-            uint8_t opcode = 0b0110111;
+            //uint8_t opcode = 0b0110111;
             uint8_t rd = encode_register(data->reg_rd);
             uint32_t imm = data_1;
 
@@ -894,8 +939,8 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             uint32_t data_3 = (data_0 - data_2) & 0xFFF;
             //printf("data_3: %08" PRIx32 "\n", data_3);
 
-            uint8_t funct3 = 0b000;
-            opcode = 0b0010011;
+            //uint8_t funct3 = 0b000;
+            //opcode = 0b0010011;
 
             rd = encode_register(data->reg_rd);
             uint8_t rs1 = encode_register(data->reg_rd);

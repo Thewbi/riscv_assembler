@@ -41,6 +41,8 @@ void encode_j(asm_line_t* asm_line, uint32_t* output_buffer);
 
 uint32_t encode_lb(asm_line_t* asm_line);
 
+uint32_t encode_lh(asm_line_t* asm_line);
+
 uint32_t encode_lw(asm_line_t* asm_line);
 
 uint32_t encode_lui(asm_line_t* asm_line);

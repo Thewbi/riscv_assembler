@@ -2,9 +2,9 @@
 
         .text
 loadb:  lb      a0, byte            # load a byte
-#        ret
-#loadh:  lh      a0, hword           # load half word
-#        ret
+        ret
+loadh:  lh      a0, hword           # load half word
+        ret
 #loadw:  lw      a0, word            # load a word
 #        ret
 #loadd:  lw      a0, dword           # load lower word of dword

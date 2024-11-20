@@ -42,6 +42,7 @@
 "jalr"  { /*printf("JALR\n");*/ return JALR; }
 
 "lb"	{ /*printf("LB\n");*/ return LB; }
+"lh"	{ /*printf("LH\n");*/ return LH; }
 "li"    { /*printf("LI\n");*/ return LI; }
 "lw"    { /*printf("LW\n");*/ return LW; }
 "lui"   { /*printf("LUI\n");*/ return LUI; }
