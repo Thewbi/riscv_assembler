@@ -4,8 +4,7 @@ uint8_t encode_register(enum register_ data) {
 
     switch (data) {
 
-        // 0, Hard-wired zero
-        case R_ZERO:
+        case R_ZERO: // 0, Hard-wired zero
             return 0b00000;
 
         case R_RA: // 1, Return address

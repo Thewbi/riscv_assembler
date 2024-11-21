@@ -43,6 +43,8 @@ enum instruction {
     // B-Type
     I_BEQ,
     I_BGE,
+    I_BGT,
+    I_BLT,
     I_BNE,
 
     // R-Type

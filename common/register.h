@@ -15,8 +15,8 @@ enum register_ {
   R_GP, // 3, Global pointer
   R_TP, // 4, Thread pointer
   R_T0, // 5, Temporary/alternate link register
-  R_T1, // 6, Temporary
-  R_T2, // 7, Temporary
+  R_T1, // 6, Temporary/alternate link register
+  R_T2, // 7, Temporary/alternate link register
   R_S0, // 8, Saved register/frame pointer
   R_S1, // 9, Saved register
   R_A0, // 10, Function arguments/return values
@@ -37,10 +37,10 @@ enum register_ {
   R_S9, // 25, Saved registers
   R_S10, // 26, Saved registers
   R_S11, // 27, Saved registers
-  R_T3, // 28, Temporary
-  R_T4, // 29, Temporary
-  R_T5, // 30, Temporary
-  R_T6, // 31, Temporary
+  R_T3, // 28, Temporary/alternate link register
+  R_T4, // 29, Temporary/alternate link register
+  R_T5, // 30, Temporary/alternate link register
+  R_T6, // 31, Temporary/alternate link register
 
   R_UNDEFINED_REGISTER
 

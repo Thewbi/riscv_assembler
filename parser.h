@@ -69,63 +69,66 @@ extern int yydebug;
     AUIPC = 270,                   /* AUIPC  */
     BEQ = 271,                     /* BEQ  */
     BEQZ = 272,                    /* BEQZ  */
-    BNE = 273,                     /* BNE  */
-    BNEZ = 274,                    /* BNEZ  */
-    CALL = 275,                    /* CALL  */
-    J = 276,                       /* J  */
-    JALR = 277,                    /* JALR  */
-    LB = 278,                      /* LB  */
-    LH = 279,                      /* LH  */
-    LI = 280,                      /* LI  */
-    LW = 281,                      /* LW  */
-    LUI = 282,                     /* LUI  */
-    MUL = 283,                     /* MUL  */
-    MV = 284,                      /* MV  */
-    RET = 285,                     /* RET  */
-    SRLI = 286,                    /* SRLI  */
-    SLLI = 287,                    /* SLLI  */
-    SW = 288,                      /* SW  */
-    NEW_LINE = 289,                /* NEW_LINE  */
-    NUMERIC = 290,                 /* NUMERIC  */
-    IDENTIFIER = 291,              /* IDENTIFIER  */
-    DOT = 292,                     /* DOT  */
-    COLON = 293,                   /* COLON  */
-    COMMA = 294,                   /* COMMA  */
-    OPENING_BRACKET = 295,         /* OPENING_BRACKET  */
-    CLOSING_BRACKET = 296,         /* CLOSING_BRACKET  */
-    REG_ZERO = 297,                /* REG_ZERO  */
-    REG_RA = 298,                  /* REG_RA  */
-    REG_SP = 299,                  /* REG_SP  */
-    REG_GP = 300,                  /* REG_GP  */
-    REG_TP = 301,                  /* REG_TP  */
-    REG_T0 = 302,                  /* REG_T0  */
-    REG_T1 = 303,                  /* REG_T1  */
-    REG_T2 = 304,                  /* REG_T2  */
-    REG_T3 = 305,                  /* REG_T3  */
-    REG_T4 = 306,                  /* REG_T4  */
-    REG_T5 = 307,                  /* REG_T5  */
-    REG_T6 = 308,                  /* REG_T6  */
-    REG_FP = 309,                  /* REG_FP  */
-    REG_A0 = 310,                  /* REG_A0  */
-    REG_A1 = 311,                  /* REG_A1  */
-    REG_A2 = 312,                  /* REG_A2  */
-    REG_A3 = 313,                  /* REG_A3  */
-    REG_A4 = 314,                  /* REG_A4  */
-    REG_A5 = 315,                  /* REG_A5  */
-    REG_A6 = 316,                  /* REG_A6  */
-    REG_A7 = 317,                  /* REG_A7  */
-    REG_S0 = 318,                  /* REG_S0  */
-    REG_S1 = 319,                  /* REG_S1  */
-    REG_S2 = 320,                  /* REG_S2  */
-    REG_S3 = 321,                  /* REG_S3  */
-    REG_S4 = 322,                  /* REG_S4  */
-    REG_S5 = 323,                  /* REG_S5  */
-    REG_S6 = 324,                  /* REG_S6  */
-    REG_S7 = 325,                  /* REG_S7  */
-    REG_S8 = 326,                  /* REG_S8  */
-    REG_S9 = 327,                  /* REG_S9  */
-    REG_S10 = 328,                 /* REG_S10  */
-    REG_S11 = 329                  /* REG_S11  */
+    BGE = 273,                     /* BGE  */
+    BLT = 274,                     /* BLT  */
+    BGT = 275,                     /* BGT  */
+    BNE = 276,                     /* BNE  */
+    BNEZ = 277,                    /* BNEZ  */
+    CALL = 278,                    /* CALL  */
+    J = 279,                       /* J  */
+    JALR = 280,                    /* JALR  */
+    LB = 281,                      /* LB  */
+    LH = 282,                      /* LH  */
+    LI = 283,                      /* LI  */
+    LW = 284,                      /* LW  */
+    LUI = 285,                     /* LUI  */
+    MUL = 286,                     /* MUL  */
+    MV = 287,                      /* MV  */
+    RET = 288,                     /* RET  */
+    SRLI = 289,                    /* SRLI  */
+    SLLI = 290,                    /* SLLI  */
+    SW = 291,                      /* SW  */
+    NEW_LINE = 292,                /* NEW_LINE  */
+    NUMERIC = 293,                 /* NUMERIC  */
+    IDENTIFIER = 294,              /* IDENTIFIER  */
+    DOT = 295,                     /* DOT  */
+    COLON = 296,                   /* COLON  */
+    COMMA = 297,                   /* COMMA  */
+    OPENING_BRACKET = 298,         /* OPENING_BRACKET  */
+    CLOSING_BRACKET = 299,         /* CLOSING_BRACKET  */
+    REG_ZERO = 300,                /* REG_ZERO  */
+    REG_RA = 301,                  /* REG_RA  */
+    REG_SP = 302,                  /* REG_SP  */
+    REG_GP = 303,                  /* REG_GP  */
+    REG_TP = 304,                  /* REG_TP  */
+    REG_T0 = 305,                  /* REG_T0  */
+    REG_T1 = 306,                  /* REG_T1  */
+    REG_T2 = 307,                  /* REG_T2  */
+    REG_T3 = 308,                  /* REG_T3  */
+    REG_T4 = 309,                  /* REG_T4  */
+    REG_T5 = 310,                  /* REG_T5  */
+    REG_T6 = 311,                  /* REG_T6  */
+    REG_FP = 312,                  /* REG_FP  */
+    REG_A0 = 313,                  /* REG_A0  */
+    REG_A1 = 314,                  /* REG_A1  */
+    REG_A2 = 315,                  /* REG_A2  */
+    REG_A3 = 316,                  /* REG_A3  */
+    REG_A4 = 317,                  /* REG_A4  */
+    REG_A5 = 318,                  /* REG_A5  */
+    REG_A6 = 319,                  /* REG_A6  */
+    REG_A7 = 320,                  /* REG_A7  */
+    REG_S0 = 321,                  /* REG_S0  */
+    REG_S1 = 322,                  /* REG_S1  */
+    REG_S2 = 323,                  /* REG_S2  */
+    REG_S3 = 324,                  /* REG_S3  */
+    REG_S4 = 325,                  /* REG_S4  */
+    REG_S5 = 326,                  /* REG_S5  */
+    REG_S6 = 327,                  /* REG_S6  */
+    REG_S7 = 328,                  /* REG_S7  */
+    REG_S8 = 329,                  /* REG_S8  */
+    REG_S9 = 330,                  /* REG_S9  */
+    REG_S10 = 331,                 /* REG_S10  */
+    REG_S11 = 332                  /* REG_S11  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -141,7 +144,7 @@ union YYSTYPE
     char sym;
     node_t* expr_ptr;
 
-#line 145 "parser.h"
+#line 148 "parser.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

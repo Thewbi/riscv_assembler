@@ -122,6 +122,22 @@ uint32_t encode_bne(asm_line_t* asm_line) {
     return encode_b_type(imm, rs2, rs1, funct3, opcode);
 }
 
+uint32_t encode_blt(asm_line_t* asm_line) {
+
+    uint8_t funct3 = 0b100;
+    uint8_t opcode = 0b1100011;
+
+    uint8_t rs1 = encode_register(asm_line->reg_rs1);
+    uint8_t rs2 = encode_register(asm_line->reg_rs2);
+
+    // uint8_t rs1 = encode_register(asm_line->reg_rd);
+    // uint8_t rs2 = encode_register(asm_line->reg_rs1);
+
+    int32_t imm = encode_immediate_part(asm_line);
+
+    return encode_b_type(imm, rs2, rs1, funct3, opcode);
+}
+
 uint32_t encode_bnez(asm_line_t* asm_line) {
 
     uint8_t funct3 = 0b001;
@@ -678,6 +694,10 @@ uint32_t encode(asm_line_t* asm_line) {
             encoded_asm_line = encode_bne(asm_line);
             break;
 
+        case I_BLT:
+            encoded_asm_line = encode_blt(asm_line);
+            break;
+
         // case I_BNEZ:
         //     encoded_asm_line = encode_bnez(asm_line);
         //     break;
@@ -700,6 +720,10 @@ uint32_t encode(asm_line_t* asm_line) {
 
         case I_LH:
             encoded_asm_line = encode_lh(asm_line);
+            break;
+
+        case I_LW:
+            encoded_asm_line = encode_lw(asm_line);
             break;
 
         // case I_CALL:

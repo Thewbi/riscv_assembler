@@ -33,6 +33,9 @@
 
 "beq"   { /*printf("BEQ\n");*/ return BEQ; }
 "beqz"   { /*printf("BEQZ\n");*/ return BEQZ; }
+"bge"  { /*printf("BGE\n");*/ return BGE; }
+"bgt"  { /*printf("BGT\n");*/ return BGT; }
+"blt"  { /*printf("BLT\n");*/ return BLT; }
 "bne"   { /*printf("BNEZ\n");*/ return BNE; }
 "bnez"  { /*printf("BNEZ\n");*/ return BNEZ; }
 
@@ -93,6 +96,45 @@
 "s9"    { /*printf("s9\n");*/ return REG_S9; }
 "s10"   { /*printf("s10\n");*/ return REG_S10; }
 "s11"   { /*printf("s11\n");*/ return REG_S11; }
+
+"x0" { /*printf("\n");*/ return REG_ZERO; }  // 0, Hard-wired zero
+"x1" { /*printf("\n");*/ return REG_RA; } // 1, Return address
+"x2" { /*printf("\n");*/ return REG_SP; } // 2, Stack pointer
+"x3" { /*printf("\n");*/ return REG_GP; } // 3, Global pointer
+"x4" { /*printf("\n");*/ return REG_TP; } // 4, Thread pointer
+
+"x5" { /*printf("\n");*/ return REG_T0; } // 5, Temporary/alternate link register
+"x6" { /*printf("\n");*/ return REG_T1; } // 6, Temporary
+"x7" { /*printf("\n");*/ return REG_T2; } // 7, Temporary
+
+"x8" { /*printf("\n");*/ return REG_S0; } // 8, Saved register/frame pointer
+"x9" { /*printf("\n");*/ return REG_S1; } // 9, Saved register
+
+"x10" { /*printf("\n");*/ return REG_A0; } // 10, Function arguments/return values
+"x11" { /*printf("\n");*/ return REG_A1; } // 11, Function arguments/return values
+
+"x12" { /*printf("\n");*/ return REG_A2; } // 12, Function arguments
+"x13" { /*printf("\n");*/ return REG_A3; } // 13, Function arguments
+"x14" { /*printf("\n");*/ return REG_A4; } // 14, Function arguments
+"x15" { /*printf("\n");*/ return REG_A5; } // 15, Function arguments
+"x16" { /*printf("\n");*/ return REG_A6; } // 16, Function arguments
+"x17" { /*printf("\n");*/ return REG_A7; } // 17, Function arguments
+
+"x18" { /*printf("\n");*/ return REG_S2; } // 18, Saved registers
+"x19" { /*printf("\n");*/ return REG_S3; } // 19, Saved registers
+"x20" { /*printf("\n");*/ return REG_S4; } // 20, Saved registers
+"x21" { /*printf("\n");*/ return REG_S5; } // 21, Saved registers
+"x22" { /*printf("\n");*/ return REG_S6; } // 22, Saved registers
+"x23" { /*printf("\n");*/ return REG_S7; } // 23, Saved registers
+"x24" { /*printf("\n");*/ return REG_S8; } // 24, Saved registers
+"x25" { /*printf("\n");*/ return REG_S9; } // 25, Saved registers
+"x26" { /*printf("\n");*/ return REG_S10; } // 26, Saved registers
+"x27" { /*printf("\n");*/ return REG_S11; } // 27, Saved registers
+
+"x28" { /*printf("\n");*/ return REG_T2; } // 28, Temporary
+"x29" { /*printf("\n");*/ return REG_T3; } // 29, Temporary
+"x30" { /*printf("\n");*/ return REG_T4; } // 30, Temporary
+"x31" { /*printf("\n");*/ return REG_T5; } // 31, Temporary
 
 "//".*  { /* DO NOTHING */ } /* https://stackoverflow.com/questions/25395251/detecting-and-skipping-line-comments-with-flex */
 "#".*   { /* DO NOTHING */ }

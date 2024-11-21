@@ -279,6 +279,7 @@ void serialize_asm_line(const asm_line_t *data) {
             // B-Type
             case I_BEQ:
             case I_BGE:
+            case I_BLT:
             case I_BNE:
             case I_LI:
                 if (data->reg_rd != R_UNDEFINED_REGISTER) {
@@ -540,6 +541,10 @@ void insert_integer_immediate(asm_line_t *data, uint32_t imm) {
 
 const char* instruction_to_string(enum instruction data) {
 
+    if (data == I_UNDEFINED_INSTRUCTION) {
+        return "I_UNDEFINED_INSTRUCTION";
+    }
+
     switch (data) {
 
         case I_ADD: return "ADD";
@@ -550,6 +555,7 @@ const char* instruction_to_string(enum instruction data) {
         case I_BEQ: return "BEQ";
         case I_BEQZ: return "BEQZ"; // pseudo instruction
         case I_BGE: return "BGE";
+        case I_BLT: return "BLT";
         case I_BNEZ: return "BNEZ";
         case I_BNE: return "BNE";
 
@@ -581,7 +587,9 @@ const char* instruction_to_string(enum instruction data) {
 
         case I_XORI: return "XORI";
 
-        default: return "UNKNOWN";
+        default: {
+            return "UNKNOWN";
+        }
     }
 }
 
@@ -605,41 +613,85 @@ const char* assembler_instruction_to_string(enum assembler_instruction data) {
 
 const char* register_to_string(enum register_ data) {
 
-    switch(data) {
-        case R_ZERO: return "zero"; // 0, Hard-wired zero
-        case R_RA: return "ra"; // 1, Return address
-        case R_SP: return "sp"; // 2, Stack pointer
-        case R_GP: return "gp"; // 3, Global pointer
-        case R_TP: return "tp"; // 4, Thread pointer
-        case R_T0: return "t0"; // 5, Temporary/alternate link register
-        case R_T1: return "t1"; // 6, Temporary
-        case R_T2: return "t2"; // 7, Temporary
-        case R_S0: return "fp"; // 8, Saved register/frame pointer
-        case R_S1: return "s1"; // 9, Saved register
-        case R_A0: return "a0"; // 10, Function arguments/return values
-        case R_A1: return "a1"; // 11, Function arguments/return values
-        case R_A2: return "a2"; // 12, Function arguments
-        case R_A3: return "a3"; // 13, Function arguments
-        case R_A4: return "a4"; // 14, Function arguments
-        case R_A5: return "a5"; // 15, Function arguments
-        case R_A6: return "a6"; // 16, Function arguments
-        case R_A7: return "a7"; // 17, Function arguments
-        case R_S2: return "s2"; // 18, Saved registers
-        case R_S3: return "s3"; // 19, Saved registers
-        case R_S4: return "s4"; // 20, Saved registers
-        case R_S5: return "s5"; // 21, Saved registers
-        case R_S6: return "s6"; // 22, Saved registers
-        case R_S7: return "s7"; // 23, Saved registers
-        case R_S8: return "s8"; // 24, Saved registers
-        case R_S9: return "s9"; // 25, Saved registers
-        case R_S10: return "s10"; // 26, Saved registers
-        case R_S11: return "s11"; // 27, Saved registers
-        case R_T3: return "t3"; // 28, Temporary
-        case R_T4: return "t4"; // 29, Temporary
-        case R_T5: return "t5"; // 30, Temporary
-        case R_T6: return "t6"; // 31, Temporary
+    int outputABIName = 0;
+    if (outputABIName) {
 
-        default: return "R_UNDEFINED_REGISTER";
+        switch(data) {
+            case R_ZERO: return "zero"; // 0, Hard-wired zero
+            case R_RA: return "ra"; // 1, Return address
+            case R_SP: return "sp"; // 2, Stack pointer
+            case R_GP: return "gp"; // 3, Global pointer
+            case R_TP: return "tp"; // 4, Thread pointer
+            case R_T0: return "t0"; // 5, Temporary/alternate link register
+            case R_T1: return "t1"; // 6, Temporary
+            case R_T2: return "t2"; // 7, Temporary
+            case R_S0: return "fp"; // 8, Saved register/frame pointer
+            case R_S1: return "s1"; // 9, Saved register
+            case R_A0: return "a0"; // 10, Function arguments/return values
+            case R_A1: return "a1"; // 11, Function arguments/return values
+            case R_A2: return "a2"; // 12, Function arguments
+            case R_A3: return "a3"; // 13, Function arguments
+            case R_A4: return "a4"; // 14, Function arguments
+            case R_A5: return "a5"; // 15, Function arguments
+            case R_A6: return "a6"; // 16, Function arguments
+            case R_A7: return "a7"; // 17, Function arguments
+            case R_S2: return "s2"; // 18, Saved registers
+            case R_S3: return "s3"; // 19, Saved registers
+            case R_S4: return "s4"; // 20, Saved registers
+            case R_S5: return "s5"; // 21, Saved registers
+            case R_S6: return "s6"; // 22, Saved registers
+            case R_S7: return "s7"; // 23, Saved registers
+            case R_S8: return "s8"; // 24, Saved registers
+            case R_S9: return "s9"; // 25, Saved registers
+            case R_S10: return "s10"; // 26, Saved registers
+            case R_S11: return "s11"; // 27, Saved registers
+            case R_T3: return "t3"; // 28, Temporary
+            case R_T4: return "t4"; // 29, Temporary
+            case R_T5: return "t5"; // 30, Temporary
+            case R_T6: return "t6"; // 31, Temporary
+
+            default: return "R_UNDEFINED_REGISTER";
+        }
+
+    } else {
+
+        switch(data) {
+            case R_ZERO: return "x0"; // 0, Hard-wired zero
+            case R_RA: return "x1"; // 1, Return address
+            case R_SP: return "x2"; // 2, Stack pointer
+            case R_GP: return "x3"; // 3, Global pointer
+            case R_TP: return "x4"; // 4, Thread pointer
+            case R_T0: return "x5"; // 5, Temporary/alternate link register
+            case R_T1: return "x6"; // 6, Temporary
+            case R_T2: return "x7"; // 7, Temporary
+            case R_S0: return "x8"; // 8, Saved register/frame pointer
+            case R_S1: return "x9"; // 9, Saved register
+            case R_A0: return "x10"; // 10, Function arguments/return values
+            case R_A1: return "x11"; // 11, Function arguments/return values
+            case R_A2: return "x12"; // 12, Function arguments
+            case R_A3: return "x13"; // 13, Function arguments
+            case R_A4: return "x14"; // 14, Function arguments
+            case R_A5: return "x15"; // 15, Function arguments
+            case R_A6: return "x16"; // 16, Function arguments
+            case R_A7: return "x17"; // 17, Function arguments
+            case R_S2: return "x18"; // 18, Saved registers
+            case R_S3: return "x19"; // 19, Saved registers
+            case R_S4: return "x20"; // 20, Saved registers
+            case R_S5: return "x21"; // 21, Saved registers
+            case R_S6: return "x22"; // 22, Saved registers
+            case R_S7: return "x23"; // 23, Saved registers
+            case R_S8: return "x24"; // 24, Saved registers
+            case R_S9: return "x25"; // 25, Saved registers
+            case R_S10: return "x26"; // 26, Saved registers
+            case R_S11: return "x27"; // 27, Saved registers
+            case R_T3: return "x28"; // 28, Temporary
+            case R_T4: return "x29"; // 29, Temporary
+            case R_T5: return "x30"; // 30, Temporary
+            case R_T6: return "x31"; // 31, Temporary
+
+            default: return "R_UNDEFINED_REGISTER";
+        }
+
     }
 }
 
@@ -993,6 +1045,20 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             data->reg_rs1 = data->reg_rd;
             data->reg_rs2 = data->reg_rd;
             data->imm = 0;
+        }
+        break;
+
+        case I_BGT: {
+            // the I_BNEZ pseudo instruction is converted to the I_BNE instruction
+            // bnez rs, offset => bne rs, x0, offset
+            // see: https://riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf
+            data->instruction = I_BLT;
+            data->instruction_type = IT_B;
+            // data->reg_rd = data->reg_rd;
+            // data->reg_rs1 = data->reg_rd;
+            enum register_ temp = data->reg_rs1;
+            data->reg_rs1 = data->reg_rs2;
+            data->reg_rs2 = temp;
         }
         break;
 
