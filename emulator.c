@@ -92,8 +92,7 @@ int main(int argc, char **argv)
     memset(machine_code, 0, 100);
 
     assemble(source_file.c_str(), machine_code, &segments);
-
-
+    printf("\n\n");
 
 #endif
 

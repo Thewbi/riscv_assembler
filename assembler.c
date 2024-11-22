@@ -45,6 +45,7 @@ extern void (*fp_emit)(asm_line_t*);
 extern int asm_line_array_index;
 extern asm_line_t asm_line_array[100];
 
+// loads equ constants into memory
 int mem_preload_value(std::map<uint32_t, uint32_t*>* segments,
     trivial_map_element_t* equ_map, asm_line_t* asm_line,
     uint32_t& constants_address, uint32_t value, bool replace_address) {
@@ -129,6 +130,7 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
     initialize_tuple_set(label_address_map, 20);
 
     int current_address = 0x0000;
+    int32_t instruction_index = 0;
 
     for (int i = 0; i < asm_line_array_index; i++) {
 
@@ -168,6 +170,11 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
         //}
 
         current_address = current_address + asm_line_array[i].size_in_bytes;
+
+        if (asm_line_array[i].instruction != I_UNDEFINED_INSTRUCTION) {
+            asm_line_array[i].instruction_index = instruction_index;
+            instruction_index++;
+        }
     }
 
     // DEBUG
@@ -227,46 +234,52 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
     //
     // Replace .equ
     //
-    // In each line, check if there is a offset_?_expr, where a symbol is used
+    // In each line, check if there is a offset_?_expr, where a symbol is used.
+    // The approach is to look for a symbol in the assembler line and blindly
+    // assume that the symbol is a defined constant in the equ map. Then try
+    // to resolve it from the equ map!
     //
 
     for (int i = 0; i < asm_line_array_index; i++) {
 
         asm_line_t* asm_line_ptr = &asm_line_array[i];
 
-        if (asm_line_ptr->offset_0_expression != NULL) {
-            printf("%s\n", asm_line_ptr->offset_0_expression->string_val);
+        if ((asm_line_ptr->offset_0_expression != NULL) && (strlen(asm_line_ptr->offset_0_expression->string_val) > 0)) {
+            //printf("%s\n", asm_line_ptr->offset_0_expression->string_val);
             if (contains_key_trivial_map(equ_map, 20, asm_line_ptr->offset_0_expression->string_val)) {
                 int val = 0;
                 retrieve_by_key_trivial_map(equ_map, 20, asm_line_ptr->offset_0_expression->string_val, &val);
                 asm_line_ptr->offset_0_expression->int_val = val;
                 // erase the replaced string
                 memset(asm_line_ptr->offset_0_expression->string_val, 0, 100);
-            } else {
-                printf("Cannot resolve symbol %s!\n", asm_line_ptr->offset_0_expression->string_val);
             }
-        } else if (asm_line_ptr->offset_1_expression != NULL) {
-            printf("%s\n", asm_line_ptr->offset_1_expression->string_val);
+            // else {
+            //     printf("Cannot resolve equ-symbol \"%s\"!\n", asm_line_ptr->offset_0_expression->string_val);
+            // }
+        } else if ((asm_line_ptr->offset_1_expression != NULL) && (strlen(asm_line_ptr->offset_1_expression->string_val) > 0)) {
+            //printf("%s\n", asm_line_ptr->offset_1_expression->string_val);
             if (contains_key_trivial_map(equ_map, 20, asm_line_ptr->offset_1_expression->string_val)) {
                 int val = 0;
                 retrieve_by_key_trivial_map(equ_map, 20, asm_line_ptr->offset_1_expression->string_val, &val);
                 asm_line_ptr->offset_1_expression->int_val = val;
                 // erase the replaced string
                 memset(asm_line_ptr->offset_1_expression->string_val, 0, 100);
-            } else {
-                printf("Cannot resolve symbol %s!\n", asm_line_ptr->offset_1_expression->string_val);
             }
-        } else if (asm_line_ptr->offset_2_expression != NULL) {
-            printf("%s\n", asm_line_ptr->offset_2_expression->string_val);
+            // else {
+            //     printf("Cannot resolve equ-symbol \"%s\"!\n", asm_line_ptr->offset_1_expression->string_val);
+            // }
+        } else if ((asm_line_ptr->offset_2_expression != NULL) && (strlen(asm_line_ptr->offset_2_expression->string_val) > 0)) {
+            //printf("%s\n", asm_line_ptr->offset_2_expression->string_val);
             if (contains_key_trivial_map(equ_map, 20, asm_line_ptr->offset_2_expression->string_val)) {
                 int val = 0;
                 retrieve_by_key_trivial_map(equ_map, 20, asm_line_ptr->offset_2_expression->string_val, &val);
                 asm_line_ptr->offset_2_expression->int_val = val;
                 // erase the replaced string
                 memset(asm_line_ptr->offset_2_expression->string_val, 0, 100);
-            } else {
-                printf("Cannot resolve symbol %s!\n", asm_line_ptr->offset_2_expression->string_val);
             }
+            // else {
+            //     printf("Cannot resolve equ-symbol \"%s\"!\n", asm_line_ptr->offset_2_expression->string_val);
+            // }
         }
 
     }
@@ -337,7 +350,7 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
 
         if (asm_line_array[i].offset_0_expression != NULL && strnlen(asm_line_array[i].offset_0_expression->string_val, 100) > 0) {
 
-            printf("offset_0_expression found: %s\n", asm_line_array[i].offset_0_expression->string_val);
+            //printf("offset_0_expression found: %s\n", asm_line_array[i].offset_0_expression->string_val);
 
             uint32_t str_len = strlen(asm_line_array[i].offset_0_expression->string_val);
             char* last_character = asm_line_array[i].offset_0_expression->string_val + str_len - 1;
@@ -347,29 +360,32 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
             if (strncmp(last_character, "f", 1) == 0) {
                 retrieve_by_key_greater_than_value_tuple_set(label_address_map, 20, asm_line_array[i].offset_0_expression->string_val, str_len-1, address, &tuple_set_element);
                 if (tuple_set_element != NULL) {
-                    printf("greater_than: %d\n", tuple_set_element->value);
+                    //printf("greater_than: %d\n", tuple_set_element->value);
                     asm_line_array[i].offset_0 = tuple_set_element->value;
                     asm_line_array[i].offset_0_used = 1;
                 } else {
-                    printf("greater_than: NotFound\n");
+                    printf("greater_than \"%s\" label not defined!\n", asm_line_array[i].offset_0_expression->string_val);
+                    abort();
                 }
             } else if (strncmp(last_character, "b", 1) == 0) {
                 retrieve_by_key_less_than_value_tuple_set(label_address_map, 20, asm_line_array[i].offset_0_expression->string_val, str_len-1, address, &tuple_set_element);
                 if (tuple_set_element != NULL) {
-                    printf("less_than: %d\n", tuple_set_element->value);
+                    //printf("less_than: %d\n", tuple_set_element->value);
                     asm_line_array[i].offset_0 = tuple_set_element->value;
                     asm_line_array[i].offset_0_used = 1;
                 } else {
-                    printf("less_than: NotFound\n");
+                    printf("less_than \"%s\" label not defined!\n", asm_line_array[i].offset_0_expression->string_val);
+                    abort();
                 }
             } else {
                 retrieve_by_key_tuple_set(label_address_map, 20, asm_line_array[i].offset_0_expression->string_val, &tuple_set_element);
                 if (tuple_set_element != NULL) {
-                    printf("direct_match: %d\n", tuple_set_element->value);
+                    //printf("direct_match: %d\n", tuple_set_element->value);
                     asm_line_array[i].offset_0 = tuple_set_element->value;
                     asm_line_array[i].offset_0_used = 1;
                 } else {
-                    printf("direct_match: NotFound\n");
+                    printf("direct_match \"%s\" label not defined!\n", asm_line_array[i].offset_0_expression->string_val);
+                    abort();
                 }
             }
 
@@ -405,7 +421,7 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
                     asm_line_array[i].offset_1 = tuple_set_element->value;
                     asm_line_array[i].offset_1_used = 1;
                 } else {
-                    printf("greater_than: NotFound\n");
+                    printf("greater_than \"%s\" label not defined!\n", asm_line_array[i].offset_1_expression->string_val);
                 }
             } else if (strncmp(last_character, "b", 1) == 0) {
                 retrieve_by_key_less_than_value_tuple_set(label_address_map, 20, asm_line_array[i].offset_1_expression->string_val, str_len-1, address, &tuple_set_element);
@@ -414,7 +430,7 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
                     asm_line_array[i].offset_1 = tuple_set_element->value;
                     asm_line_array[i].offset_1_used = 1;
                 } else {
-                    printf("less_than: NotFound\n");
+                    printf("less_than \"%s\" label not defined!\n", asm_line_array[i].offset_1_expression->string_val);
                 }
             } else {
                 retrieve_by_key_tuple_set(label_address_map, 20, asm_line_array[i].offset_1_expression->string_val, &tuple_set_element);
@@ -423,7 +439,7 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
                     asm_line_array[i].offset_1 = tuple_set_element->value;
                     asm_line_array[i].offset_1_used = 1;
                 } else {
-                    printf("direct_match: NotFound\n");
+                    printf("direct_match \"%s\" label not defined!\n", asm_line_array[i].offset_1_expression->string_val);
                 }
             }
 
@@ -445,7 +461,7 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
         }
         if (asm_line_array[i].offset_2_expression != NULL && strnlen(asm_line_array[i].offset_2_expression->string_val, 100) > 0) {
 
-            printf("offset_2_expression found: %s\n", asm_line_array[i].offset_2_expression->string_val);
+            //printf("offset_2_expression found: %s\n", asm_line_array[i].offset_2_expression->string_val);
 
             uint32_t str_len = strlen(asm_line_array[i].offset_2_expression->string_val);
             char* last_character = asm_line_array[i].offset_2_expression->string_val + str_len - 1;
@@ -455,29 +471,32 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
             if (strncmp(last_character, "f", 1) == 0) {
                 retrieve_by_key_greater_than_value_tuple_set(label_address_map, 20, asm_line_array[i].offset_2_expression->string_val, str_len-1, address, &tuple_set_element);
                 if (tuple_set_element != NULL) {
-                    printf("greater_than: %d\n", tuple_set_element->value);
+                    //printf("greater_than: %d\n", tuple_set_element->value);
                     asm_line_array[i].offset_2 = tuple_set_element->value;
                     asm_line_array[i].offset_2_used = 1;
                 } else {
-                    printf("greater_than: NotFound\n");
+                    printf("greater_than \"%s\" label not defined!\n", asm_line_array[i].offset_2_expression->string_val);
+                    abort();
                 }
             } else if (strncmp(last_character, "b", 1) == 0) {
                 retrieve_by_key_less_than_value_tuple_set(label_address_map, 20, asm_line_array[i].offset_2_expression->string_val, str_len-1, address, &tuple_set_element);
                 if (tuple_set_element != NULL) {
-                    printf("less_than: %d\n", tuple_set_element->value);
+                    //printf("less_than: %d\n", tuple_set_element->value);
                     asm_line_array[i].offset_2 = tuple_set_element->value;
                     asm_line_array[i].offset_2_used = 1;
                 } else {
-                    printf("less_than: NotFound\n");
+                    printf("less_than \"%s\" label not defined!\n", asm_line_array[i].offset_2_expression->string_val);
+                    abort();
                 }
             } else {
                 retrieve_by_key_tuple_set(label_address_map, 20, asm_line_array[i].offset_2_expression->string_val, &tuple_set_element);
                 if (tuple_set_element != NULL) {
-                    printf("direct_match: %d\n", tuple_set_element->value);
+                    //printf("direct_match: %d\n", tuple_set_element->value);
                     asm_line_array[i].offset_2 = tuple_set_element->value;
                     asm_line_array[i].offset_2_used = 1;
                 } else {
-                    printf("direct_match: NotFound\n");
+                    printf("direct_match \"%s\" label not defined!\n", asm_line_array[i].offset_2_expression->string_val);
+                    abort();
                 }
             }
 
@@ -533,7 +552,8 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
     for (int i = 0; i < 100; i++) {
         //printf("line %d\n", i);
         if ((asm_line_array[i].used != 0) && (asm_line_array[i].instruction != I_UNDEFINED_INSTRUCTION)) {
-            printf("%d) ", i);
+            //printf("%d) ", i);
+            printf("%d) ", asm_line_array[i].instruction_index * 4);
             serialize_asm_line(&asm_line_array[i]);
         }
     }
@@ -542,7 +562,7 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
     printf("\n\n");
     printf("machine code:\n");
 
-    size_t instruction_index = 0;
+    instruction_index = 0;
     for (int i = 0; i < 100; i++) {
         //printf("line %d\n", i);
         if ((asm_line_array[i].used != 0) && (asm_line_array[i].instruction != I_UNDEFINED_INSTRUCTION)) {

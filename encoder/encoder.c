@@ -3,7 +3,7 @@
 int asm_line_array_index = 0;
 asm_line_t asm_line_array[100];
 
-int32_t encode_immediate_part(asm_line_t* asm_line) {
+int32_t retrieve_immediate_part(asm_line_t* asm_line) {
 
     int32_t imm = 0;
 
@@ -75,7 +75,7 @@ uint32_t encode_addi(asm_line_t* asm_line) {
 
     uint8_t rd = encode_register(asm_line->reg_rd);
     uint8_t rs1 = encode_register(asm_line->reg_rs1);
-    int32_t imm = encode_immediate_part(asm_line);
+    int32_t imm = retrieve_immediate_part(asm_line);
 
     // printf("rd %d\n", rd);
     // printf("rs1 %d\n", rs1);
@@ -89,7 +89,7 @@ uint32_t encode_auipc(asm_line_t* asm_line) {
     uint8_t opcode = 0b0010111;
 
     uint8_t rd = encode_register(asm_line->reg_rd);
-    int32_t imm = encode_immediate_part(asm_line);
+    int32_t imm = retrieve_immediate_part(asm_line);
 
     return encode_u_type(imm, rd, opcode);
 }
@@ -101,7 +101,7 @@ uint32_t encode_beq(asm_line_t* asm_line) {
 
     uint8_t rs1 = encode_register(asm_line->reg_rs1);
     uint8_t rs2 = encode_register(asm_line->reg_rs2);
-    int32_t imm = encode_immediate_part(asm_line);
+    int32_t imm = retrieve_immediate_part(asm_line);
 
     return encode_b_type(imm, rs2, rs1, funct3, opcode);
 }
@@ -117,7 +117,7 @@ uint32_t encode_bne(asm_line_t* asm_line) {
     // uint8_t rs1 = encode_register(asm_line->reg_rd);
     // uint8_t rs2 = encode_register(asm_line->reg_rs1);
 
-    int32_t imm = encode_immediate_part(asm_line);
+    int32_t imm = retrieve_immediate_part(asm_line);
 
     return encode_b_type(imm, rs2, rs1, funct3, opcode);
 }
@@ -133,7 +133,7 @@ uint32_t encode_blt(asm_line_t* asm_line) {
     // uint8_t rs1 = encode_register(asm_line->reg_rd);
     // uint8_t rs2 = encode_register(asm_line->reg_rs1);
 
-    int32_t imm = encode_immediate_part(asm_line);
+    int32_t imm = retrieve_immediate_part(asm_line);
 
     return encode_b_type(imm, rs2, rs1, funct3, opcode);
 }
@@ -268,9 +268,11 @@ uint32_t encode_jal(asm_line_t* asm_line) {
     uint8_t opcode = 0b1101111;
 
     uint8_t rd = encode_register(asm_line->reg_rd);
-    uint16_t imm = encode_immediate_part(asm_line);
+    uint16_t imm = retrieve_immediate_part(asm_line);
 
-    return encode_j_type(imm, rd, opcode);
+    int32_t relative_offset = imm - ((asm_line->instruction_index + 1) * 4);
+
+    return encode_j_type(relative_offset, rd, opcode);
 }
 
 uint32_t encode_jalr(asm_line_t* asm_line) {
@@ -280,7 +282,7 @@ uint32_t encode_jalr(asm_line_t* asm_line) {
 
     uint8_t rd = encode_register(asm_line->reg_rd);
     uint8_t rs1 = encode_register(asm_line->reg_rs1);
-    uint16_t imm = encode_immediate_part(asm_line);
+    uint16_t imm = retrieve_immediate_part(asm_line);
 
     return encode_i_type(imm, rs1, funct3, rd, opcode);
 }
@@ -357,7 +359,7 @@ uint32_t encode_lui(asm_line_t* asm_line) {
     //uint32_t imm = asm_line->imm;
 
     //uint16_t imm = asm_line->offset_0_expression->int_val;
-    int32_t imm = encode_immediate_part(asm_line);
+    int32_t imm = retrieve_immediate_part(asm_line);
 
     //uint16_t imm = asm_line->offset_2_expression->int_val;
 

@@ -27,7 +27,7 @@ argmax:
 
 exit7:
     li a1, 7
-    j exit2
+    j exit2 # this will not assemble since the label exit2 is not defined
 
 loop_start:
     addi t0, x0,0 #i =0

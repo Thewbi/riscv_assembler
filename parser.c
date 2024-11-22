@@ -1500,7 +1500,7 @@ yyreduce:
   case 12: /* asm_line: assembler_instruction  */
 #line 138 "parser.y"
                           {
-        printf("assembler_instruction without label\n");
+        //printf("assembler_instruction without label\n");
         //printf("Line: %d\n", yylineno);
 
         parser_asm_line.line_nr = yylineno;
@@ -1513,7 +1513,7 @@ yyreduce:
   case 13: /* asm_line: label assembler_instruction  */
 #line 147 "parser.y"
                                 {
-        printf("assembler_instruction  with label\n");
+        //printf("assembler_instruction  with label\n");
         //printf("Line: %d\n", yylineno);
 
         parser_asm_line.line_nr = yylineno;
@@ -1701,10 +1701,11 @@ yyreduce:
   case 38: /* expr: NUMERIC  */
 #line 260 "parser.y"
             {
-        printf("PARSER-NUMERIC: %16" PRIx64 "\n", (yyvsp[0].int_val));
+        //printf("PARSER-NUMERIC: %16" PRIx64 "\n", (yyvsp[0].int_val));
         //insert_integer_immediate(&parser_asm_line, $1);
 
         if (current_node == NULL) {
+
             //current_node = new node_t;
             current_node = (node_t *)malloc(sizeof(node_t));
 
@@ -1713,7 +1714,7 @@ yyreduce:
             reset_node(current_node);
 
             //printf("PARSER-NUMERIC: creating node: %d\n", $1);
-            printf("PARSER-NUMERIC: creating node: %16" PRIx64 "\n", (yyvsp[0].int_val));
+            //printf("PARSER-NUMERIC: creating node: %16" PRIx64 "\n", (yyvsp[0].int_val));
             //current_node->int_val = sign_extend_20_bit_to_uint32_t($1);
             current_node->int_val = (yyvsp[0].int_val);
             //printf("PARSER-NUMERIC: creating node: %d\n", current_node->int_val);
@@ -1721,9 +1722,10 @@ yyreduce:
             //printf("PARSER-NUMERIC: creating node: %d\n", current_node->int_val);
 
             (yyval.expr_ptr) = current_node;
-        } else {
-            printf("PARSER-NUMERIC: not null!\n");
         }
+        // else {
+        //     printf("PARSER-NUMERIC: not null!\n");
+        // }
     }
 #line 1729 "parser.c"
     break;

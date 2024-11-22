@@ -113,6 +113,7 @@ typedef struct asm_line {
 
     uint8_t used;
     uint32_t line_nr;
+    int32_t instruction_index;
     uint8_t size_in_bytes;
 
     //

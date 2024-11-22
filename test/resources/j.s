@@ -1,10 +1,12 @@
 // https://www.reddit.com/r/RISCV/comments/129qg6t/can_someone_pls_explain/?tl=de
 //
-// j is a pseudo instruction. It jumps to a target address which is computed 
+// j is a pseudo instruction. It jumps to a target address which is computed
 // using the current pc value and an immediate value (= pc relative).
 //
+// Format:
 // j imm
 //
+// Specifcation
 // pc <-- pc + imm
 //
 // The pseudo instruction j is implemented by a call to auipc followed by a jalr
@@ -14,7 +16,7 @@
 // In effect the combination of auipc and jalr load a 32 bit value into pc if the temporary
 // register used in the auipc command is also used in the jalr command.
 //
-// 
+//
 //
 // example:
 // Assume the pc contains 0x40000000 and the user executes j 0x2FFFC00/4 == j 0xBFFF00
@@ -24,7 +26,7 @@
 //
 // 2. Take the lower 12 bits of data_1 (0xC00) = data_2
 //
-// 3. interpret data_2 as a sign extended value: 
+// 3. interpret data_2 as a sign extended value:
 // In my calculator app, a number is sign extended only if you enter it as a 64 bit value:
 // 0xFFFFFFFFFFFFFC00 == -1024 = data_3
 //
@@ -58,11 +60,11 @@ j 0x00BFFF00
 // implemented by auipc and jalr
 
 // jalr - jump and link register
-// jalr rd, 
+// jalr rd,
 //
-// load the pc with 
+// load the pc with
 // jalr x0, 0xc00(x5)
 
 // The idea is to jump relative to the current program counter (pc) value.
 //
-// To load a new value into the pc, 
+// To load a new value into the pc,
