@@ -91,6 +91,34 @@ int mem_preload_value(std::map<uint32_t, uint32_t*>* segments,
     return 0;
 }
 
+uint32_t determine_instruction_size(asm_line_t* data) {
+
+    if (data->instruction == I_UNDEFINED_INSTRUCTION) {
+        return 0;
+    }
+
+    switch (data->instruction) {
+
+        case I_CALL:
+            return 8;
+
+        // pseudo instruction -> is replaced with JAL
+        case I_J:
+            return 4;
+
+        case I_LI:
+            if (data->imm <= 0xFFF) {
+                return 4;
+            }
+            return 8;
+
+        case I_MV:
+            return 4;
+    }
+
+    return 4;
+}
+
 int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, uint32_t*>* segments) {
 
     // this is the address where constants defined by assembler instructions .byte, .half, .word, .dword are placed
@@ -112,12 +140,13 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
     yydebug = 0;
     yyparse();
 
-    // DEBUG
-    printf("asm_lines after parse: %d\n", asm_line_array_index);
-    for (int i = 0; i < asm_line_array_index; i++) {
-        //printf("line %d\n", i);
-        print_asm_line(&asm_line_array[i]);
-    }
+    // // DEBUG
+    // printf("asm_lines after parse: %d\n", asm_line_array_index);
+    // for (int i = 0; i < asm_line_array_index; i++) {
+    //     //printf("line %d\n", i);
+    //     print_asm_line(&asm_line_array[i]);
+    // }
+
 
     //
     // collect all labels and store them inside the label_address_map
@@ -169,7 +198,9 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
             //printf("size_in_bytes:%d\n", asm_line_array[i].size_in_bytes);
         //}
 
-        current_address = current_address + asm_line_array[i].size_in_bytes;
+        //printf("current_address: %d, determine_instruction_size: %d\n", current_address, determine_instruction_size(&asm_line_array[i]));
+
+        current_address = current_address + determine_instruction_size(&asm_line_array[i]);
 
         if (asm_line_array[i].instruction != I_UNDEFINED_INSTRUCTION) {
             asm_line_array[i].instruction_index = instruction_index;
@@ -294,7 +325,8 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
 
     for (int i = 0; i < asm_line_array_index; i++) {
 
-        address += asm_line_array[i].size_in_bytes;
+        //address += asm_line_array[i].size_in_bytes;
+        address += determine_instruction_size(&asm_line_array[i]);
 
         if (asm_line_array[i].offset_0_used && strnlen(asm_line_array[i].offset_identifier_0, 100) > 0) {
 
@@ -518,15 +550,15 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
         }
     }
 
-    // DEBUG
-    printf("\n\n");
-    printf("asm_lines after replace labels: %d\n", 100);
-    for (int i = 0; i < 100; i++) {
-        //printf("line %d\n", i);
-        if (asm_line_array[i].used != 0) {
-            print_asm_line(&asm_line_array[i]);
-        }
-    }
+    // // DEBUG
+    // printf("\n\n");
+    // printf("asm_lines after replace labels: %d\n", 100);
+    // for (int i = 0; i < 100; i++) {
+    //     //printf("line %d\n", i);
+    //     if (asm_line_array[i].used != 0) {
+    //         print_asm_line(&asm_line_array[i]);
+    //     }
+    // }
 
     //
     // Replace Pseudo instructions
@@ -536,15 +568,15 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
         resolve_pseudo_instructions_asm_line(asm_line_array, 100, i);
     }
 
-    // DEBUG
-    printf("\n\n");
-    printf("asm_lines after replace pseudo instructions: %d\n", 100);
-    for (int i = 0; i < 100; i++) {
-        //printf("line %d\n", i);
-        if (asm_line_array[i].used != 0) {
-            print_asm_line(&asm_line_array[i]);
-        }
-    }
+    // // DEBUG
+    // printf("\n\n");
+    // printf("asm_lines after replace pseudo instructions: %d\n", 100);
+    // for (int i = 0; i < 100; i++) {
+    //     //printf("line %d\n", i);
+    //     if (asm_line_array[i].used != 0) {
+    //         print_asm_line(&asm_line_array[i]);
+    //     }
+    // }
 
     // print code
     printf("\n\n");
@@ -570,7 +602,8 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
 
             uint32_t machine_code_for_instruction = encode(&asm_line_array[i]);
             if (machine_code_for_instruction != 0) {
-                printf("%d) %08" PRIx64 "\n", i, machine_code_for_instruction);
+                //printf("%d) %08" PRIx64 "\n", i, machine_code_for_instruction);
+                printf("%08" PRIx64 "\n", machine_code_for_instruction);
 
                 machine_code[instruction_index] = machine_code_for_instruction;
                 instruction_index++;

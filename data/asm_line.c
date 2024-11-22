@@ -11,7 +11,7 @@ void reset_asm_line(asm_line_t *data) {
     data->used = 0;
     data->line_nr = 0;
     data->instruction_index = -1;
-    data->size_in_bytes = 0;
+    //data->size_in_bytes = 0;
 
     //
     // Label to jump to in assembler code
@@ -75,7 +75,7 @@ void copy_asm_line(asm_line_t* target, asm_line_t* source) {
     target->used = source->used;
     target->line_nr = source->line_nr;
     target->instruction_index = source->instruction_index;
-    target->size_in_bytes = source->size_in_bytes;
+    //target->size_in_bytes = source->size_in_bytes;
 
     //
     // Label to jump to in assembler code
@@ -170,7 +170,8 @@ void print_asm_line(const asm_line_t *data) {
         print_expression(data->offset_1_expression, buffer_1);
         print_expression(data->offset_2_expression, buffer_2);
 
-        printf("[(%d) InstrIdx: %d Label: %s, Instr: %s Size: %d Imm: %d Used: %d \n \
+        // Size: %d
+        printf("[(%d) InstrIdx: %d Label: %s, Instr: %s Imm: %d Used: %d \n \
     0:{offset_0_used:%d offset:%d offset_ident:%s register:%s offset_0_expr:%s}\n \
     1:{offset_1_used:%d offset:%d offset_ident:%s register:%s offset_1_expr:%s}\n \
     2:{offset_2_used:%d offset:%d offset_ident:%s register:%s offset_2_expr:%s}\n \
@@ -179,7 +180,7 @@ void print_asm_line(const asm_line_t *data) {
             data->instruction_index,
             data->label,
             instruction_to_string(data->instruction),
-            data->size_in_bytes,
+            //data->size_in_bytes,
             data->imm,
             data->used,
             data->offset_0_used, data->offset_0, data->offset_identifier_0, register_to_string(data->reg_rd), buffer_0,
@@ -698,6 +699,7 @@ const char* register_to_string(enum register_ data) {
     }
 }
 
+// called by the parser, when a mnemonic is parsed
 void set_instruction(asm_line_t *data, const enum instruction instr, const enum instruction_type type) {
 
     //printf("set_instruction()\n");
@@ -705,26 +707,26 @@ void set_instruction(asm_line_t *data, const enum instruction instr, const enum 
     data->instruction = instr;
     data->instruction_type = type;
 
-    data->size_in_bytes = 4;
-    switch (data->instruction) {
+    // data->size_in_bytes = 4;
+    // switch (data->instruction) {
 
-        case I_CALL:
-            data->size_in_bytes = 8;
-            break;
+    //     case I_CALL:
+    //         data->size_in_bytes = 8;
+    //         break;
 
-        // pseudo instruction -> is replaced with JAL
-        case I_J:
-            data->size_in_bytes = 4;
-            break;
+    //     // pseudo instruction -> is replaced with JAL
+    //     case I_J:
+    //         data->size_in_bytes = 4;
+    //         break;
 
-        case I_LI:
-            data->size_in_bytes = 8;
-            break;
+    //     case I_LI:
+    //         data->size_in_bytes = 8;
+    //         break;
 
-        case I_MV:
-            data->size_in_bytes = 4;
-            break;
-    }
+    //     case I_MV:
+    //         data->size_in_bytes = 4;
+    //         break;
+    // }
 
 }
 
