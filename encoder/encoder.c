@@ -27,19 +27,7 @@ int32_t retrieve_immediate_part(asm_line_t* asm_line) {
 }
 
 int32_t compute_relative_offset(int32_t imm, int32_t instruction_index) {
-
-    int jump_forward = (instruction_index * 4) < imm;
-
-    if (jump_forward) {
-        return (imm - ((instruction_index + 0) * 4));
-    } else {
-        return (imm - ((instruction_index + 0) * 4));
-    }
-
-    //return (imm - ((instruction_index + 0) * 4));
-
-    //return (imm - ((instruction_index + 1) * 4));
-    //return (imm - ((instruction_index + 2) * 4));
+    return (imm - ((instruction_index + 0) * 4));
 }
 
 // Whenever the parser reduces a rule for a asm_line, it is performing an action.

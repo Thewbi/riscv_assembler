@@ -127,8 +127,9 @@ is in a good state or if anything is broken already before you change the code.
 1. Update the parser parser.y (add a new <sym> token and add the instruction to the mnemonic rule)
 1. Update instruction_to_string() in asm_line.c
 1. update the instruction-enum in asm_line.h (this file)
-1. Update encoder/encoder.h
-1. Update decoder/decoder.h
+1. Update encoder.c/.h
+1. Update decoder.c/.h
+1. Make sure that the function determine_instruction_size() in assembler.c returns the correct size for each instruction!
 1. Add test to test\unit_tests\main.c (this entails creating a new pair of .c/.h for the new test)
 1. Add the test files .c/.h to test\Makefile so that they get compiled
 1. Generate the lexer and the parser (only once as long as you do not change lexer.l and parser.y)
