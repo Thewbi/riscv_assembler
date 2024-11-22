@@ -616,7 +616,7 @@ const char* assembler_instruction_to_string(enum assembler_instruction data) {
 
 const char* register_to_string(enum register_ data) {
 
-    int outputABIName = 0;
+    int outputABIName = 1;
     if (outputABIName) {
 
         switch(data) {
@@ -795,6 +795,10 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             beq.instruction_index = data->instruction_index;
             beq.reg_rs1 = data->reg_rd;
             beq.reg_rs2 = R_ZERO;
+
+            // int32_t relative_offset = imm_int_val - ((data->instruction_index + 1) * 4);
+            // beq.imm = relative_offset;
+
             beq.imm = imm_int_val;
 
             reset_asm_line(data);
@@ -1091,7 +1095,8 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             // see: https://riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf
             data->instruction = I_ADDI;
             data->instruction_type = IT_B;
-            data->reg_rs1 = R_ZERO;
+            data->reg_rs2 = R_ZERO;
+            data->imm = 0;
         }
         break;
 

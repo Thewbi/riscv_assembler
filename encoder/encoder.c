@@ -103,7 +103,9 @@ uint32_t encode_beq(asm_line_t* asm_line) {
     uint8_t rs2 = encode_register(asm_line->reg_rs2);
     int32_t imm = retrieve_immediate_part(asm_line);
 
-    return encode_b_type(imm, rs2, rs1, funct3, opcode);
+    int32_t relative_offset = imm - ((asm_line->instruction_index + 1) * 4);
+
+    return encode_b_type(relative_offset, rs2, rs1, funct3, opcode);
 }
 
 uint32_t encode_bne(asm_line_t* asm_line) {
@@ -130,12 +132,11 @@ uint32_t encode_blt(asm_line_t* asm_line) {
     uint8_t rs1 = encode_register(asm_line->reg_rs1);
     uint8_t rs2 = encode_register(asm_line->reg_rs2);
 
-    // uint8_t rs1 = encode_register(asm_line->reg_rd);
-    // uint8_t rs2 = encode_register(asm_line->reg_rs1);
-
     int32_t imm = retrieve_immediate_part(asm_line);
 
-    return encode_b_type(imm, rs2, rs1, funct3, opcode);
+    int32_t relative_offset = imm - ((asm_line->instruction_index + 1) * 4);
+
+    return encode_b_type(relative_offset, rs2, rs1, funct3, opcode);
 }
 
 uint32_t encode_bnez(asm_line_t* asm_line) {
@@ -256,7 +257,11 @@ void encode_j(asm_line_t* asm_line, uint32_t* output_buffer) {
     uint8_t rs1 = encode_register(free_temp_register);
     imm = data_2;
 
+    //int32_t relative_offset = imm - ((asm_line->instruction_index + 1) * 4);
+
     uint32_t jalr_encoded = encode_i_type(imm, rs1, funct3, rd, opcode);
+
+    // DEBUG
     //printf("jalr_encoded: %08" PRIx32 "\n", jalr_encoded);
 
     output_buffer[1] = jalr_encoded;
@@ -272,7 +277,11 @@ uint32_t encode_jal(asm_line_t* asm_line) {
 
     int32_t relative_offset = imm - ((asm_line->instruction_index + 1) * 4);
 
-    return encode_j_type(relative_offset, rd, opcode);
+    uint32_t result = encode_j_type(relative_offset, rd, opcode);
+
+    //printf("encode_jal: relative_offset: %d, result: %08" PRIx32 "\n", relative_offset, result);
+
+    return result;
 }
 
 uint32_t encode_jalr(asm_line_t* asm_line) {
@@ -475,20 +484,20 @@ uint32_t encode_mul(asm_line_t* asm_line) {
     return encode_r_type(funct7, rs2, rs1, funct3, rd, opcode);
 }
 
-// mv (move) is a pseudoinstruction. It is implemented using:
-// mv rd, rs --> addi rd, rs, 0
-// mv a0, a5 --> addi a0, a5, 0
-uint32_t encode_mv(asm_line_t* asm_line) {
+// // mv (move) is a pseudoinstruction. It is implemented using:
+// // mv rd, rs --> addi rd, rs, 0
+// // mv a0, a5 --> addi a0, a5, 0
+// uint32_t encode_mv(asm_line_t* asm_line) {
 
-    uint8_t funct3 = 0b000;
-    uint8_t opcode = 0b0010011;
-    uint16_t imm = 0;
+//     uint8_t funct3 = 0b000;
+//     uint8_t opcode = 0b0010011;
+//     uint16_t imm = 0;
 
-    uint8_t rs1 = encode_register(asm_line->reg_rs1);
-    uint8_t rd = encode_register(asm_line->reg_rd);
+//     uint8_t rs1 = encode_register(asm_line->reg_rs1);
+//     uint8_t rd = encode_register(asm_line->reg_rd);
 
-    return encode_i_type(imm, rs1, funct3, rd, opcode);
-}
+//     return encode_i_type(imm, rs1, funct3, rd, opcode);
+// }
 
 uint32_t encode_ret(asm_line_t* asm_line) {
 
@@ -652,7 +661,7 @@ uint32_t encode_u_type(uint32_t imm, uint8_t rd, uint8_t opcode) {
 }
 
 // imm[20] imm[10:1] imm[11] imm[19:12] rd opcode
-uint32_t encode_j_type(uint32_t imm, uint8_t rd, uint8_t opcode) {
+uint32_t encode_j_type(int32_t imm, uint8_t rd, uint8_t opcode) {
 
     uint16_t imm_20 = (imm >> 19) & 0b1; // 1
     uint16_t imm_10_1 = (imm >> 1) & 0b1111111111; // 10
@@ -664,7 +673,7 @@ uint32_t encode_j_type(uint32_t imm, uint8_t rd, uint8_t opcode) {
            ((imm_19_12 & 0b11111111) << (7+5)) |
            ((imm_11 & 0b1) << (7+5+8)) |
            ((imm_10_1 & 0b1111111111) << (7+5+8+1)) |
-           ((imm_20 & 0b1) << (7+5+3+5+10));
+           ((imm_20 & 0b1) << (7+5+8+1+10));
 }
 
 uint32_t encode(asm_line_t* asm_line) {

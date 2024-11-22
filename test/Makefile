@@ -64,10 +64,6 @@ test: unit_tests/main.c \
 	unit_tests/mul_encode_test.h \
 	unit_tests/mul_decode_test.c \
 	unit_tests/mul_decode_test.h \
-	unit_tests/mv_encode_test.c \
-	unit_tests/mv_encode_test.h \
-	unit_tests/mv_decode_test.c \
-	unit_tests/mv_decode_test.h \
 	unit_tests/ret_encode_test.c \
 	unit_tests/ret_encode_test.h \
 	unit_tests/ret_decode_test.c \
@@ -114,8 +110,6 @@ test: unit_tests/main.c \
 	unit_tests/li_decode_test.c \
 	unit_tests/mul_encode_test.c \
 	unit_tests/mul_decode_test.c \
-	unit_tests/mv_encode_test.c \
-	unit_tests/mv_decode_test.c \
 	unit_tests/ret_encode_test.c \
 	unit_tests/ret_decode_test.c \
 	unit_tests/srli_encode_test.c \
@@ -147,3 +141,13 @@ install:
 	mkdir -p lib include
 	cp $(CMOCKA_BUILD_DIR)/$(CMOCKA_DIR)/build/output/lib/libcmocka.a lib
 	cp $(CMOCKA_BUILD_DIR)/$(CMOCKA_DIR)/build/output/include/*.h include
+
+
+
+#unit_tests/mv_encode_test.c \
+#unit_tests/mv_encode_test.h \
+#unit_tests/mv_decode_test.c \
+#unit_tests/mv_decode_test.h \
+
+#unit_tests/mv_encode_test.c \
+#unit_tests/mv_decode_test.c \
