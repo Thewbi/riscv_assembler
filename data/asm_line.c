@@ -11,7 +11,6 @@ void reset_asm_line(asm_line_t *data) {
     data->used = 0;
     data->line_nr = 0;
     data->instruction_index = -1;
-    //data->size_in_bytes = 0;
 
     //
     // Label to jump to in assembler code
@@ -210,54 +209,11 @@ void output_offset(const asm_line_t *data) {
 
 void serialize_asm_line(const asm_line_t *data) {
 
-    // if (strlen(data->label) != 0) {
-
-    //     //printf("[(%d) Label: %s]\n", data->line_nr, data->label);
-
-    // } else
-
     if (data->asm_instruction != AI_UNDEFINED) {
 
-        // char buffer_3[100];
-
-        // memset(buffer_3, 0, 100);
-
-        // //printf("print_expression ...\n");
-        // print_expression(data->asm_instruction_expr, buffer_3);
-        // //printf("print_expression done.\n");
-
-        // printf("[(%d) AssemblerInstr: Instr:%s Symbol:%s Val: %s]\n",
-        //     data->line_nr,
-        //     assembler_instruction_to_string(data->asm_instruction),
-        //     data->asm_instruction_symbol, buffer_3);
+        // nop
 
     } else {
-
-        //printf("asm_line with parameters\n");
-
-//         char buffer_0[100];
-//         char buffer_1[100];
-//         char buffer_2[100];
-
-//         memset(buffer_0, 0, 100);
-//         memset(buffer_1, 0, 100);
-//         memset(buffer_2, 0, 100);
-
-//         print_expression(data->offset_0_expression, buffer_0);
-//         print_expression(data->offset_1_expression, buffer_1);
-//         print_expression(data->offset_2_expression, buffer_2);
-
-//         printf("[(%d) Instr: %s Size: %d\n\
-//     0:{offset_used:%d offset:%d offset_ident:%s register:%s offset_expr:%s}\n\
-//     1:{offset_used:%d offset:%d offset_ident:%s register:%s offset_expr:%s}\n\
-//     2:{offset_used:%d offset:%d offset_ident:%s register:%s offset_expr:%s}\n\
-// ]\n",
-//             data->line_nr,
-//             instruction_to_string(data->instruction),
-//             data->size_in_bytes,
-//             data->offset_0_used, data->offset_0, data->offset_identifier_0, register_to_string(data->reg_rd), buffer_0,
-//             data->offset_1_used, data->offset_1, data->offset_identifier_1, register_to_string(data->reg_rs1), buffer_1,
-//             data->offset_2_used, data->offset_2, data->offset_identifier_2, register_to_string(data->reg_rs2), buffer_2);
 
         printf("%s ", instruction_to_string(data->instruction));
 
@@ -407,8 +363,6 @@ void print_expression(const node_t* data, char* buffer) {
 
 void insert_register(asm_line_t *data, enum register_ reg) {
 
-    //printf("insert_register()\n");
-
     if (data->instruction_type == IT_S) {
 
         if (R_UNDEFINED_REGISTER == data->reg_rs2) {
@@ -423,8 +377,6 @@ void insert_register(asm_line_t *data, enum register_ reg) {
 
     } else if (data->instruction_type == IT_B) {
 
-        //printf("insert_register() IT_B IT_S\n");
-
         if (R_UNDEFINED_REGISTER == data->reg_rs1) {
             data->reg_rs1 = reg;
             return;
@@ -436,20 +388,15 @@ void insert_register(asm_line_t *data, enum register_ reg) {
 
     } else {
 
-        //printf("insert_register()\n");
-
         if (R_UNDEFINED_REGISTER == data->reg_rd) {
-            //printf("insert_register() insert into rd \n");
             data->reg_rd = reg;
             return;
         }
         if (R_UNDEFINED_REGISTER == data->reg_rs1) {
-            //printf("insert_register() insert into rs1 \n");
             data->reg_rs1 = reg;
             return;
         }
         if (R_UNDEFINED_REGISTER == data->reg_rs2) {
-            //printf("insert_register() insert into rs2 \n");
             data->reg_rs2 = reg;
             return;
         }
@@ -818,10 +765,9 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             beq.reg_rs1 = data->reg_rd;
             beq.reg_rs2 = R_ZERO;
 
-            // int32_t relative_offset = imm_int_val - ((data->instruction_index + 1) * 4);
-            // beq.imm = relative_offset;
 
-            beq.imm = imm_int_val;
+            int32_t relative_offset = imm_int_val;
+            beq.imm = relative_offset;
 
             reset_asm_line(data);
             copy_asm_line(data, &beq);
@@ -833,11 +779,6 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
 
             int line_nr = data->line_nr;
 
-            // if (data->offset_0_expression == NULL) {
-            //     printf("error\n");
-            // }
-
-            //uint32_t imm_int_val = data->offset_0_expression->int_val;
             uint32_t imm_int_val = 0;
             if (data->offset_0_used) {
                 imm_int_val = data->offset_0;
@@ -853,8 +794,6 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             // auipc
             //
 
-            //uint8_t opcode = 0b0010111;
-            //uint8_t rd = encode_register(free_temp_register);
             uint32_t imm = data_0;
 
             asm_line_t auipc;
@@ -871,10 +810,6 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             // jalr
             //
 
-            //uint8_t funct3 = 0b000;
-            //opcode = 0b1100111;
-
-            //rd = encode_register(R_ZERO);
             uint8_t rs1 = encode_register(free_temp_register);
             imm = data_1;
 
@@ -927,8 +862,8 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             //
             // this sequence loads part of the immediate into the rs1 register
             // if the entire immediate value does not fit into 12 bits.
-            if (data->offset_1_expression->int_val > 0xFFF) {
-                printf("boink");
+            //if (data->offset_1_expression->int_val > 0xFFF) {
+            if (data->offset_1 > 0xFFF) {
 
                 int line_nr = data->line_nr;
 
@@ -946,8 +881,6 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
                 auipc.reg_rd = data->reg_rd;
                 auipc.imm = (data->offset_1_expression->int_val >> 12);
 
-                //reset_asm_line(data);
-
                 // modify rs1 register
                 data->reg_rs1 = data->reg_rd;
 
@@ -959,19 +892,7 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
                     if (asm_line_array[i + 1].instruction_index != -1) {
                         asm_line_array[i + 1].instruction_index++;
                     }
-
-                    // printf("%d: ", i);
-                    // print_asm_line(&asm_line_array[i]);
-                    // printf(" %d: ", i+1);
-                    // print_asm_line(&asm_line_array[i + i]);
                 }
-
-                // for (int i = 0; i < 100; i++) {
-                //     //printf("line %d\n", i);
-                //     if (asm_line_array[i].used != 0) {
-                //         print_asm_line(&asm_line_array[i]);
-                //     }
-                // }
 
                 asm_line_t* next_data = &asm_line_array[index + 1];
 
@@ -983,7 +904,6 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
 
                 reset_asm_line(data);
                 copy_asm_line(data, &auipc);
-                //copy_asm_line(&asm_line_array[index+1], &jalr);
             }
         }
         break;
@@ -1022,7 +942,6 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
                 // lui
                 //
 
-                //uint8_t opcode = 0b0110111;
                 uint8_t rd = encode_register(data->reg_rd);
                 uint32_t imm = data_1;
 
@@ -1043,9 +962,6 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
                 uint32_t data_2 = data_1 << 12;
                 uint32_t data_3 = (data_0 - data_2) & 0xFFF;
                 //printf("data_3: %08" PRIx32 "\n", data_3);
-
-                //uint8_t funct3 = 0b000;
-                //opcode = 0b0010011;
 
                 rd = encode_register(data->reg_rd);
                 uint8_t rs1 = encode_register(data->reg_rd);
@@ -1088,8 +1004,6 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             // see: https://riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf
             data->instruction = I_BNE;
             data->instruction_type = IT_I;
-            // data->reg_rd = data->reg_rd;
-            // data->reg_rs1 = data->reg_rd;
             data->reg_rs1 = data->reg_rd;
             data->reg_rs2 = data->reg_rd;
             data->imm = 0;
@@ -1102,8 +1016,6 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             // see: https://riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf
             data->instruction = I_BLT;
             data->instruction_type = IT_B;
-            // data->reg_rd = data->reg_rd;
-            // data->reg_rs1 = data->reg_rd;
             enum register_ temp = data->reg_rs1;
             data->reg_rs1 = data->reg_rs2;
             data->reg_rs2 = temp;

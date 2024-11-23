@@ -323,7 +323,8 @@ uint32_t encode_lb(asm_line_t* asm_line) {
 
     uint8_t rs1 = encode_register(asm_line->reg_rs1);
     uint8_t rd = encode_register(asm_line->reg_rd);
-    int64_t imm = asm_line->offset_1_expression->int_val;
+    //int64_t imm = asm_line->offset_1_expression->int_val;
+    int64_t imm = asm_line->offset_1;
 
     return encode_i_type(imm, rs1, funct3, rd, opcode);
 }
@@ -339,7 +340,8 @@ uint32_t encode_lh(asm_line_t* asm_line) {
 
     uint8_t rs1 = encode_register(asm_line->reg_rs1);
     uint8_t rd = encode_register(asm_line->reg_rd);
-    int64_t imm = asm_line->offset_1_expression->int_val;
+    //int64_t imm = asm_line->offset_1_expression->int_val;
+    int64_t imm = asm_line->offset_1;
 
     return encode_i_type(imm, rs1, funct3, rd, opcode);
 }
@@ -367,7 +369,8 @@ uint32_t encode_ld(asm_line_t* asm_line) {
 
     uint8_t rs1 = encode_register(asm_line->reg_rs1);
     uint8_t rd = encode_register(asm_line->reg_rd);
-    uint16_t imm = asm_line->offset_1_expression->int_val;
+    //uint16_t imm = asm_line->offset_1_expression->int_val;
+    uint16_t imm = asm_line->offset_1;
 
     return encode_i_type(imm, rs1, funct3, rd, opcode);
 }
@@ -767,10 +770,6 @@ uint32_t encode(asm_line_t* asm_line) {
             encoded_asm_line = encode_blt(asm_line);
             break;
 
-        // case I_BNEZ:
-        //     encoded_asm_line = encode_bnez(asm_line);
-        //     break;
-
         case I_JAL:
             encoded_asm_line = encode_jal(asm_line);
             break;
@@ -798,18 +797,6 @@ uint32_t encode(asm_line_t* asm_line) {
         case I_LD:
             encoded_asm_line = encode_ld(asm_line);
             break;
-
-        // case I_CALL:
-        //      encode_call(asm_line, output_buffer);
-        //      break;
-
-        // case I_LI:
-        //     encode_li(asm_line, output_buffer);
-        //     break;
-
-        // case I_RET:
-        //     encoded_asm_line = encode_ret(asm_line);
-        //     break;
 
         case I_SRLI:
             encoded_asm_line = encode_srli(asm_line);
@@ -849,111 +836,3 @@ uint32_t encode(asm_line_t* asm_line) {
 
     return encoded_asm_line;
 }
-
-/*
-void encoder_callback(asm_line_t* asm_line) {
-
-    // resolve pseudo instructions
-
-    switch (asm_line->instruction) {
-
-        case I_CALL: {
-            // call offset ->
-            //  auipc x6, offset[31:12]
-            //  jalr x1, x6, offset[11:0]
-
-            uint32_t data_0 = (asm_line->imm & 0xFFFFF000) >> 12;
-            uint32_t data_1 = (asm_line->imm & 0xFFF);
-
-            asm_line_t auipc_asm_line;
-            auipc_asm_line.instruction = I_AUIPC;
-            auipc_asm_line.instruction_type = IT_U;
-            auipc_asm_line.reg_rd = R_T1;
-            auipc_asm_line.offset_1 = data_0;
-            auipc_asm_line.offset_1_used = 1;
-
-            print_asm_line(&auipc_asm_line);
-
-            asm_line_t jalr_asm_line;
-            jalr_asm_line.instruction = I_JALR;
-            auipc_asm_line.instruction_type = IT_I;
-            jalr_asm_line.reg_rd = R_T1;
-            jalr_asm_line.reg_rs1 = R_RA;
-            jalr_asm_line.reg_rs2 = R_T1;
-            jalr_asm_line.offset_2 = data_1;
-            jalr_asm_line.offset_2_used = 1;
-
-            print_asm_line(&jalr_asm_line);
-
-        }
-        break;
-
-        default:
-            print_asm_line(asm_line);
-            break;
-
-    }
-
-    reset_asm_line(asm_line);
-}
-*/
-
-/*
-// this function is used by the fp_emit function pointer which
-// is called for each parsed row
-void encoder_callback(asm_line_t* asm_line) {
-
-    //printf("encoder_callback\n");
-
-    print_asm_line(asm_line);
-
-    uint32_t encoded_asm_line = 0;
-    uint32_t output_buffer[2];
-
-    switch (asm_line->instruction) {
-
-        case I_ADD:
-            encoded_asm_line = encode_add(asm_line);
-            break;
-
-        case I_ADDI:
-            encoded_asm_line = encode_addi(asm_line);
-            break;
-
-        case I_BNEZ:
-            encoded_asm_line = encode_bnez(asm_line);
-            break;
-
-        case I_CALL:
-             encode_call(asm_line, output_buffer);
-             break;
-
-        case I_LI:
-            encode_li(asm_line, output_buffer);
-            break;
-
-        // case I_RET:
-        //     encoded_asm_line = encode_ret(asm_line);
-        //     break;
-
-        case I_SRLI:
-            encoded_asm_line = encode_srli(asm_line);
-            break;
-
-        case I_SLLI:
-            encoded_asm_line = encode_slli(asm_line);
-            break;
-
-        case I_SW:
-            encoded_asm_line = encode_sw(asm_line);
-            break;
-
-        default:
-            printf("Unknown instruction! %s \n", instruction_to_string(asm_line->instruction));
-            return;
-    }
-
-    //printf("encoder_callback 0x%08x\n", encoded_asm_line);
-
-    reset_asm_line(asm_line);
-}*/
