@@ -26,9 +26,9 @@ int32_t retrieve_immediate_part(asm_line_t* asm_line) {
     return imm;
 }
 
-int32_t compute_relative_offset(int32_t imm, int32_t instruction_index) {
-    return (imm - ((instruction_index + 0) * 4));
-}
+// int32_t compute_relative_offset(int32_t imm, int32_t instruction_index) {
+//     return (imm - ((instruction_index + 0) * 4));
+// }
 
 // Whenever the parser reduces a rule for a asm_line, it is performing an action.
 // Inside this action, it calls the fp_emit function pointer.
@@ -72,18 +72,12 @@ uint32_t encode_add(asm_line_t* asm_line) {
 
 uint32_t encode_addi(asm_line_t* asm_line) {
 
-    //printf("encode_addi\n");
-
     uint8_t funct3 = 0b000;
     uint8_t opcode = 0b0010011;
 
     uint8_t rd = encode_register(asm_line->reg_rd);
     uint8_t rs1 = encode_register(asm_line->reg_rs1);
     int32_t imm = retrieve_immediate_part(asm_line);
-
-    // printf("rd %d\n", rd);
-    // printf("rs1 %d\n", rs1);
-    // printf("imm %d\n", imm);
 
     return encode_i_type(imm, rs1, funct3, rd, opcode);
 }
@@ -107,7 +101,8 @@ uint32_t encode_beq(asm_line_t* asm_line) {
     uint8_t rs2 = encode_register(asm_line->reg_rs2);
     int32_t imm = retrieve_immediate_part(asm_line);
 
-    int32_t relative_offset = imm - ((asm_line->instruction_index + 0) * 4);
+    //int32_t relative_offset = imm - ((asm_line->instruction_index + 0) * 4);
+    int32_t relative_offset = imm;
 
     return encode_b_type(relative_offset, rs2, rs1, funct3, opcode);
 }
@@ -121,7 +116,8 @@ uint32_t encode_bge(asm_line_t* asm_line) {
     uint8_t rs2 = encode_register(asm_line->reg_rs2);
     int32_t imm = retrieve_immediate_part(asm_line);
 
-    int32_t relative_offset = imm - ((asm_line->instruction_index + 0) * 4);
+    //int32_t relative_offset = imm - ((asm_line->instruction_index + 0) * 4);
+    int32_t relative_offset = imm;
 
     return encode_b_type(relative_offset, rs2, rs1, funct3, opcode);
 }
@@ -134,12 +130,10 @@ uint32_t encode_bne(asm_line_t* asm_line) {
     uint8_t rs1 = encode_register(asm_line->reg_rs1);
     uint8_t rs2 = encode_register(asm_line->reg_rs2);
 
-    // uint8_t rs1 = encode_register(asm_line->reg_rd);
-    // uint8_t rs2 = encode_register(asm_line->reg_rs1);
-
     int32_t imm = retrieve_immediate_part(asm_line);
 
-    int32_t relative_offset = imm - ((asm_line->instruction_index + 0) * 4);
+    //int32_t relative_offset = imm - ((asm_line->instruction_index + 0) * 4);
+    int32_t relative_offset = imm;
 
     return encode_b_type(relative_offset, rs2, rs1, funct3, opcode);
 }
@@ -154,7 +148,8 @@ uint32_t encode_blt(asm_line_t* asm_line) {
 
     int32_t imm = retrieve_immediate_part(asm_line);
 
-    int32_t relative_offset = imm - ((asm_line->instruction_index + 0) * 4);
+    //int32_t relative_offset = imm - ((asm_line->instruction_index + 0) * 4);
+    int32_t relative_offset = imm;
 
     return encode_b_type(relative_offset, rs2, rs1, funct3, opcode);
 }
@@ -166,8 +161,7 @@ uint32_t encode_bnez(asm_line_t* asm_line) {
 
     uint8_t rs1 = encode_register(asm_line->reg_rd);
     uint8_t rs2 = encode_register(R_ZERO);
-    //uint16_t imm = asm_line->imm;
-    uint16_t imm = asm_line->offset_1_expression->int_val;
+    int64_t imm = asm_line->offset_1_expression->int_val;
 
     return encode_b_type(imm, rs2, rs1, funct3, opcode);
 }
@@ -293,10 +287,11 @@ uint32_t encode_jal(asm_line_t* asm_line) {
     uint8_t opcode = 0b1101111;
 
     uint8_t rd = encode_register(asm_line->reg_rd);
-    uint16_t imm = retrieve_immediate_part(asm_line);
+    int32_t imm = retrieve_immediate_part(asm_line);
 
     //int32_t relative_offset = imm - ((asm_line->instruction_index + 1) * 4);
-    int32_t relative_offset = compute_relative_offset(imm, asm_line->instruction_index);
+    //int32_t relative_offset = compute_relative_offset(imm, asm_line->instruction_index);
+    int32_t relative_offset = imm;
 
     uint32_t result = encode_j_type(relative_offset, rd, opcode);
 
@@ -312,7 +307,7 @@ uint32_t encode_jalr(asm_line_t* asm_line) {
 
     uint8_t rd = encode_register(asm_line->reg_rd);
     uint8_t rs1 = encode_register(asm_line->reg_rs1);
-    uint16_t imm = retrieve_immediate_part(asm_line);
+    int32_t imm = retrieve_immediate_part(asm_line);
 
     return encode_i_type(imm, rs1, funct3, rd, opcode);
 }
@@ -328,8 +323,7 @@ uint32_t encode_lb(asm_line_t* asm_line) {
 
     uint8_t rs1 = encode_register(asm_line->reg_rs1);
     uint8_t rd = encode_register(asm_line->reg_rd);
-    // uint16_t imm = asm_line->offset_1
-    uint16_t imm = asm_line->offset_1_expression->int_val;
+    int64_t imm = asm_line->offset_1_expression->int_val;
 
     return encode_i_type(imm, rs1, funct3, rd, opcode);
 }
@@ -345,37 +339,86 @@ uint32_t encode_lh(asm_line_t* asm_line) {
 
     uint8_t rs1 = encode_register(asm_line->reg_rs1);
     uint8_t rd = encode_register(asm_line->reg_rd);
-    // uint16_t imm = asm_line->offset_1
-    uint16_t imm = asm_line->offset_1_expression->int_val;
+    int64_t imm = asm_line->offset_1_expression->int_val;
 
     return encode_i_type(imm, rs1, funct3, rd, opcode);
 }
 
 uint32_t encode_lw(asm_line_t* asm_line) {
 
-    // printf("encode_lw\n");
-
-    // printf("asm_line->reg_rs1 %d\n", asm_line->reg_rs1);
-    // printf("asm_line->reg_rs2 %d\n", asm_line->reg_rs2);
-    // printf("asm_line->imm %d\n", asm_line->imm);
-
-    // printf("asm_line->offset_0_used %d\n", asm_line->offset_0_used);
-    // printf("asm_line->offset_0 %d\n", asm_line->offset_0);
-
-    // printf("asm_line->offset_1_used %d\n", asm_line->offset_1_used);
-    // printf("asm_line->offset_1 %d\n", asm_line->offset_1);
-
-    // printf("asm_line->offset_2_used %d\n", asm_line->offset_2_used);
-    // printf("asm_line->offset_2 %d\n", asm_line->offset_2);
-
     uint8_t funct3 = 0b010;
     uint8_t opcode = 0b0000011;
 
     uint8_t rs1 = encode_register(asm_line->reg_rs1);
     uint8_t rd = encode_register(asm_line->reg_rd);
-    uint16_t imm = asm_line->offset_1;
+    int32_t imm = asm_line->offset_1;
 
     return encode_i_type(imm, rs1, funct3, rd, opcode);
+}
+
+uint32_t encode_ld(asm_line_t* asm_line) {
+
+    uint8_t funct3 = 0b011;
+    uint8_t opcode = 0b0000011;
+
+    if (asm_line->reg_rs1 == R_UNDEFINED_REGISTER) {
+        asm_line->reg_rs1 = R_ZERO;
+    }
+
+    uint8_t rs1 = encode_register(asm_line->reg_rs1);
+    uint8_t rd = encode_register(asm_line->reg_rd);
+    uint16_t imm = asm_line->offset_1_expression->int_val;
+
+    return encode_i_type(imm, rs1, funct3, rd, opcode);
+}
+
+uint32_t encode_sb(asm_line_t* asm_line) {
+
+    uint8_t funct3 = 0b000;
+    uint8_t opcode = 0b0100011;
+
+    uint8_t rs1 = encode_register(asm_line->reg_rs1);
+    uint8_t rs2 = encode_register(asm_line->reg_rs2);
+    uint16_t imm = asm_line->offset_1;
+
+    return encode_s_type(imm, rs2, rs1, funct3, opcode);
+}
+
+uint32_t encode_sh(asm_line_t* asm_line) {
+
+    uint8_t funct3 = 0b001;
+    uint8_t opcode = 0b0100011;
+
+    uint8_t rs1 = encode_register(asm_line->reg_rs1);
+    uint8_t rs2 = encode_register(asm_line->reg_rs2);
+    uint16_t imm = asm_line->offset_1;
+
+    return encode_s_type(imm, rs2, rs1, funct3, opcode);
+}
+
+// https://luplab.gitlab.io/rvcodecjs/#q=sw++++++ra,28(sp)&abi=false&isa=AUTO
+uint32_t encode_sw(asm_line_t* asm_line) {
+
+    uint8_t funct3 = 0b010;
+    uint8_t opcode = 0b0100011;
+
+    uint8_t rs1 = encode_register(asm_line->reg_rs1);
+    uint8_t rs2 = encode_register(asm_line->reg_rs2);
+    uint16_t imm = asm_line->offset_1;
+
+    return encode_s_type(imm, rs2, rs1, funct3, opcode);
+}
+
+uint32_t encode_sd(asm_line_t* asm_line) {
+
+    uint8_t funct3 = 0b011;
+    uint8_t opcode = 0b0100011;
+
+    uint8_t rs1 = encode_register(asm_line->reg_rs1);
+    uint8_t rs2 = encode_register(asm_line->reg_rs2);
+    uint16_t imm = asm_line->offset_1;
+
+    return encode_s_type(imm, rs2, rs1, funct3, opcode);
 }
 
 // https://luplab.gitlab.io/rvcodecjs/#q=0xdeadc537&abi=false&isa=AUTO
@@ -567,34 +610,6 @@ uint32_t encode_slli(asm_line_t* asm_line) {
     return result;
 }
 
-// https://luplab.gitlab.io/rvcodecjs/#q=sw++++++ra,28(sp)&abi=false&isa=AUTO
-uint32_t encode_sw(asm_line_t* asm_line) {
-
-    // printf("encode_sw\n");
-
-    // printf("asm_line->reg_rs1 %d\n", asm_line->reg_rs1);
-    // printf("asm_line->reg_rs2 %d\n", asm_line->reg_rs2);
-    // printf("asm_line->imm %d\n", asm_line->imm);
-
-    // printf("asm_line->offset_0_used %d\n", asm_line->offset_0_used);
-    // printf("asm_line->offset_0 %d\n", asm_line->offset_0);
-
-    // printf("asm_line->offset_1_used %d\n", asm_line->offset_1_used);
-    // printf("asm_line->offset_1 %d\n", asm_line->offset_1);
-
-    // printf("asm_line->offset_2_used %d\n", asm_line->offset_2_used);
-    // printf("asm_line->offset_2 %d\n", asm_line->offset_2);
-
-    uint8_t funct3 = 0b010;
-    uint8_t opcode = 0b0100011;
-
-    uint8_t rs1 = encode_register(asm_line->reg_rs1);
-    uint8_t rs2 = encode_register(asm_line->reg_rs2);
-    uint16_t imm = asm_line->offset_1;
-
-    return encode_s_type(imm, rs1, rs2, funct3, opcode);
-}
-
 // funct7 rs2 rs1 funct3 rd
 uint32_t encode_r_type(uint8_t funct7, uint8_t rs2, uint8_t rs1, uint8_t funct3, uint8_t rd, uint8_t opcode) {
 
@@ -633,7 +648,25 @@ uint32_t encode_i_type(uint16_t imm, uint8_t rs1, uint8_t funct3, uint8_t rd, ui
 
 // imm[11:5] rs2 rs1 funct3 imm[4:0]
 uint32_t encode_s_type(uint16_t imm, uint8_t rs2, uint8_t rs1, uint8_t funct3, uint8_t opcode) {
-    return encode_b_type(imm, rs2, rs1, funct3, opcode);
+    //return encode_b_type(imm, rs2, rs1, funct3, opcode);
+
+    uint32_t imm_4_0 = (imm >> 0) & 0b11111;
+    uint32_t imm_11_5 = (imm >> 5) & 0b1111111;
+
+    uint32_t result = ((opcode & 0b1111111) << 0) |
+           ((imm_4_0) << 7) |
+           ((funct3 & 0b111) << (7+5)) |
+           ((rs1 & 0b11111) << (7+5+3)) |
+           ((rs2 & 0b11111) << (7+5+3+5)) |
+           ((imm_11_5 & 0b1111111) << (7+5+3+5+5));
+
+    // uint32_t test = result;
+    // for (int i = 31; i >= 0; --i) {
+    //     printf("%" PRIu32, test >> i & 1);
+    // }
+    // printf("\n");
+
+    return result;
 }
 
 // imm[12] imm[10:5] rs2 rs1 funct3 imm[4:1] imm[11] opcode
@@ -762,6 +795,10 @@ uint32_t encode(asm_line_t* asm_line) {
             encoded_asm_line = encode_lw(asm_line);
             break;
 
+        case I_LD:
+            encoded_asm_line = encode_ld(asm_line);
+            break;
+
         // case I_CALL:
         //      encode_call(asm_line, output_buffer);
         //      break;
@@ -782,17 +819,29 @@ uint32_t encode(asm_line_t* asm_line) {
             encoded_asm_line = encode_slli(asm_line);
             break;
 
+        case I_SD:
+            encoded_asm_line = encode_sd(asm_line);
+            break;
+
         case I_SW:
             encoded_asm_line = encode_sw(asm_line);
             break;
 
+        case I_SH:
+            encoded_asm_line = encode_sh(asm_line);
+            break;
+
+        case I_SB:
+            encoded_asm_line = encode_sb(asm_line);
+            break;
+
         default:
-            printf("ERROR Unknown instruction! %s \n", instruction_to_string(asm_line->instruction));
-            printf("ERROR Unknown instruction! %s \n", instruction_to_string(asm_line->instruction));
-            printf("ERROR Unknown instruction! %s \n", instruction_to_string(asm_line->instruction));
-            printf("ERROR Unknown instruction! %s \n", instruction_to_string(asm_line->instruction));
-            printf("ERROR Unknown instruction! %s \n", instruction_to_string(asm_line->instruction));
-            printf("ERROR Unknown instruction! %s \n", instruction_to_string(asm_line->instruction));
+            printf("encoder.c - ERROR Unknown instruction! %s \n", instruction_to_string(asm_line->instruction));
+            printf("encoder.c - ERROR Unknown instruction! %s \n", instruction_to_string(asm_line->instruction));
+            printf("encoder.c - ERROR Unknown instruction! %s \n", instruction_to_string(asm_line->instruction));
+            printf("encoder.c - ERROR Unknown instruction! %s \n", instruction_to_string(asm_line->instruction));
+            printf("encoder.c - ERROR Unknown instruction! %s \n", instruction_to_string(asm_line->instruction));
+            printf("encoder.c - ERROR Unknown instruction! %s \n", instruction_to_string(asm_line->instruction));
             printf("Aborting the application!\n");
             abort();
             return 0;

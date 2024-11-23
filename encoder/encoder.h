@@ -47,6 +47,16 @@ uint32_t encode_lh(asm_line_t* asm_line);
 
 uint32_t encode_lw(asm_line_t* asm_line);
 
+uint32_t encode_ld(asm_line_t* asm_line);
+
+uint32_t encode_sb(asm_line_t* asm_line);
+
+uint32_t encode_sh(asm_line_t* asm_line);
+
+uint32_t encode_sw(asm_line_t* asm_line);
+
+uint32_t encode_dw(asm_line_t* asm_line);
+
 uint32_t encode_lui(asm_line_t* asm_line);
 
 void encode_li(asm_line_t* asm_line, uint32_t* output_buffer);

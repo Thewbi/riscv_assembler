@@ -44,10 +44,11 @@
 "j"     { /*printf("J\n");*/ return J; }
 "jalr"  { /*printf("JALR\n");*/ return JALR; }
 
-"lb"	{ /*printf("LB\n");*/ return LB; }
-"lh"	{ /*printf("LH\n");*/ return LH; }
-"li"    { /*printf("LI\n");*/ return LI; }
+"ld"    { /*printf("LD\n");*/ return LD; }
 "lw"    { /*printf("LW\n");*/ return LW; }
+"lh"	{ /*printf("LH\n");*/ return LH; }
+"lb"	{ /*printf("LB\n");*/ return LB; }
+"li"    { /*printf("LI\n");*/ return LI; }
 "lui"   { /*printf("LUI\n");*/ return LUI; }
 
 "mul"   { /*printf("MUL\n");*/ return MUL; }
@@ -56,8 +57,11 @@
 "ret"   { /*printf("RET\n");*/ return RET; }
 
 "srli"  { /*printf("SRLI\n");*/ return SRLI; }
-"slli"  { /*printf("SRLI\n");*/ return SLLI; }
-"sw"    { /*printf("SRLI\n");*/ return SW; }
+"slli"  { /*printf("SLLI\n");*/ return SLLI; }
+"sd"    { /*printf("SD\n");*/ return SD; }
+"sw"    { /*printf("SW\n");*/ return SW; }
+"sh"    { /*printf("SH\n");*/ return SH; }
+"sb"    { /*printf("SB\n");*/ return SB; }
 
 "zero"  { /*printf("zero\n");*/ return REG_ZERO; }
 "ra"    { /*printf("ra\n");*/ return REG_RA; }

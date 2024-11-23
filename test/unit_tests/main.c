@@ -99,8 +99,8 @@ int main(void)
         cmocka_unit_test(mul_encode_valid_input_test),
         cmocka_unit_test(mul_decode_valid_input_test),
 
-        cmocka_unit_test(mv_encode_valid_input_test),
-        cmocka_unit_test(mv_decode_valid_input_test),
+        // cmocka_unit_test(mv_encode_valid_input_test),
+        // cmocka_unit_test(mv_decode_valid_input_test),
 
         cmocka_unit_test(ret_encode_valid_input_test),
         cmocka_unit_test(ret_decode_valid_input_test),

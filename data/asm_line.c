@@ -191,6 +191,23 @@ void print_asm_line(const asm_line_t *data) {
 
 }
 
+void output_offset(const asm_line_t *data) {
+    if (data->offset_0_used) {
+        printf("0x%08" PRIx32 "", data->offset_0);
+    }
+    else if (data->offset_1_used) {
+        printf("0x%08" PRIx32 "", data->offset_1);
+    }
+    else if (data->offset_2_used) {
+        printf("0x%08" PRIx32 "", data->offset_2);
+    }
+    else if (data->offset_2_expression != NULL) {
+        printf("0x%08" PRIx32 "", data->offset_2_expression->int_val);
+    } else {
+        printf("0x%08" PRIx32 "", data->imm);
+    }
+}
+
 void serialize_asm_line(const asm_line_t *data) {
 
     // if (strlen(data->label) != 0) {
@@ -268,6 +285,7 @@ void serialize_asm_line(const asm_line_t *data) {
             case I_LB:
             case I_LH:
             case I_LW:
+            case I_LD:
             case I_LBU:
             case I_LHU: {
                 printf("%s, ", register_to_string(data->reg_rd));
@@ -295,21 +313,7 @@ void serialize_asm_line(const asm_line_t *data) {
                 if (data->reg_rs2 != R_UNDEFINED_REGISTER) {
                     printf("%s, ", register_to_string(data->reg_rs2));
                 }
-
-                if (data->offset_0_used) {
-                    printf("0x%08" PRIx32 "", data->offset_0);
-                }
-                else if (data->offset_1_used) {
-                    printf("0x%08" PRIx32 "", data->offset_1);
-                }
-                else if (data->offset_2_used) {
-                    printf("0x%08" PRIx32 "", data->offset_2);
-                }
-                else if (data->offset_2_expression != NULL) {
-                    printf("0x%08" PRIx32 "", data->offset_2_expression->int_val);
-                } else {
-                    printf("0x%08" PRIx32 "", data->imm);
-                }
+                output_offset(data);
                 break;
 
             // R-Type
@@ -321,12 +325,12 @@ void serialize_asm_line(const asm_line_t *data) {
                 break;
 
             // S-Type
+            case  I_SB: // store byte
+            case  I_SH: // store half-word
             case  I_SW: // store word
+            case  I_SD: // store double-word
                 printf("%s, ", register_to_string(data->reg_rs1));
-                // printf("%s(", register_to_string(data->reg_rs2));
-                // printf("0x%08" PRIx32 "", data->imm);
-                // printf(")");
-                printf("0x%08" PRIx32 "", data->imm);
+                output_offset(data);
                 printf("(%s)", register_to_string(data->reg_rs2));
                 break;
 
@@ -405,7 +409,19 @@ void insert_register(asm_line_t *data, enum register_ reg) {
 
     //printf("insert_register()\n");
 
-    if (data->instruction_type == IT_B || data->instruction_type == IT_S) {
+    if (data->instruction_type == IT_S) {
+
+        if (R_UNDEFINED_REGISTER == data->reg_rs2) {
+            data->reg_rs2 = reg;
+            return;
+        }
+
+        if (R_UNDEFINED_REGISTER == data->reg_rs1) {
+            data->reg_rs1 = reg;
+            return;
+        }
+
+    } else if (data->instruction_type == IT_B) {
 
         //printf("insert_register() IT_B IT_S\n");
 
@@ -569,13 +585,14 @@ const char* instruction_to_string(enum instruction data) {
         case I_JAL: return "JAL";
         case I_JALR: return "JALR";
 
-        case I_LB: return "LB";
+        case I_LD: return "LD";
+        case I_LW: return "LW";
         case I_LH: return "LH";
+        case I_LB: return "LB";
         case I_LBU: return "LBU";
         case I_LHU: return "LHU";
         case I_LI: return "LI"; // pseudo instruction
         case I_LUI: return "LUI";
-        case I_LW: return "LW";
 
         case I_MUL: return "MUL";
         case I_MV: return "MV"; // pseudo instruction
@@ -587,7 +604,10 @@ const char* instruction_to_string(enum instruction data) {
         case I_SLLI: return "SLLI";
         case I_SRLI: return "SRLI";
         case I_SLTIU: return "SLTIU";
+        case I_SD: return "SD";
         case I_SW: return "SW";
+        case I_SH: return "SH";
+        case I_SB: return "SB";
 
         case I_XORI: return "XORI";
 

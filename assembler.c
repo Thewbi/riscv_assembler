@@ -319,13 +319,14 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
     // replace labels in lines
     //
 
-    //printf("Replace\n");
-
     uint32_t address = 0;
 
     for (int i = 0; i < asm_line_array_index; i++) {
 
-        //address += asm_line_array[i].size_in_bytes;
+        if (asm_line_array[i].instruction == I_J) {
+            printf("abx\n");
+        }
+
         address += determine_instruction_size(&asm_line_array[i]);
 
         if (asm_line_array[i].offset_0_used && strnlen(asm_line_array[i].offset_identifier_0, 100) > 0) {
@@ -413,29 +414,18 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
                 retrieve_by_key_tuple_set(label_address_map, 20, asm_line_array[i].offset_0_expression->string_val, &tuple_set_element);
                 if (tuple_set_element != NULL) {
                     //printf("direct_match: %d\n", tuple_set_element->value);
-                    asm_line_array[i].offset_0 = tuple_set_element->value;
+                    //asm_line_array[i].offset_0 = tuple_set_element->value;
+
+                    // convert the target label address into a relative value (relative to the current assembler line)
+                    // since the branch instructions work by adding an offset to the current pc so they are inherently
+                    // pc-relative jumps and the immediate value has to be a pc-relative value
+                    asm_line_array[i].offset_0 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * 4);
                     asm_line_array[i].offset_0_used = 1;
                 } else {
                     printf("direct_match \"%s\" label not defined!\n", asm_line_array[i].offset_0_expression->string_val);
                     abort();
                 }
             }
-
-            // asm_line_array[i].offset_0_used = 1;
-
-            // if (contains_key_trivial_map(equ_map, 20, asm_line_array[i].offset_0_expression->string_val)) {
-            //     int value = 0;
-            //     retrieve_by_key_trivial_map(equ_map, 20, asm_line_array[i].offset_0_expression->string_val, &value);
-            //     asm_line_array[i].offset_0 = value;
-            // }
-            // if (contains_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_0_expression->string_val)) {
-            //     int value = 0;
-            //     retrieve_by_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_0_expression->string_val, &value);
-            //     asm_line_array[i].offset_0 = value;
-            // }
-
-            // free(asm_line_array[i].offset_0_expression);
-            // asm_line_array[i].offset_0_expression = NULL;
         }
         if (asm_line_array[i].offset_1_expression != NULL && strnlen(asm_line_array[i].offset_1_expression->string_val, 100) > 0) {
 
@@ -468,28 +458,17 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
                 retrieve_by_key_tuple_set(label_address_map, 20, asm_line_array[i].offset_1_expression->string_val, &tuple_set_element);
                 if (tuple_set_element != NULL) {
                     printf("direct_match: %d\n", tuple_set_element->value);
-                    asm_line_array[i].offset_1 = tuple_set_element->value;
+                    //asm_line_array[i].offset_1 = tuple_set_element->value;
+
+                    // convert the target label address into a relative value (relative to the current assembler line)
+                    // since the branch instructions work by adding an offset to the current pc so they are inherently
+                    // pc-relative jumps and the immediate value has to be a pc-relative value
+                    asm_line_array[i].offset_1 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * 4);
                     asm_line_array[i].offset_1_used = 1;
                 } else {
                     printf("direct_match \"%s\" label not defined!\n", asm_line_array[i].offset_1_expression->string_val);
                 }
             }
-
-            // asm_line_array[i].offset_1_used = 1;
-
-            // if (contains_key_trivial_map(equ_map, 20, asm_line_array[i].offset_1_expression->string_val)) {
-            //     int value = 0;
-            //     retrieve_by_key_trivial_map(equ_map, 20, asm_line_array[i].offset_1_expression->string_val, &value);
-            //     asm_line_array[i].offset_1 = value;
-            // }
-            // if (contains_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_1_expression->string_val)) {
-            //     int value = 0;
-            //     retrieve_by_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_1_expression->string_val, &value);
-            //     asm_line_array[i].offset_1 = value;
-            // }
-
-            // free(asm_line_array[i].offset_1_expression);
-            // asm_line_array[i].offset_1_expression = NULL;
         }
         if (asm_line_array[i].offset_2_expression != NULL && strnlen(asm_line_array[i].offset_2_expression->string_val, 100) > 0) {
 
@@ -523,30 +502,20 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
             } else {
                 retrieve_by_key_tuple_set(label_address_map, 20, asm_line_array[i].offset_2_expression->string_val, &tuple_set_element);
                 if (tuple_set_element != NULL) {
+
                     //printf("direct_match: %d\n", tuple_set_element->value);
-                    asm_line_array[i].offset_2 = tuple_set_element->value;
+                    //asm_line_array[i].offset_2 = tuple_set_element->value;
+
+                    // convert the target label address into a relative value (relative to the current assembler line)
+                    // since the branch instructions work by adding an offset to the current pc so they are inherently
+                    // pc-relative jumps and the immediate value has to be a pc-relative value
+                    asm_line_array[i].offset_2 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * 4);
                     asm_line_array[i].offset_2_used = 1;
                 } else {
                     printf("direct_match \"%s\" label not defined!\n", asm_line_array[i].offset_2_expression->string_val);
                     abort();
                 }
             }
-
-            // asm_line_array[i].offset_2_used = 1;
-
-            // if (contains_key_trivial_map(equ_map, 20, asm_line_array[i].offset_2_expression->string_val)) {
-            //     int value = 0;
-            //     retrieve_by_key_trivial_map(equ_map, 20, asm_line_array[i].offset_2_expression->string_val, &value);
-            //     asm_line_array[i].offset_2 = value;
-            // }
-            // if (contains_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_2_expression->string_val)) {
-            //     int value = 0;
-            //     retrieve_by_key_trivial_map(label_address_map, 20, asm_line_array[i].offset_2_expression->string_val, &value);
-            //     asm_line_array[i].offset_2 = value;
-            // }
-
-            // free(asm_line_array[i].offset_2_expression);
-            // asm_line_array[i].offset_2_expression = NULL;
         }
     }
 

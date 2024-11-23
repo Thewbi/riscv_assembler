@@ -37,6 +37,7 @@ enum instruction {
     I_LB,
     I_LH,
     I_LW,
+    I_LD,
     I_LBU,
     I_LHU,
 
@@ -52,7 +53,10 @@ enum instruction {
     I_MUL,
 
     // S-Type
-    I_SW, // store word
+    I_SD, // store double-word (64 bit)
+    I_SW, // store word (32 bit)
+    I_SH, // store half-word (16 bit)
+    I_SB, // store byte (8 bit)
 
     // U-Type
     I_AUIPC,
@@ -144,17 +148,17 @@ typedef struct asm_line {
 
     uint32_t imm;
 
-    uint32_t offset_0;
+    int32_t offset_0;
     char offset_identifier_0[100];
     uint8_t offset_0_used;
     node_t* offset_0_expression;
 
-    uint32_t offset_1;
+    int32_t offset_1;
     char offset_identifier_1[100];
     uint8_t offset_1_used;
     node_t* offset_1_expression;
 
-    uint32_t offset_2;
+    int32_t offset_2;
     char offset_identifier_2[100];
     uint8_t offset_2_used;
     node_t* offset_2_expression;

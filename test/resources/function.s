@@ -1,5 +1,7 @@
 # source: https://www.riscfive.com/2022/04/28/risc-v-assembly-tutorial/
 # void my_function();
+#
+# File: function.s
 
 my_function:
     # Prologue
