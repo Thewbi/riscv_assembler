@@ -934,66 +934,92 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
 
                 // split it into a 20 bit (data_1) and a twelve bit part (is ignored)
                 uint32_t data_1 = ((data_0 & 0b11111111111111111111000000000000) >> 12);
-
-                // the 20 bit part is incremented by 1, (then shifted left by 12 bits to get (data_2))
-                //data_1 = data_1 + 1;
-
-                //
-                // lui
-                //
-
-                uint8_t rd = encode_register(data->reg_rd);
-                uint32_t imm = data_1;
-
-                asm_line_t lui;
-                reset_asm_line(&lui);
-                lui.used = 1;
-                lui.line_nr = line_nr;
-                lui.instruction = I_LUI;
-                lui.instruction_type = IT_U;
-                lui.instruction_index = data->instruction_index;
-                lui.reg_rd = data->reg_rd;
-                lui.imm = imm;
-
-                //
-                // addi
-                //
-
-                uint32_t data_2 = data_1 << 12;
-                uint32_t data_3 = (data_0 - data_2) & 0xFFF;
+                //uint32_t data_2 = data_1 << 12;
+                //uint32_t data_3 = (data_0 - data_2) & 0xFFF;
+                uint32_t data_3 = data_0 & 0xFFF;
                 //printf("data_3: %08" PRIx32 "\n", data_3);
 
-                rd = encode_register(data->reg_rd);
-                uint8_t rs1 = encode_register(data->reg_rd);
-                imm = data_3;
+                if (data_3 == 0) {
 
-                asm_line_t addi;
-                reset_asm_line(&addi);
-                addi.used = 1;
-                addi.line_nr = line_nr + 1;
-                addi.instruction = I_ADDI;
-                addi.instruction_type = IT_I;
-                addi.instruction_index = data->instruction_index + 1;
-                addi.reg_rd = data->reg_rd;
-                addi.reg_rs1 = data->reg_rd;
-                addi.imm = imm;
+                    //
+                    // lui
+                    //
 
-                reset_asm_line(data);
+                    uint8_t rd = encode_register(data->reg_rd);
+                    uint32_t imm = data_1;
 
-                for (int i = size-1; i > index; i--) {
-                    //printf("index: %d\n", (i > index));
-                    //printf("copy %d <- %d\n", i+1, i);
-                    copy_asm_line(&asm_line_array[i + 1], &asm_line_array[i]);
-                    asm_line_array[i + 1].line_nr++;
+                    asm_line_t lui;
+                    reset_asm_line(&lui);
+                    lui.used = 1;
+                    lui.line_nr = line_nr;
+                    lui.instruction = I_LUI;
+                    lui.instruction_type = IT_U;
+                    lui.instruction_index = data->instruction_index;
+                    lui.reg_rd = data->reg_rd;
+                    lui.imm = imm;
 
-                    if (asm_line_array[i + 1].instruction_index != -1) {
-                        asm_line_array[i + 1].instruction_index++;
+                    copy_asm_line(data, &lui);
+
+                } else {
+
+                    // the 20 bit part is incremented by 1, (then shifted left by 12 bits to get (data_2))
+                    //data_1 = data_1 + 1;
+
+                    //
+                    // lui
+                    //
+
+                    uint8_t rd = encode_register(data->reg_rd);
+                    uint32_t imm = data_1;
+
+                    asm_line_t lui;
+                    reset_asm_line(&lui);
+                    lui.used = 1;
+                    lui.line_nr = line_nr;
+                    lui.instruction = I_LUI;
+                    lui.instruction_type = IT_U;
+                    lui.instruction_index = data->instruction_index;
+                    lui.reg_rd = data->reg_rd;
+                    lui.imm = imm;
+
+                    copy_asm_line(data, &lui);
+
+                    //
+                    // addi
+                    //
+
+                    rd = encode_register(data->reg_rd);
+                    uint8_t rs1 = encode_register(data->reg_rd);
+                    imm = data_3;
+
+                    asm_line_t addi;
+                    reset_asm_line(&addi);
+                    addi.used = 1;
+                    addi.line_nr = line_nr + 1;
+                    addi.instruction = I_ADDI;
+                    addi.instruction_type = IT_I;
+                    addi.instruction_index = data->instruction_index + 1;
+                    addi.reg_rd = data->reg_rd;
+                    addi.reg_rs1 = data->reg_rd;
+                    addi.imm = imm;
+
+                    reset_asm_line(data);
+
+                    for (int i = size-1; i > index; i--) {
+                        //printf("index: %d\n", (i > index));
+                        //printf("copy %d <- %d\n", i+1, i);
+                        copy_asm_line(&asm_line_array[i + 1], &asm_line_array[i]);
+                        asm_line_array[i + 1].line_nr++;
+
+                        if (asm_line_array[i + 1].instruction_index != -1) {
+                            asm_line_array[i + 1].instruction_index++;
+                        }
                     }
+
+                    copy_asm_line(data, &lui);
+                    copy_asm_line(&asm_line_array[index + 1], &addi);
+
                 }
-
-                copy_asm_line(data, &lui);
-                copy_asm_line(&asm_line_array[index + 1], &addi);
-
             }
         }
         break;

@@ -107,9 +107,18 @@ uint32_t determine_instruction_size(asm_line_t* data) {
             return 4;
 
         case I_LI:
+
+            // if the immediate is twelve bits only, the LUI is not needed and only I_ADDI is generated
             if (data->imm <= 0xFFF) {
                 return 4;
             }
+
+            // if the lower twelve bits are zero, a simple LUI suffices
+            if ((data->imm & 0xFFF) == 0) {
+                return 4;
+            }
+
+            // normally replace by LUI and ADDI
             return 8;
 
         case I_MV:
