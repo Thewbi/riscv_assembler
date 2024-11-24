@@ -84,6 +84,7 @@
         "node.h": "c",
         "format": "c",
         "xmemory": "c",
-        "xlocmon": "c"
+        "xlocmon": "c",
+        "xlocale": "c"
     }
 }

@@ -1161,7 +1161,8 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             data->instruction = I_BNE;
             data->instruction_type = IT_I;
             data->reg_rs1 = data->reg_rd;
-            data->reg_rs2 = data->reg_rd;
+            //data->reg_rs2 = data->reg_rd;
+            data->reg_rs2 = R_ZERO;
             data->imm = 0;
         }
         break;

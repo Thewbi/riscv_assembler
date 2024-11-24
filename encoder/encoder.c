@@ -145,7 +145,20 @@ uint32_t encode_bne(asm_line_t* asm_line) {
     int32_t imm = retrieve_immediate_part(asm_line);
 
     //int32_t relative_offset = imm - ((asm_line->instruction_index + 0) * 4);
-    int32_t relative_offset = imm;
+    //uint32_t relative_offset = sign_extend_uint16_t(imm);
+    uint16_t relative_offset = imm;
+    //int32_t relative_offset = imm;
+
+    // relative_offset = relative_offset >> 1;
+    // relative_offset |= 0b1000000000000000;
+
+    // uint16_t test = relative_offset;
+    // for (int i = 15; i >= 0; --i) {
+    //     printf("%" PRIu32, test >> i & 1);
+    // }
+    // printf("\n");
+
+    //1111111111111110
 
     return encode_b_type(relative_offset, rs2, rs1, funct3, opcode);
 }
@@ -665,7 +678,6 @@ uint32_t encode_i_type(uint16_t imm, uint8_t rs1, uint8_t funct3, uint8_t rd, ui
 
 // imm[11:5] rs2 rs1 funct3 imm[4:0]
 uint32_t encode_s_type(uint16_t imm, uint8_t rs2, uint8_t rs1, uint8_t funct3, uint8_t opcode) {
-    //return encode_b_type(imm, rs2, rs1, funct3, opcode);
 
     uint32_t imm_4_0 = (imm >> 0) & 0b11111;
     uint32_t imm_11_5 = (imm >> 5) & 0b1111111;
@@ -702,19 +714,20 @@ uint32_t encode_b_type(uint16_t imm, uint8_t rs2, uint8_t rs1, uint8_t funct3, u
     //        ((rs2 & 0b11111) << (7+5+3+5)) |
     //        ((imm & 0b111111100000) << (7+5+3+5+5));
 
-    uint16_t imm_11 = (imm >> 10) & 0b1;
-    uint16_t imm_4_1 = (imm >> 1) & 0b1111;
-    uint16_t imm_10_5 = (imm >> 5) & 0b111111;
-    uint16_t imm_12 = (imm >> 11);
+    uint32_t imm_11 = (imm >> 10) & 0b1;
+    uint32_t imm_4_1 = (imm >> 1) & 0b1111;
+    uint32_t imm_10_5 = (imm >> 5) & 0b111111;
+    uint32_t imm_12 = (imm >> 11) & 0b1;
+
 
     return ((opcode & 0b1111111) << 0) |
            ((imm_11) << 7) |
-           ((imm_4_1) << 8) |
-           ((funct3 & 0b111) << (7+5)) |
-           ((rs1 & 0b11111) << (7+5+3)) |
-           ((rs2 & 0b11111) << (7+5+3+5)) |
-           ((imm_10_5 & 0b111111) << (7+5+3+5+5)) |
-           ((imm_12 & 0b1) << (7+5+3+5+5));
+           ((imm_4_1) << (7+1)) |
+           ((funct3 & 0b111) << (7+1+4)) |
+           ((rs1 & 0b11111) << (7+1+4+3)) |
+           ((rs2 & 0b11111) << (7+1+4+3+5)) |
+           ((imm_10_5 & 0b111111) << (7+1+4+3+5+5)) |
+           ((imm_12 & 0b1) << (7+1+4+3+5+5+6));
 
 }
 
