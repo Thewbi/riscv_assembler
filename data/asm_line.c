@@ -513,56 +513,117 @@ const char* instruction_to_string(enum instruction data) {
         return "I_UNDEFINED_INSTRUCTION";
     }
 
-    switch (data) {
+    int uppercase = 0;
 
-        case I_ADD: return "ADD";
-        case I_ADDI: return "ADDI";
-        case I_ADDIW: return "ADDIW"; // part of RV64I
-        case I_ANDI: return "ANDI";
-        case I_AUIPC: return "AUIPC";
+    if (uppercase) {
 
-        case I_BEQ: return "BEQ";
-        case I_BEQZ: return "BEQZ"; // pseudo instruction
-        case I_BGE: return "BGE";
-        case I_BLT: return "BLT";
-        case I_BNEZ: return "BNEZ";
-        case I_BNE: return "BNE";
+        switch (data) {
 
-        case I_CALL: return "CALL"; // pseudo instruction
+            case I_ADD: return "ADD";
+            case I_ADDI: return "ADDI";
+            case I_ADDIW: return "ADDIW"; // part of RV64I
+            case I_ANDI: return "ANDI";
+            case I_AUIPC: return "AUIPC";
 
-        case I_J: return "J"; // pseudo instruction
-        case I_JAL: return "JAL";
-        case I_JALR: return "JALR";
+            case I_BEQ: return "BEQ";
+            case I_BEQZ: return "BEQZ"; // pseudo instruction
+            case I_BGE: return "BGE";
+            case I_BLT: return "BLT";
+            case I_BNEZ: return "BNEZ";
+            case I_BNE: return "BNE";
 
-        case I_LD: return "LD";
-        case I_LW: return "LW";
-        case I_LH: return "LH";
-        case I_LB: return "LB";
-        case I_LBU: return "LBU";
-        case I_LHU: return "LHU";
-        case I_LI: return "LI"; // pseudo instruction
-        case I_LUI: return "LUI";
+            case I_CALL: return "CALL"; // pseudo instruction
 
-        case I_MUL: return "MUL";
-        case I_MV: return "MV"; // pseudo instruction
+            case I_J: return "J"; // pseudo instruction
+            case I_JAL: return "JAL";
+            case I_JALR: return "JALR";
 
-        case I_ORI: return "ORI";
+            case I_LD: return "LD";
+            case I_LW: return "LW";
+            case I_LH: return "LH";
+            case I_LB: return "LB";
+            case I_LBU: return "LBU";
+            case I_LHU: return "LHU";
+            case I_LI: return "LI"; // pseudo instruction
+            case I_LUI: return "LUI";
 
-        case I_RET: return "RET";
+            case I_MUL: return "MUL";
+            case I_MV: return "MV"; // pseudo instruction
 
-        case I_SLLI: return "SLLI";
-        case I_SRLI: return "SRLI";
-        case I_SLTIU: return "SLTIU";
-        case I_SD: return "SD";
-        case I_SW: return "SW";
-        case I_SH: return "SH";
-        case I_SB: return "SB";
+            case I_ORI: return "ORI";
 
-        case I_XORI: return "XORI";
+            case I_RET: return "RET";
 
-        default: {
-            return "UNKNOWN";
+            case I_SLLI: return "SLLI";
+            case I_SRLI: return "SRLI";
+            case I_SLTIU: return "SLTIU";
+            case I_SD: return "SD";
+            case I_SW: return "SW";
+            case I_SH: return "SH";
+            case I_SB: return "SB";
+
+            case I_XORI: return "XORI";
+
+            default: {
+                return "UNKNOWN";
+            }
+
         }
+    } else {
+
+        switch (data) {
+
+            case I_ADD: return "add";
+            case I_ADDI: return "addi";
+            case I_ADDIW: return "addiw"; // part of RV64I
+            case I_ANDI: return "andi";
+            case I_AUIPC: return "auipc";
+
+            case I_BEQ: return "beq";
+            case I_BEQZ: return "beqz"; // pseudo instruction
+            case I_BGE: return "bge";
+            case I_BLT: return "blt";
+            case I_BNEZ: return "bnez";
+            case I_BNE: return "bne";
+
+            case I_CALL: return "call"; // pseudo instruction
+
+            case I_J: return "j"; // pseudo instruction
+            case I_JAL: return "jal";
+            case I_JALR: return "jalr";
+
+            case I_LD: return "ld";
+            case I_LW: return "lw";
+            case I_LH: return "lh";
+            case I_LB: return "lb";
+            case I_LBU: return "lbu";
+            case I_LHU: return "lhu";
+            case I_LI: return "li"; // pseudo instruction
+            case I_LUI: return "lui";
+
+            case I_MUL: return "mul";
+            case I_MV: return "mv"; // pseudo instruction
+
+            case I_ORI: return "ori";
+
+            case I_RET: return "ret";
+
+            case I_SLLI: return "slli";
+            case I_SRLI: return "srli";
+            case I_SLTIU: return "sltiu";
+            case I_SD: return "sd";
+            case I_SW: return "sw";
+            case I_SH: return "sh";
+            case I_SB: return "sb";
+
+            case I_XORI: return "xori";
+
+            default: {
+                return "UNKNOWN";
+            }
+
+        }
+
     }
 }
 
