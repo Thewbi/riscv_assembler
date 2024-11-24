@@ -8,6 +8,7 @@
 uint16_t sign_extend_uint16_t(uint16_t data);
 uint32_t sign_extend_8_bit_to_uint32_t(const uint8_t data);
 uint32_t sign_extend_12_bit_to_uint32_t(const uint16_t data);
+int32_t sign_extend_12_bit_to_int32_t(const uint16_t data);
 uint32_t sign_extend_20_bit_to_uint32_t(const uint32_t data);
 
 #endif

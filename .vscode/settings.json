@@ -83,6 +83,7 @@
         "xtr1common": "c",
         "node.h": "c",
         "format": "c",
-        "xmemory": "c"
+        "xmemory": "c",
+        "xlocmon": "c"
     }
 }

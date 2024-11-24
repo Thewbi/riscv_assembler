@@ -221,6 +221,7 @@ void serialize_asm_line(const asm_line_t *data) {
 
             // I-Type
             case I_ADDI:
+            case I_ADDIW:
             case I_SRLI:
             case I_SLLI:
             case I_SLTI:
@@ -516,6 +517,7 @@ const char* instruction_to_string(enum instruction data) {
 
         case I_ADD: return "ADD";
         case I_ADDI: return "ADDI";
+        case I_ADDIW: return "ADDIW"; // part of RV64I
         case I_ANDI: return "ANDI";
         case I_AUIPC: return "AUIPC";
 
@@ -921,105 +923,147 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
                 data_0 = data->offset_1_expression->int_val;
             }
 
-            if (data_0 <= 0xFFF) {
+            // split it into a 20 bit (upper_data) and a lower twelve bit part (is ignored)
+            uint32_t upper_data = ((data_0 & 0b11111111111111111111000000000000) >> 12);
+            //printf("upper_data: %08" PRIx32 "\n", upper_data);
 
-                // Case 1: CONSTANT fits into 12 bit. For CASE 1, a addi instruction is generated since addi handles 12 bit sufficiently
+            uint32_t lower_data = data_0 & 0xFFF;
+            //printf("lower_data: %08" PRIx32 "\n", lower_data);
+
+            int upper_part_used = upper_data;
+            int lower_part_used = lower_data;
+
+            if (upper_part_used == 0 && lower_part_used == 0) {
+
+                // Case 0: addi to fill entire 32bit register with zero
+
+                //
+                // addi
+                //
+
+                uint8_t rd = encode_register(data->reg_rd);
+                uint8_t rs1 = encode_register(data->reg_rd);
+                uint32_t imm = 0x00;
+
+                asm_line_t addi;
+                reset_asm_line(&addi);
+                addi.used = 1;
+                addi.line_nr = line_nr + 1;
+                addi.instruction = I_ADDI;
+                addi.instruction_type = IT_I;
+                addi.instruction_index = data->instruction_index + 1;
+                addi.reg_rd = data->reg_rd;
+                addi.reg_rs1 = R_ZERO;
+                addi.imm = imm;
+
+                copy_asm_line(data, &addi);
+
+            } else if (upper_part_used == 0 && lower_part_used != 0) {
+
+                // Case 1: CONSTANT fits into 12 lower bits.
+                // For CASE 1, a addi instruction is generated since addi handles 12 bit sufficiently
 
                 data->instruction = I_ADDI;
                 data->reg_rs1 = R_ZERO;
 
+            } else if (upper_part_used != 0 && lower_part_used == 0) {
+
+                // Case 2: CONSTANT fits into the 20 upper bits.
+
+                //
+                // lui - LUI (load upper immediate) is used to build 32-bit constants and uses the U-type format. LUI
+                // places the U-immediate value in the top 20 bits of the destination register rd, filling in the lowest
+                // 12 bits with zeros.
+                //
+
+                uint8_t rd = encode_register(data->reg_rd);
+                uint32_t imm = upper_data;
+
+                asm_line_t lui;
+                reset_asm_line(&lui);
+                lui.used = 1;
+                lui.line_nr = line_nr;
+                lui.instruction = I_LUI;
+                lui.instruction_type = IT_U;
+                lui.instruction_index = data->instruction_index;
+                lui.reg_rd = data->reg_rd;
+                lui.imm = imm;
+
+                copy_asm_line(data, &lui);
+
             } else {
 
-                // Case 2: CONSTANT fits into 32 bit. For CASE 2, a LUI, ADDI combination is generated
+                // CASE 3 For CASE 3, a LUI, ADDI combination is generated so
+                // that the upper 20 bits and the lower 20 bits are used
 
-                // split it into a 20 bit (data_1) and a twelve bit part (is ignored)
-                uint32_t data_1 = ((data_0 & 0b11111111111111111111000000000000) >> 12);
-                //uint32_t data_2 = data_1 << 12;
-                //uint32_t data_3 = (data_0 - data_2) & 0xFFF;
-                uint32_t data_3 = data_0 & 0xFFF;
-                //printf("data_3: %08" PRIx32 "\n", data_3);
+                // the 20 bit part is incremented by 1, (then shifted left by 12 bits to get (data_2))
+                //data_1 = data_1 + 1;
 
-                if (data_3 == 0) {
+                int32_t twelve_bit_sign_extended = sign_extend_12_bit_to_int32_t(data_0);
+                int udata = data_0 - twelve_bit_sign_extended;
+                udata = udata >> 12;
 
-                    //
-                    // lui
-                    //
+                // // if the lower 12 bits have a 1 in the most signifiant bit, output an optimized sequence
+                // if ((lower_data & 0x08) > 0) {
 
-                    uint8_t rd = encode_register(data->reg_rd);
-                    uint32_t imm = data_1;
+                // }
 
-                    asm_line_t lui;
-                    reset_asm_line(&lui);
-                    lui.used = 1;
-                    lui.line_nr = line_nr;
-                    lui.instruction = I_LUI;
-                    lui.instruction_type = IT_U;
-                    lui.instruction_index = data->instruction_index;
-                    lui.reg_rd = data->reg_rd;
-                    lui.imm = imm;
+                //
+                // lui - LUI (load upper immediate) is used to build 32-bit constants and uses the U-type format. LUI
+                // places the U-immediate value in the top 20 bits of the destination register rd, filling in the lowest
+                // 12 bits with zeros.
+                //
 
-                    copy_asm_line(data, &lui);
+                uint8_t rd = encode_register(data->reg_rd);
+                uint32_t imm = udata;
 
-                } else {
+                asm_line_t lui;
+                reset_asm_line(&lui);
+                lui.used = 1;
+                lui.line_nr = line_nr;
+                lui.instruction = I_LUI;
+                lui.instruction_type = IT_U;
+                lui.instruction_index = data->instruction_index;
+                lui.reg_rd = data->reg_rd;
+                lui.imm = imm;
 
-                    // the 20 bit part is incremented by 1, (then shifted left by 12 bits to get (data_2))
-                    //data_1 = data_1 + 1;
+                copy_asm_line(data, &lui);
 
-                    //
-                    // lui
-                    //
+                //
+                // addi
+                //
 
-                    uint8_t rd = encode_register(data->reg_rd);
-                    uint32_t imm = data_1;
+                rd = encode_register(data->reg_rd);
+                uint8_t rs1 = encode_register(data->reg_rd);
+                imm = lower_data;
 
-                    asm_line_t lui;
-                    reset_asm_line(&lui);
-                    lui.used = 1;
-                    lui.line_nr = line_nr;
-                    lui.instruction = I_LUI;
-                    lui.instruction_type = IT_U;
-                    lui.instruction_index = data->instruction_index;
-                    lui.reg_rd = data->reg_rd;
-                    lui.imm = imm;
+                asm_line_t addi;
+                reset_asm_line(&addi);
+                addi.used = 1;
+                addi.line_nr = line_nr + 1;
+                addi.instruction = I_ADDIW;
+                addi.instruction_type = IT_I;
+                addi.instruction_index = data->instruction_index + 1;
+                addi.reg_rd = data->reg_rd;
+                addi.reg_rs1 = data->reg_rd;
+                addi.imm = imm;
 
-                    copy_asm_line(data, &lui);
+                reset_asm_line(data);
 
-                    //
-                    // addi
-                    //
+                for (int i = size-1; i > index; i--) {
+                    //printf("index: %d\n", (i > index));
+                    //printf("copy %d <- %d\n", i+1, i);
+                    copy_asm_line(&asm_line_array[i + 1], &asm_line_array[i]);
+                    asm_line_array[i + 1].line_nr++;
 
-                    rd = encode_register(data->reg_rd);
-                    uint8_t rs1 = encode_register(data->reg_rd);
-                    imm = data_3;
-
-                    asm_line_t addi;
-                    reset_asm_line(&addi);
-                    addi.used = 1;
-                    addi.line_nr = line_nr + 1;
-                    addi.instruction = I_ADDI;
-                    addi.instruction_type = IT_I;
-                    addi.instruction_index = data->instruction_index + 1;
-                    addi.reg_rd = data->reg_rd;
-                    addi.reg_rs1 = data->reg_rd;
-                    addi.imm = imm;
-
-                    reset_asm_line(data);
-
-                    for (int i = size-1; i > index; i--) {
-                        //printf("index: %d\n", (i > index));
-                        //printf("copy %d <- %d\n", i+1, i);
-                        copy_asm_line(&asm_line_array[i + 1], &asm_line_array[i]);
-                        asm_line_array[i + 1].line_nr++;
-
-                        if (asm_line_array[i + 1].instruction_index != -1) {
-                            asm_line_array[i + 1].instruction_index++;
-                        }
+                    if (asm_line_array[i + 1].instruction_index != -1) {
+                        asm_line_array[i + 1].instruction_index++;
                     }
-
-                    copy_asm_line(data, &lui);
-                    copy_asm_line(&asm_line_array[index + 1], &addi);
-
                 }
+
+                copy_asm_line(data, &lui);
+                copy_asm_line(&asm_line_array[index + 1], &addi);
+
             }
         }
         break;

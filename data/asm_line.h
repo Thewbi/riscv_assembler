@@ -26,6 +26,7 @@ enum instruction {
 
     // I-Type
     I_ADDI,
+    I_ADDIW, // part of RV64I (not part of RV32I), only generate this instruction if the extension is set to RV64I !!!
     I_SRLI,
     I_SLLI,
     I_SLTI,

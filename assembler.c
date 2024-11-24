@@ -113,12 +113,15 @@ uint32_t determine_instruction_size(asm_line_t* data) {
                 return 4;
             }
 
-            // if the lower twelve bits are zero, a simple LUI suffices
+            // if the lower twelve bits are zero and only the upper bits contain
+            // a value, a simple LUI suffices to only load the upper bits
             if ((data->imm & 0xFFF) == 0) {
                 return 4;
             }
 
-            // normally replace by LUI and ADDI
+            // if the immediate value has non-zero bits in both the lower 12 bits
+            // and the upper twelve bits, then replace by LUI and ADDI
+            // see https://stackoverflow.com/questions/76331514/riscv-li-instruction
             return 8;
 
         case I_MV:

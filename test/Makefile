@@ -56,10 +56,6 @@ test: unit_tests/main.c \
 	unit_tests/lui_encode_test.h \
 	unit_tests/lui_decode_test.c \
 	unit_tests/lui_decode_test.h \
-	unit_tests/li_encode_test.c \
-	unit_tests/li_encode_test.h \
-	unit_tests/li_decode_test.c \
-	unit_tests/li_decode_test.h \
 	unit_tests/mul_encode_test.c \
 	unit_tests/mul_encode_test.h \
 	unit_tests/mul_decode_test.c \
@@ -106,8 +102,6 @@ test: unit_tests/main.c \
 	unit_tests/lw_decode_test.c \
 	unit_tests/lui_encode_test.c \
 	unit_tests/lui_decode_test.c \
-	unit_tests/li_encode_test.c \
-	unit_tests/li_decode_test.c \
 	unit_tests/mul_encode_test.c \
 	unit_tests/mul_decode_test.c \
 	unit_tests/ret_encode_test.c \
@@ -151,3 +145,11 @@ install:
 
 #unit_tests/mv_encode_test.c \
 #unit_tests/mv_decode_test.c \
+
+#unit_tests/li_encode_test.c \
+#unit_tests/li_encode_test.h \
+#unit_tests/li_decode_test.c \
+#unit_tests/li_decode_test.h \
+
+#unit_tests/li_encode_test.c \
+#unit_tests/li_decode_test.c \

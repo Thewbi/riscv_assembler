@@ -15,3 +15,20 @@
 // Case 3: CONSTANT fits into 64 bit. For CASE 3, ??? I think a lui, addi, slli, addi combination handles case 3 maybe????
 
 li a0, 0xdeadbeef
+
+
+# Test 1: load a zero
+#li t0, 0x00
+
+# Test 2: load only lower 12 bits
+#li t0, 0x05
+
+# Test 3: load only upper 20 bits
+#li t0, 0x8000
+
+# Test 4: load both lower and upper
+#li t0, 0x8001
+
+# Test 5: load a value where the lower 12 bits have the most significant bit set (negative value)
+# Test 5 may output an optimized lui, addi or lui, addiw sequence (see: https://stackoverflow.com/questions/76331514/riscv-li-instruction)
+#li   sp, 0x1800

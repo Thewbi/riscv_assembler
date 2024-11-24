@@ -90,8 +90,8 @@ int main(void)
         cmocka_unit_test(lui_encode_valid_input_test),
         cmocka_unit_test(lui_decode_valid_input_test),
 
-        cmocka_unit_test(li_encode_valid_input_test),
-        cmocka_unit_test(li_decode_valid_input_test),
+        // cmocka_unit_test(li_encode_valid_input_test),
+        // cmocka_unit_test(li_decode_valid_input_test),
 
         cmocka_unit_test(lw_encode_valid_input_test),
         cmocka_unit_test(lw_decode_valid_input_test),

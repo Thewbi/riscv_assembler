@@ -82,6 +82,18 @@ uint32_t encode_addi(asm_line_t* asm_line) {
     return encode_i_type(imm, rs1, funct3, rd, opcode);
 }
 
+uint32_t encode_addiw(asm_line_t* asm_line) {
+
+    uint8_t funct3 = 0b000;
+    uint8_t opcode = 0b0011011;
+
+    uint8_t rd = encode_register(asm_line->reg_rd);
+    uint8_t rs1 = encode_register(asm_line->reg_rs1);
+    int32_t imm = retrieve_immediate_part(asm_line);
+
+    return encode_i_type(imm, rs1, funct3, rd, opcode);
+}
+
 uint32_t encode_auipc(asm_line_t* asm_line) {
 
     uint8_t opcode = 0b0010111;
@@ -444,99 +456,99 @@ uint32_t encode_lui(asm_line_t* asm_line) {
     return encode_u_type(imm, rd, opcode);
 }
 
-// https://stackoverflow.com/questions/56781564/how-to-load-an-immediate-number-to-a-register-in-rv32i-base-instruction-set
-//
-// li is a pseudo instruction. Here it is implemented by a LUI and ADDI instruction
-//
-// 11011110101011011100
-//
-// DEADBEEF = 3735928559 (data_0)
-// 000DEADB (data_1)
-//
-// 000DEADC = data_1 + 1 = 912092
-// 000DEADC
-// DEADC000 = 3735928832 (data_2)
-//
-// data_3 = data_0 - data_2 = DEADBEEF - DEADC000 = 0xFFFFFFFFFFFFFEEF => 0xEEF
-//                          = 3735928559 - 3735928832 = -273
-//
-// EEF + 1 = EF0
-//
-// lui     a0, 0xdeadc   0b11011110101011011100
-// addi    a0, a0, -273  0b111111111111111111111111111111111111111111111111 1111 1110 1110 1111
-//
-//                      0xDEADC
-//                      0xFFFFFFFFFFFFFEEF
-//
-//                      B
-//                      1011
-//
-//                      0xD    E    A    D    B    0    0    0
-//                        1101 1110 1010 1101 1011 0000 0000 0000
-//
-//                                           0    E    E    F
-//                                           0000 1110 1110 1111
-//
-//
-//                                                 take the 32 bit value (data_0)
-//                                                 split it into a 20 bit (data_1) and a twelve bit part (is ignored)
-//                                                 the 20 bit part is incremented by 1, then shifted left by 12 bits to get (data_2)
-//                                                 form a "lui rd, data2" command
-//                                                 the twelve bit part (data_3) created by data_3 = data_0 - data_2
-//                                                 Only the lower twelve bits of data_3 are relevant!
-//                                                 data_4 = lower_twelve_bits(data_3)
-//                                                 form a "addi rd, rd, data_4" command
-//
-void encode_li(asm_line_t* asm_line, uint32_t* output_buffer) {
+// // https://stackoverflow.com/questions/56781564/how-to-load-an-immediate-number-to-a-register-in-rv32i-base-instruction-set
+// //
+// // li is a pseudo instruction. Here it is implemented by a LUI and ADDI instruction
+// //
+// // 11011110101011011100
+// //
+// // DEADBEEF = 3735928559 (data_0)
+// // 000DEADB (data_1)
+// //
+// // 000DEADC = data_1 + 1 = 912092
+// // 000DEADC
+// // DEADC000 = 3735928832 (data_2)
+// //
+// // data_3 = data_0 - data_2 = DEADBEEF - DEADC000 = 0xFFFFFFFFFFFFFEEF => 0xEEF
+// //                          = 3735928559 - 3735928832 = -273
+// //
+// // EEF + 1 = EF0
+// //
+// // lui     a0, 0xdeadc   0b11011110101011011100
+// // addi    a0, a0, -273  0b111111111111111111111111111111111111111111111111 1111 1110 1110 1111
+// //
+// //                      0xDEADC
+// //                      0xFFFFFFFFFFFFFEEF
+// //
+// //                      B
+// //                      1011
+// //
+// //                      0xD    E    A    D    B    0    0    0
+// //                        1101 1110 1010 1101 1011 0000 0000 0000
+// //
+// //                                           0    E    E    F
+// //                                           0000 1110 1110 1111
+// //
+// //
+// //                                                 take the 32 bit value (data_0)
+// //                                                 split it into a 20 bit (data_1) and a twelve bit part (is ignored)
+// //                                                 the 20 bit part is incremented by 1, then shifted left by 12 bits to get (data_2)
+// //                                                 form a "lui rd, data2" command
+// //                                                 the twelve bit part (data_3) created by data_3 = data_0 - data_2
+// //                                                 Only the lower twelve bits of data_3 are relevant!
+// //                                                 data_4 = lower_twelve_bits(data_3)
+// //                                                 form a "addi rd, rd, data_4" command
+// //
+// void encode_li(asm_line_t* asm_line, uint32_t* output_buffer) {
 
-    //printf("asm_line->imm: 0x%" PRIx64 "\n", asm_line->imm);
-    //printf("asm_line->imm: %08" PRIx32 "\n", asm_line->imm);
+//     //printf("asm_line->imm: 0x%" PRIx64 "\n", asm_line->imm);
+//     //printf("asm_line->imm: %08" PRIx32 "\n", asm_line->imm);
 
-    // take the 32 bit value (data_0)
-    //uint32_t data_0 = asm_line->imm;
-    uint32_t data_0 = asm_line->offset_1_expression->int_val;
+//     // take the 32 bit value (data_0)
+//     //uint32_t data_0 = asm_line->imm;
+//     uint32_t data_0 = asm_line->offset_1_expression->int_val;
 
-    // split it into a 20 bit (data_1) and a twelve bit part (is ignored)
-    uint32_t data_1 = ((data_0 & 0b11111111111111111111000000000000) >> 12);
+//     // split it into a 20 bit (data_1) and a twelve bit part (is ignored)
+//     uint32_t data_1 = ((data_0 & 0b11111111111111111111000000000000) >> 12);
 
-    // the 20 bit part is incremented by 1, (then shifted left by 12 bits to get (data_2))
-    data_1 = data_1 + 1;
+//     // the 20 bit part is incremented by 1, (then shifted left by 12 bits to get (data_2))
+//     data_1 = data_1 + 1;
 
-    //printf("data_2: %08" PRIx32 "\n", data_1);
+//     //printf("data_2: %08" PRIx32 "\n", data_1);
 
-    //
-    // lui
-    //
+//     //
+//     // lui
+//     //
 
-    uint8_t opcode = 0b0110111;
-    uint8_t rd = encode_register(asm_line->reg_rd);
-    uint32_t imm = data_1;
-    //printf("encode_lui asm_line->imm: %d\n", imm);
-    uint32_t lui_encoded = encode_u_type(imm, rd, opcode);
-    //printf("lui_encoded: %08" PRIx32 "\n", lui_encoded);
+//     uint8_t opcode = 0b0110111;
+//     uint8_t rd = encode_register(asm_line->reg_rd);
+//     uint32_t imm = data_1;
+//     //printf("encode_lui asm_line->imm: %d\n", imm);
+//     uint32_t lui_encoded = encode_u_type(imm, rd, opcode);
+//     //printf("lui_encoded: %08" PRIx32 "\n", lui_encoded);
 
-    output_buffer[0] = lui_encoded;
+//     output_buffer[0] = lui_encoded;
 
-    //
-    // addi
-    //
+//     //
+//     // addi
+//     //
 
-    uint32_t data_2 = data_1 << 12;
-    uint32_t data_3 = (data_0 - data_2) & 0xFFF;
-    //printf("data_3: %08" PRIx32 "\n", data_3);
+//     uint32_t data_2 = data_1 << 12;
+//     uint32_t data_3 = (data_0 - data_2) & 0xFFF;
+//     //printf("data_3: %08" PRIx32 "\n", data_3);
 
-    uint8_t funct3 = 0b000;
-    opcode = 0b0010011;
+//     uint8_t funct3 = 0b000;
+//     opcode = 0b0010011;
 
-    rd = encode_register(asm_line->reg_rd);
-    uint8_t rs1 = encode_register(asm_line->reg_rd);
-    imm = data_3;
+//     rd = encode_register(asm_line->reg_rd);
+//     uint8_t rs1 = encode_register(asm_line->reg_rd);
+//     imm = data_3;
 
-    uint32_t addi_encoded = encode_i_type(imm, rs1, funct3, rd, opcode);
-    //printf("addi_encoded: %08" PRIx32 "\n", addi_encoded);
+//     uint32_t addi_encoded = encode_i_type(imm, rs1, funct3, rd, opcode);
+//     //printf("addi_encoded: %08" PRIx32 "\n", addi_encoded);
 
-    output_buffer[1] = addi_encoded;
-}
+//     output_buffer[1] = addi_encoded;
+// }
 
 uint32_t encode_mul(asm_line_t* asm_line) {
 
@@ -752,6 +764,11 @@ uint32_t encode(asm_line_t* asm_line) {
 
         case I_ADDI:
             encoded_asm_line = encode_addi(asm_line);
+            break;
+
+        // ADDIW is part of RV64I not RV32I. Only generate this instruction if the extension RV64I is enabled !!!
+        case I_ADDIW:
+            encoded_asm_line = encode_addiw(asm_line);
             break;
 
         case I_BEQ:
