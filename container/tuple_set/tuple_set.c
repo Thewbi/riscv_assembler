@@ -64,9 +64,12 @@ int retrieve_by_key_tuple_set(tuple_set_element_t* set,
     const int size, const char* key, tuple_set_element_t** result) {
 
     for (int i = 0; i < size; i++) {
-        const tuple_set_element_t* element = set+i;
+        const tuple_set_element_t* element = set + i;
         if ((element->used == 1) && (strncmp(element->key, key, 100) == 0)) {
-            *result = &set[i];
+
+            if (result != NULL) {
+                *result = &set[i];
+            }
             return 1;
         }
     }

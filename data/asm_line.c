@@ -286,9 +286,9 @@ void serialize_asm_line(const asm_line_t *data) {
             case  I_SH: // store half-word
             case  I_SW: // store word
             case  I_SD: // store double-word
-                printf("%s, ", register_to_string(data->reg_rs1));
+                printf("%s, ", register_to_string(data->reg_rs2));
                 output_offset(data);
-                printf("(%s)", register_to_string(data->reg_rs2));
+                printf("(%s)", register_to_string(data->reg_rs1));
                 break;
 
             // U-Type
@@ -731,33 +731,8 @@ const char* register_to_string(enum register_ data) {
 
 // called by the parser, when a mnemonic is parsed
 void set_instruction(asm_line_t *data, const enum instruction instr, const enum instruction_type type) {
-
-    //printf("set_instruction()\n");
-
     data->instruction = instr;
     data->instruction_type = type;
-
-    // data->size_in_bytes = 4;
-    // switch (data->instruction) {
-
-    //     case I_CALL:
-    //         data->size_in_bytes = 8;
-    //         break;
-
-    //     // pseudo instruction -> is replaced with JAL
-    //     case I_J:
-    //         data->size_in_bytes = 4;
-    //         break;
-
-    //     case I_LI:
-    //         data->size_in_bytes = 8;
-    //         break;
-
-    //     case I_MV:
-    //         data->size_in_bytes = 4;
-    //         break;
-    // }
-
 }
 
 void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int size, const int index) {
@@ -840,6 +815,18 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
 
         case I_CALL: {
 
+            // when to generate a jal instruction instead of a auipc, jalr combination ?
+            //
+            // The official specification (https://riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf)
+            // says on page 110, table 20.2 that a call instruction is resolved by auipc, jalr
+            //
+            // jal
+            // The jump and link (JAL) instruction uses the J-type format, where the J-immediate encodes a
+            // signed offset in multiples of 2 bytes. The offset is sign-extended and added to the pc to form the
+            // jump target address. Jumps can therefore target a ±1 MiB range. JAL stores the address of the
+            // instruction following the jump (pc+4) into register rd. The standard software calling convention
+            // uses x1 as the return address register and x5 as an alternate link register.
+
             int line_nr = data->line_nr;
 
             uint32_t imm_int_val = 0;
@@ -850,56 +837,95 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             uint32_t data_0 = (imm_int_val & 0xFFFFF000) >> 12;
             uint32_t data_1 = (imm_int_val & 0xFFF);
 
-            // TODO: search for a register that is really free
-            enum register_ free_temp_register = R_T1; // x6
+            if (data_0 == 0) {
 
-            //
-            // auipc
-            //
+                printf("CALL: Short jump detected\n");
 
-            uint32_t imm = data_0;
+                // Plain unconditional jumps (assembler pseudo-op J) are encoded as a JAL with rd=x0
+                asm_line_t jal;
+                reset_asm_line(&jal);
+                jal.used = 1;
+                jal.line_nr = line_nr;
+                jal.instruction = I_JAL;
+                jal.instruction_type = IT_J;
+                jal.instruction_index = data->instruction_index;
+                jal.reg_rd = R_RA;
+                jal.reg_rs1 = R_ZERO;
 
-            asm_line_t auipc;
-            reset_asm_line(&auipc);
-            auipc.used = 1;
-            auipc.line_nr = line_nr;
-            auipc.instruction = I_AUIPC;
-            auipc.instruction_type = IT_U;
-            auipc.instruction_index = data->instruction_index;
-            auipc.reg_rd = free_temp_register;
-            auipc.imm = imm;
+                //int32_t relative_offset = data_1 - ((data->instruction_index + 0) * 4);
+                int32_t relative_offset = data_1;
+                jal.imm = relative_offset;
 
-            //
-            // jalr
-            //
+                // jal.offset_0_used = data->offset_0_used;
+                // jal.offset_0 = data->offset_0;
+                // jal.offset_1_used = data->offset_1_used;
+                // jal.offset_1 = data->offset_1;
+                // jal.offset_2_used = data->offset_2_used;
+                // jal.offset_2 = data->offset_2;
 
-            uint8_t rs1 = encode_register(free_temp_register);
-            imm = data_1;
+                jal.offset_0_used = 0;
+                jal.offset_0 = 0;
+                jal.offset_1_used = 0;
+                jal.offset_1 = 0;
+                jal.offset_2_used = 0;
+                jal.offset_2 = 0;
 
-            asm_line_t jalr;
-            reset_asm_line(&jalr);
-            jalr.used = 1;
-            jalr.line_nr = line_nr + 1;
-            jalr.instruction = I_JALR;
-            jalr.instruction_type = IT_J;
-            jalr.instruction_index = data->instruction_index + 1;
-            jalr.reg_rd = R_ZERO;
-            jalr.reg_rs1 = free_temp_register;
-            jalr.imm = imm;
+                copy_asm_line(data, &jal);
 
-            reset_asm_line(data);
+            } else {
 
-            for (int i = size-1; i > index; i--) {
-                copy_asm_line(&asm_line_array[i+1], &asm_line_array[i]);
-                asm_line_array[i+1].line_nr++;
+                // TODO: search for a register that is really free
+                enum register_ free_temp_register = R_T1; // x6
 
-                if (asm_line_array[i + 1].instruction_index != -1) {
-                    asm_line_array[i + 1].instruction_index++;
+                //
+                // auipc
+                //
+
+                uint32_t imm = data_0;
+
+                asm_line_t auipc;
+                reset_asm_line(&auipc);
+                auipc.used = 1;
+                auipc.line_nr = line_nr;
+                auipc.instruction = I_AUIPC;
+                auipc.instruction_type = IT_U;
+                auipc.instruction_index = data->instruction_index;
+                auipc.reg_rd = free_temp_register;
+                auipc.imm = imm;
+
+                //
+                // jalr
+                //
+
+                uint8_t rs1 = encode_register(free_temp_register);
+                imm = data_1;
+
+                asm_line_t jalr;
+                reset_asm_line(&jalr);
+                jalr.used = 1;
+                jalr.line_nr = line_nr + 1;
+                jalr.instruction = I_JALR;
+                jalr.instruction_type = IT_J;
+                jalr.instruction_index = data->instruction_index + 1;
+                jalr.reg_rd = R_ZERO;
+                jalr.reg_rs1 = free_temp_register;
+                jalr.imm = imm;
+
+                reset_asm_line(data);
+
+                for (int i = size-1; i > index; i--) {
+                    copy_asm_line(&asm_line_array[i+1], &asm_line_array[i]);
+                    asm_line_array[i+1].line_nr++;
+
+                    if (asm_line_array[i + 1].instruction_index != -1) {
+                        asm_line_array[i + 1].instruction_index++;
+                    }
                 }
-            }
 
-            copy_asm_line(data, &auipc);
-            copy_asm_line(&asm_line_array[index+1], &jalr);
+                copy_asm_line(data, &auipc);
+                copy_asm_line(&asm_line_array[index+1], &jalr);
+
+            }
         }
         break;
 
@@ -959,7 +985,6 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
 
                 asm_line_t* next_data = &asm_line_array[index + 1];
 
-                //data->offset_1_expression->int_val = data->offset_1_expression->int_val & 0xFFF;
                 next_data->imm = next_data->offset_1_expression->int_val & 0xFFF;
 
                 // adjust the immediate value of the lb instruction

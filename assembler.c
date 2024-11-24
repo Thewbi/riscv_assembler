@@ -91,7 +91,7 @@ int mem_preload_value(std::map<uint32_t, uint32_t*>* segments,
     return 0;
 }
 
-uint32_t determine_instruction_size(asm_line_t* data) {
+uint32_t determine_instruction_size(asm_line_t* data, int label_exists_in_file) {
 
     if (data->instruction == I_UNDEFINED_INSTRUCTION) {
         return 0;
@@ -100,6 +100,13 @@ uint32_t determine_instruction_size(asm_line_t* data) {
     switch (data->instruction) {
 
         case I_CALL:
+
+            // HEURISTIC: if the label exists within the same file, create a simple JAL instead of a auipc and jalr
+            if (label_exists_in_file) {
+                // resolved into jal
+                return 4;
+            }
+            // resolved into combination of auipc and jalr
             return 8;
 
         // pseudo instruction -> is replaced with JAL
@@ -152,23 +159,38 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
     yydebug = 0;
     yyparse();
 
-    // // DEBUG
-    // printf("asm_lines after parse: %d\n", asm_line_array_index);
-    // for (int i = 0; i < asm_line_array_index; i++) {
-    //     //printf("line %d\n", i);
-    //     print_asm_line(&asm_line_array[i]);
-    // }
-
+    // DEBUG
+    printf("asm_lines after parse: %d\n", asm_line_array_index);
+    for (int i = 0; i < asm_line_array_index; i++) {
+        //printf("line %d\n", i);
+        print_asm_line(&asm_line_array[i]);
+    }
 
     //
     // collect all labels and store them inside the label_address_map
     //
 
-    // trivial_map_element_t label_address_map[20];
-    // initialize_trivial_map(label_address_map, 20);
-
     tuple_set_element_t label_address_map[20];
     initialize_tuple_set(label_address_map, 20);
+
+    // determine all labels that are defined within this file
+    for (int i = 0; i < asm_line_array_index; i++) {
+
+        // ignore assembler instructions
+        if (asm_line_array[i].asm_instruction != AI_UNDEFINED) {
+            continue;
+        }
+
+        // if there is a label
+        if (strnlen(asm_line_array[i].label, 100) > 0) {
+
+            if (!insert_tuple_set(label_address_map, 20, asm_line_array[i].label, 0x00)) {
+                printf("Insert label address mapping failed!\n");
+                break;
+            }
+        }
+
+    }
 
     int current_address = 0x0000;
     int32_t instruction_index = 0;
@@ -201,10 +223,20 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
             //     break;
             // }
 
-            if (!insert_tuple_set(label_address_map, 20, asm_line_array[i].label, current_address)) {
-                printf("Insert label address mapping failed!\n");
-                break;
+            tuple_set_element_t* tuple_set_element = NULL;
+            retrieve_by_key_tuple_set(label_address_map, 20, asm_line_array[i].label, &tuple_set_element);
+
+            if (tuple_set_element == NULL) {
+                printf("Retrieving \"%s\" from label address mapping failed!\n", asm_line_array[i].label);
+                abort();
             }
+
+            tuple_set_element->value = current_address;
+
+            // if (!insert_tuple_set(label_address_map, 20, asm_line_array[i].label, current_address)) {
+            //     printf("Insert label address mapping failed!\n");
+            //     break;
+            // }
         }
         //else {
             //printf("size_in_bytes:%d\n", asm_line_array[i].size_in_bytes);
@@ -212,7 +244,14 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
 
         //printf("current_address: %d, determine_instruction_size: %d\n", current_address, determine_instruction_size(&asm_line_array[i]));
 
-        current_address = current_address + determine_instruction_size(&asm_line_array[i]);
+        //uint32_t label_exists_in_file = retrieve_by_key_tuple_set(label_address_map, 20, asm_line_array[i].label, NULL);
+
+        uint32_t label_exists_in_file = 0;
+        if (asm_line_array[i].offset_0_expression != NULL) {
+            label_exists_in_file = retrieve_by_key_tuple_set(label_address_map, 20, asm_line_array[i].offset_0_expression->string_val, NULL);
+        }
+
+        current_address = current_address + determine_instruction_size(&asm_line_array[i], label_exists_in_file);
 
         if (asm_line_array[i].instruction != I_UNDEFINED_INSTRUCTION) {
             asm_line_array[i].instruction_index = instruction_index;
@@ -288,6 +327,7 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
         asm_line_t* asm_line_ptr = &asm_line_array[i];
 
         if ((asm_line_ptr->offset_0_expression != NULL) && (strlen(asm_line_ptr->offset_0_expression->string_val) > 0)) {
+
             //printf("%s\n", asm_line_ptr->offset_0_expression->string_val);
             if (contains_key_trivial_map(equ_map, 20, asm_line_ptr->offset_0_expression->string_val)) {
                 int val = 0;
@@ -299,7 +339,9 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
             // else {
             //     printf("Cannot resolve equ-symbol \"%s\"!\n", asm_line_ptr->offset_0_expression->string_val);
             // }
+
         } else if ((asm_line_ptr->offset_1_expression != NULL) && (strlen(asm_line_ptr->offset_1_expression->string_val) > 0)) {
+
             //printf("%s\n", asm_line_ptr->offset_1_expression->string_val);
             if (contains_key_trivial_map(equ_map, 20, asm_line_ptr->offset_1_expression->string_val)) {
                 int val = 0;
@@ -311,7 +353,9 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
             // else {
             //     printf("Cannot resolve equ-symbol \"%s\"!\n", asm_line_ptr->offset_1_expression->string_val);
             // }
+
         } else if ((asm_line_ptr->offset_2_expression != NULL) && (strlen(asm_line_ptr->offset_2_expression->string_val) > 0)) {
+
             //printf("%s\n", asm_line_ptr->offset_2_expression->string_val);
             if (contains_key_trivial_map(equ_map, 20, asm_line_ptr->offset_2_expression->string_val)) {
                 int val = 0;
@@ -323,6 +367,33 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
             // else {
             //     printf("Cannot resolve equ-symbol \"%s\"!\n", asm_line_ptr->offset_2_expression->string_val);
             // }
+
+        }
+
+        if (asm_line_ptr->offset_0_used && (strlen(asm_line_ptr->offset_identifier_0) > 0)) {
+
+            printf("offset 0\n");
+
+            int val = 0;
+            retrieve_by_key_trivial_map(equ_map, 20, asm_line_ptr->offset_identifier_0, &val);
+            asm_line_ptr->offset_0 = val;
+
+        } else if (asm_line_ptr->offset_1_used && (strlen(asm_line_ptr->offset_identifier_1) > 0)) {
+
+            printf("offset 1\n");
+
+            int val = 0;
+            retrieve_by_key_trivial_map(equ_map, 20, asm_line_ptr->offset_identifier_1, &val);
+            asm_line_ptr->offset_1 = val;
+
+        } else if (asm_line_ptr->offset_2_used && (strlen(asm_line_ptr->offset_identifier_2) > 0)) {
+
+            printf("offset 2\n");
+
+            int val = 0;
+            retrieve_by_key_trivial_map(equ_map, 20, asm_line_ptr->offset_identifier_2, &val);
+            asm_line_ptr->offset_2 = val;
+
         }
 
     }
@@ -339,7 +410,7 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
              printf("abx\n");
         }
 
-        address += determine_instruction_size(&asm_line_array[i]);
+        address += determine_instruction_size(&asm_line_array[i], 1);
 
         if (asm_line_array[i].offset_0_used && strnlen(asm_line_array[i].offset_identifier_0, 100) > 0) {
 
@@ -537,15 +608,18 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
         }
     }
 
-    // // DEBUG
-    // printf("\n\n");
-    // printf("asm_lines after replace labels: %d\n", 100);
-    // for (int i = 0; i < 100; i++) {
-    //     //printf("line %d\n", i);
-    //     if (asm_line_array[i].used != 0) {
-    //         print_asm_line(&asm_line_array[i]);
-    //     }
-    // }
+    //
+    // DEBUG - asm_lines after replace labels
+    //
+
+    printf("\n\n");
+    printf("asm_lines after replace labels: %d\n", 100);
+    for (int i = 0; i < 100; i++) {
+        //printf("line %d\n", i);
+        if (asm_line_array[i].used != 0) {
+            print_asm_line(&asm_line_array[i]);
+        }
+    }
 
     //
     // Replace Pseudo instructions

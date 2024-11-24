@@ -419,7 +419,9 @@ uint32_t encode_sw(asm_line_t* asm_line) {
 
     uint8_t rs1 = encode_register(asm_line->reg_rs1);
     uint8_t rs2 = encode_register(asm_line->reg_rs2);
-    uint16_t imm = asm_line->offset_1;
+
+    uint16_t imm = retrieve_immediate_part(asm_line);
+    //uint16_t imm = asm_line->offset_1;
 
     return encode_s_type(imm, rs2, rs1, funct3, opcode);
 }
