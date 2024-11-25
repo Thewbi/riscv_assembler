@@ -55,6 +55,10 @@ void reset_asm_line(asm_line_t *data) {
     memset(data->offset_identifier_1, 0, 100);
     memset(data->offset_identifier_2, 0, 100);
 
+    data->parameter_modifier_0 = PM_UNDEFINED;
+    data->parameter_modifier_1 = PM_UNDEFINED;
+    data->parameter_modifier_2 = PM_UNDEFINED;
+
 }
 
 void reset_asm_lines(asm_line_t *data, const int size) {
@@ -108,34 +112,25 @@ void copy_asm_line(asm_line_t* target, asm_line_t* source) {
     target->imm = source->imm;
 
     target->offset_0 = source->offset_0;
-    //target->offset_identifier_0 = source->offset_identifier_0; // TODO: deep copy?
     memcpy(target->offset_identifier_0, source->offset_identifier_0, 100);
     target->offset_0_used = source->offset_0_used;
     target->offset_0_expression = source->offset_0_expression; // TODO: deep copy?
+    target->parameter_modifier_0 = source->parameter_modifier_0;
 
     target->offset_1 = source->offset_1;
-    //target->offset_identifier_1 = source->offset_identifier_1; // TODO: deep copy?
     memcpy(target->offset_identifier_1, source->offset_identifier_1, 100);
     target->offset_1_used = source->offset_1_used;
     target->offset_1_expression = source->offset_1_expression; // TODO: deep copy?
+    target->parameter_modifier_1 = source->parameter_modifier_1;
 
     target->offset_2 = source->offset_2;
-    //target->offset_identifier_2 = source->offset_identifier_2; // TODO: deep copy?
     memcpy(target->offset_identifier_2, source->offset_identifier_2, 100);
     target->offset_2_used = source->offset_2_used;
     target->offset_2_expression = source->offset_2_expression; // TODO: deep copy?
+    target->parameter_modifier_2 = source->parameter_modifier_2;
 }
 
 void print_asm_line(const asm_line_t *data) {
-
-    //printf("print_asm_line\n");
-    //printf("print_asm_line label: %s \n", data->label);
-
-    // if (strlen(data->label) != 0) {
-
-    //     printf("[(%d) Label: %s]\n", data->line_nr, data->label);
-
-    // } else
 
     if (data->asm_instruction != AI_UNDEFINED) {
 
@@ -143,9 +138,7 @@ void print_asm_line(const asm_line_t *data) {
 
         memset(buffer_3, 0, 100);
 
-        //printf("print_expression ...\n");
         print_expression(data->asm_instruction_expr, buffer_3);
-        //printf("print_expression done.\n");
 
         printf("[(%d) AssemblerInstr: Label:%s Instr:%s Symbol:%s Val: %s]\n",
             data->line_nr,
@@ -154,8 +147,6 @@ void print_asm_line(const asm_line_t *data) {
             data->asm_instruction_symbol, buffer_3);
 
     } else {
-
-        //printf("asm_line with parameters\n");
 
         char buffer_0[100];
         char buffer_1[100];
@@ -169,22 +160,20 @@ void print_asm_line(const asm_line_t *data) {
         print_expression(data->offset_1_expression, buffer_1);
         print_expression(data->offset_2_expression, buffer_2);
 
-        // Size: %d
         printf("[(%d) InstrIdx: %d Label: %s, Instr: %s Imm: %d Used: %d \n \
-    0:{offset_0_used:%d offset:%d offset_ident:%s register:%s offset_0_expr:%s}\n \
-    1:{offset_1_used:%d offset:%d offset_ident:%s register:%s offset_1_expr:%s}\n \
-    2:{offset_2_used:%d offset:%d offset_ident:%s register:%s offset_2_expr:%s}\n \
+    0:{offset_0_used:%d offset:%d offset_ident:%s register:%s offset_0_expr:%s modifier:%s}\n \
+    1:{offset_1_used:%d offset:%d offset_ident:%s register:%s offset_1_expr:%s modifier:%s}\n \
+    2:{offset_2_used:%d offset:%d offset_ident:%s register:%s offset_2_expr:%s modifier:%s}\n \
 ]\n",
             data->line_nr,
             data->instruction_index,
             data->label,
             instruction_to_string(data->instruction),
-            //data->size_in_bytes,
             data->imm,
             data->used,
-            data->offset_0_used, data->offset_0, data->offset_identifier_0, register_to_string(data->reg_rd), buffer_0,
-            data->offset_1_used, data->offset_1, data->offset_identifier_1, register_to_string(data->reg_rs1), buffer_1,
-            data->offset_2_used, data->offset_2, data->offset_identifier_2, register_to_string(data->reg_rs2), buffer_2);
+            data->offset_0_used, data->offset_0, data->offset_identifier_0, register_to_string(data->reg_rd), buffer_0, print_parameter_modifier(data->parameter_modifier_0),
+            data->offset_1_used, data->offset_1, data->offset_identifier_1, register_to_string(data->reg_rs1), buffer_1, print_parameter_modifier(data->parameter_modifier_1),
+            data->offset_2_used, data->offset_2, data->offset_identifier_2, register_to_string(data->reg_rs2), buffer_2, print_parameter_modifier(data->parameter_modifier_2));
 
     }
 
@@ -302,7 +291,7 @@ void serialize_asm_line(const asm_line_t *data) {
                 }
                 break;
 
-            // // J-Type
+            // J-Type
             case I_JAL: // jump and link (pseudo instruction j is implemented via jal)
                 printf("%s, ", register_to_string(data->reg_rd));
                 printf("0x%08" PRIx32 "", data->imm);
@@ -507,6 +496,28 @@ void insert_integer_immediate(asm_line_t *data, uint32_t imm) {
     data->imm = sign_extended;
 }
 
+void insert_modifier(asm_line_t *data, char* modifier, uint8_t index) {
+
+    printf("insert_modifier: %s index: %d \n", modifier);
+
+    enum parameter_modifier parameter_modifier_temp = PM_UNDEFINED;
+
+    if (strncmp(modifier, "HI", 2) == 0) {
+        parameter_modifier_temp = PM_HI;
+    } else if (strncmp(modifier, "LO", 2) == 0) {
+        parameter_modifier_temp = PM_LO;
+    }
+
+    switch(index) {
+        case 0: data->parameter_modifier_0 = parameter_modifier_temp;  break;
+        case 1: data->parameter_modifier_1 = parameter_modifier_temp;  break;
+        case 2: data->parameter_modifier_2 = parameter_modifier_temp;  break;
+        default:
+            break;
+    }
+
+}
+
 const char* instruction_to_string(enum instruction data) {
 
     if (data == I_UNDEFINED_INSTRUCTION) {
@@ -650,7 +661,7 @@ const char* register_to_string(enum register_ data) {
     int outputABIName = 1;
     if (outputABIName) {
 
-        switch(data) {
+        switch (data) {
             case R_ZERO: return "zero"; // 0, Hard-wired zero
             case R_RA: return "ra"; // 1, Return address
             case R_SP: return "sp"; // 2, Stack pointer
@@ -727,6 +738,23 @@ const char* register_to_string(enum register_ data) {
         }
 
     }
+}
+
+const char* print_parameter_modifier(const enum parameter_modifier data) {
+
+    switch (data) {
+
+        case PM_HI:
+            return "%hi";
+
+        case PM_LO:
+            return "%LO";
+
+        default:
+            return "PM_UNDEFINED";
+
+    }
+
 }
 
 // called by the parser, when a mnemonic is parsed

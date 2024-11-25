@@ -57,6 +57,7 @@ void (*fp_emit)(asm_line_t*);
 %token <sym> EQU SECTION GLOBL GLOBAL TEXT DATA BYTE HALF WORD DWORD
 %token <sym> ADD ADDI AUIPC BEQ BEQZ BGE BLT BGT BNE BNEZ CALL J JALR LD LW LH LB LI LUI MUL MV RET SRLI SLLI SD SW SH SB
 %token <sym> NEW_LINE
+%token <sym> MODIFIER_HI MODIFIER_LO
 %token <int_val> NUMERIC
 %token <string_val> IDENTIFIER
 %token <sym> DOT COLON COMMA OPENING_BRACKET CLOSING_BRACKET
@@ -69,6 +70,7 @@ void (*fp_emit)(asm_line_t*);
 %type <expr_ptr> expr; // the expr rule will return a node_t pointer
 %type <string_val> label;
 %type <string_val> csv_identifier_list;
+%type <string_val> modifier;
 
 //-- SECTION 3: GRAMMAR RULES ---------------------------------------
 
@@ -171,6 +173,12 @@ asm_line :
         if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
     }
 
+modifier :
+    MODIFIER_HI { printf("test_123\n"); strncpy($$, "HI", 2); }
+    |
+    MODIFIER_LO { printf("test_456\n"); strncpy($$, "LOW", 3); }
+    ;
+
 params : param_1 COMMA param_2 COMMA param_3 {
         //printf("param_1 COMMA param_2 COMMA param_3\n");
     }
@@ -191,49 +199,83 @@ params : param_1 COMMA param_2 COMMA param_3 {
     }
 
 param_1 :
-    IDENTIFIER OPENING_BRACKET expr {
-        //printf("identifier OFFSET 1\n");
+    IDENTIFIER OPENING_BRACKET expr CLOSING_BRACKET {
         insert_identifier_offset(&parser_asm_line, (char *)$1, 0);
-    } CLOSING_BRACKET
+
+        insert_expr(&parser_asm_line, current_node, 0);
+        current_node = NULL;
+    }
     |
-    NUMERIC OPENING_BRACKET expr {
-        //printf("numeric OFFSET 1\n");
+    NUMERIC OPENING_BRACKET expr CLOSING_BRACKET {
         insert_offset(&parser_asm_line, $2, 0);
-    } CLOSING_BRACKET
+
+        insert_expr(&parser_asm_line, current_node, 0);
+        current_node = NULL;
+    }
+    |
+    modifier OPENING_BRACKET expr CLOSING_BRACKET {
+        printf("modifier 1: '%s' \n", (char *) $1);
+        insert_modifier(&parser_asm_line, (char *)$1, 0);
+
+        insert_expr(&parser_asm_line, current_node, 0);
+        current_node = NULL;
+    }
     |
     expr {
-        //printf("expr 1\n");
         insert_expr(&parser_asm_line, current_node, 0);
         current_node = NULL;
     }
 
 param_2 :
-    IDENTIFIER OPENING_BRACKET expr {
-        //printf("identifier OFFSET 2: %s\n", $1);
+    IDENTIFIER OPENING_BRACKET expr CLOSING_BRACKET {
         insert_identifier_offset(&parser_asm_line, (char *)$1, 1);
-    } CLOSING_BRACKET
+
+        insert_expr(&parser_asm_line, current_node, 1);
+        current_node = NULL;
+    }
     |
-    NUMERIC OPENING_BRACKET expr {
-        //printf("numeric OFFSET 2\n");
+    NUMERIC OPENING_BRACKET expr CLOSING_BRACKET {
         insert_offset(&parser_asm_line, $2, 1);
-    } CLOSING_BRACKET
+
+        insert_expr(&parser_asm_line, current_node, 1);
+        current_node = NULL;
+    }
+    |
+    modifier OPENING_BRACKET expr CLOSING_BRACKET {
+        printf("modifier 2: '%s' \n", (char *) $1);
+        insert_modifier(&parser_asm_line, (char *)$1, 1);
+
+        insert_expr(&parser_asm_line, current_node, 1);
+        current_node = NULL;
+    }
     |
     expr {
-        //printf("expr 2\n");
         insert_expr(&parser_asm_line, current_node, 1);
         current_node = NULL;
     }
 
 param_3 :
-    IDENTIFIER OPENING_BRACKET expr {
-        //printf("identifier OFFSET 3\n");
+    IDENTIFIER OPENING_BRACKET expr CLOSING_BRACKET {
         insert_identifier_offset(&parser_asm_line, (char *)$1, 2);
-    } CLOSING_BRACKET
+
+        insert_expr(&parser_asm_line, current_node, 2);
+        current_node = NULL;
+    }
     |
-    NUMERIC OPENING_BRACKET expr {
-        //printf("numeric OFFSET 3\n");
+    NUMERIC OPENING_BRACKET expr CLOSING_BRACKET {
         insert_offset(&parser_asm_line, $2, 2);
-    } CLOSING_BRACKET
+
+        insert_expr(&parser_asm_line, current_node, 2);
+        current_node = NULL;
+    }
+    |
+    modifier OPENING_BRACKET expr CLOSING_BRACKET {
+        printf("modifier 3: '%s' \n", (char *) $1);
+        insert_modifier(&parser_asm_line, (char *)$1, 2);
+
+        insert_expr(&parser_asm_line, current_node, 2);
+        current_node = NULL;
+    }
     |
     expr {
         //printf("expr 3\n");
@@ -289,23 +331,23 @@ expr:
     }
     |
     IDENTIFIER {
-        //printf("expr - IDENTIFIER: %s \n", $1);
+        printf("expr - IDENTIFIER: %s \n", $1);
 
-        if (current_node == NULL)
-        {
-            //current_node = new node_t;
+        if (current_node == NULL) {
+
             current_node = (node_t *)malloc(sizeof(node_t));
 
-            //printf("Line: %d\n", yylineno);
-
             reset_node(current_node);
+
             memset(current_node->string_val, 0, 100);
             memcpy(current_node->string_val, $1, strlen($1));
 
             $$ = current_node;
-        } else {
-            printf("expr - IDENTIFIER: not null!\n");
         }
+
+        //  else {
+        //     printf("expr - IDENTIFIER: not null!\n");
+        // }
     }
 
 csv_identifier_list :

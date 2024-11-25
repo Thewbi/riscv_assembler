@@ -110,6 +110,15 @@ enum assembler_instruction {
 
 };
 
+enum parameter_modifier {
+
+    PM_HI,
+    PM_LO,
+
+    PM_UNDEFINED
+
+};
+
 typedef struct asm_line {
 
     //
@@ -153,16 +162,19 @@ typedef struct asm_line {
     char offset_identifier_0[100];
     uint8_t offset_0_used;
     node_t* offset_0_expression;
+    enum parameter_modifier parameter_modifier_0;
 
     int32_t offset_1;
     char offset_identifier_1[100];
     uint8_t offset_1_used;
     node_t* offset_1_expression;
+    enum parameter_modifier parameter_modifier_1;
 
     int32_t offset_2;
     char offset_identifier_2[100];
     uint8_t offset_2_used;
     node_t* offset_2_expression;
+    enum parameter_modifier parameter_modifier_2;
 
 } asm_line_t;
 
@@ -186,6 +198,7 @@ void insert_register(asm_line_t *data, enum register_);
  */
 void insert_offset(asm_line_t *data, uint32_t offset, uint8_t index);
 void insert_identifier_offset(asm_line_t *data, char* offset, uint8_t index);
+void insert_modifier(asm_line_t *data, char* modifier, uint8_t index);
 
 /**
  *
@@ -223,6 +236,8 @@ const char* assembler_instruction_to_string(enum assembler_instruction data);
  *
  */
 const char* register_to_string(enum register_ data);
+
+const char* print_parameter_modifier(const enum parameter_modifier data);
 
 void set_instruction(asm_line_t *data, const enum instruction instr, const enum instruction_type type);
 
