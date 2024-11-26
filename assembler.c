@@ -13,6 +13,7 @@
 // 5. Encode asm_line objects into 32 bit machine code
 
 #include <stdio.h>
+#include <stddef.h>
 
 #include <asm_line.h>
 #include <encoder.h>
@@ -100,7 +101,6 @@ uint32_t determine_instruction_size(asm_line_t* data, int label_exists_in_file) 
     switch (data->instruction) {
 
         case I_CALL:
-
             // HEURISTIC: if the label exists within the same file, create a simple JAL instead of a auipc and jalr
             if (label_exists_in_file) {
                 // resolved into jal
@@ -114,18 +114,15 @@ uint32_t determine_instruction_size(asm_line_t* data, int label_exists_in_file) 
             return 4;
 
         case I_LI:
-
             // if the immediate is twelve bits only, the LUI is not needed and only I_ADDI is generated
             if (data->imm <= 0xFFF) {
                 return 4;
             }
-
             // if the lower twelve bits are zero and only the upper bits contain
             // a value, a simple LUI suffices to only load the upper bits
             if ((data->imm & 0xFFF) == 0) {
                 return 4;
             }
-
             // if the immediate value has non-zero bits in both the lower 12 bits
             // and the upper twelve bits, then replace by LUI and ADDI
             // see https://stackoverflow.com/questions/76331514/riscv-li-instruction
@@ -165,6 +162,62 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
         //printf("line %d\n", i);
         print_asm_line(&asm_line_array[i]);
     }
+
+//#if 0
+    //
+    // optimize
+    //
+
+    for (int i = 0; i < (asm_line_array_index - 1); i++) {
+
+        print_asm_line(&asm_line_array[i]);
+        print_asm_line(&asm_line_array[i + 1]);
+
+        //
+        // optimization: recombine lui, addi into li so that li can be optimized by the encoder
+        //
+
+        asm_line_t* data_1 = &asm_line_array[i];
+        asm_line_t* data_2 = &asm_line_array[i + 1];
+
+        if ((!data_1->used) || (!data_2->used)) {
+            continue;
+        }
+
+        if ((data_1->instruction == I_LUI) && (data_2->instruction == I_ADDI)) {
+
+            printf("found optimization\n", i);
+
+            uint32_t strlength = strlen(data_1->offset_1_expression->string_val);
+
+            // check if the symbol is the same
+            if (strncmp(data_1->offset_1_expression->string_val, data_2->offset_2_expression->string_val, strlength) == 0) {
+
+                reset_asm_line(data_1);
+                data_1->used = 1;
+                data_1->instruction = I_LI;
+                data_1->reg_rd = data_2->reg_rd;
+
+                // data_1->offset_1_used = 1;
+                // data_1->offset_identifier_0 = "";
+
+                data_1->offset_1_expression = data_2->offset_2_expression;
+
+                // second line is erased
+                reset_asm_line(data_2);
+            }
+
+        }
+    }
+
+    // DEBUG
+    printf("\n\n");
+    printf("asm_lines after optimize\n");
+    for (int i = 0; i < asm_line_array_index; i++) {
+        //printf("line %d\n", i);
+        print_asm_line(&asm_line_array[i]);
+    }
+//#endif
 
     //
     // collect all labels and store them inside the label_address_map
@@ -207,22 +260,6 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
 
         if (strnlen(asm_line_array[i].label, 100) > 0) {
 
-            // printf("line_nr:%d label:%s address:%d address/4:%d size_in_bytes:%d\n",
-            //     asm_line_array[i].line_nr,
-            //     asm_line_array[i].label,
-            //     current_address,
-            //     current_address/4,
-            //     asm_line_array[i].size_in_bytes);
-
-            // if (contains_key_trivial_map(label_address_map, 20, asm_line_array[i].label)) {
-            //     printf("Label is already contained: %s\n", asm_line_array[i].label);
-            // }
-
-            // if (!insert_or_replace_trivial_map(label_address_map, 20, asm_line_array[i].label, current_address)) {
-            //     printf("Insert label address mapping failed!\n");
-            //     break;
-            // }
-
             tuple_set_element_t* tuple_set_element = NULL;
             retrieve_by_key_tuple_set(label_address_map, 20, asm_line_array[i].label, &tuple_set_element);
 
@@ -233,10 +270,6 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
 
             tuple_set_element->value = current_address;
 
-            // if (!insert_tuple_set(label_address_map, 20, asm_line_array[i].label, current_address)) {
-            //     printf("Insert label address mapping failed!\n");
-            //     break;
-            // }
         }
         //else {
             //printf("size_in_bytes:%d\n", asm_line_array[i].size_in_bytes);
@@ -317,6 +350,7 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
     // Replace .equ
     //
     // In each line, check if there is a offset_?_expr, where a symbol is used.
+    //
     // The approach is to look for a symbol in the assembler line and blindly
     // assume that the symbol is a defined constant in the equ map. Then try
     // to resolve it from the equ map!
@@ -406,7 +440,7 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
 
     for (int i = 0; i < asm_line_array_index; i++) {
 
-        if (asm_line_array[i].instruction == I_BEQZ) {
+        if (asm_line_array[i].instruction == I_J) {
              printf("abx\n");
         }
 
@@ -476,9 +510,16 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
             if (strncmp(last_character, "f", 1) == 0) {
                 retrieve_by_key_greater_than_value_tuple_set(label_address_map, 20, asm_line_array[i].offset_0_expression->string_val, str_len-1, address, &tuple_set_element);
                 if (tuple_set_element != NULL) {
-                    //printf("greater_than: %d\n", tuple_set_element->value);
-                    //asm_line_array[i].offset_0 = tuple_set_element->value;
-                    asm_line_array[i].offset_0 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * 4);
+                    switch (asm_line_array[i].instruction_type) {
+                        case IT_B:
+                        case IT_J:
+                        case IT_P:
+                            asm_line_array[i].offset_0 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * 4);
+                            break;
+                        default:
+                            asm_line_array[i].offset_0 = tuple_set_element->value;
+                            break;
+                    }
                     asm_line_array[i].offset_0_used = 1;
                 } else {
                     printf("greater_than \"%s\" label not defined!\n", asm_line_array[i].offset_0_expression->string_val);
@@ -487,9 +528,16 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
             } else if (strncmp(last_character, "b", 1) == 0) {
                 retrieve_by_key_less_than_value_tuple_set(label_address_map, 20, asm_line_array[i].offset_0_expression->string_val, str_len-1, address, &tuple_set_element);
                 if (tuple_set_element != NULL) {
-                    //printf("less_than: %d\n", tuple_set_element->value);
-                    //asm_line_array[i].offset_0 = tuple_set_element->value;
-                    asm_line_array[i].offset_0 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * 4);
+                    switch (asm_line_array[i].instruction_type) {
+                        case IT_B:
+                        case IT_J:
+                        case IT_P:
+                            asm_line_array[i].offset_0 = tuple_set_element->value - ((asm_line_array[i].instruction_index -1) * 4);
+                            break;
+                        default:
+                            asm_line_array[i].offset_0 = tuple_set_element->value;
+                            break;
+                    }
                     asm_line_array[i].offset_0_used = 1;
                 } else {
                     printf("less_than \"%s\" label not defined!\n", asm_line_array[i].offset_0_expression->string_val);
@@ -498,13 +546,19 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
             } else {
                 retrieve_by_key_tuple_set(label_address_map, 20, asm_line_array[i].offset_0_expression->string_val, &tuple_set_element);
                 if (tuple_set_element != NULL) {
-                    //printf("direct_match: %d\n", tuple_set_element->value);
-                    //asm_line_array[i].offset_0 = tuple_set_element->value;
-
                     // convert the target label address into a relative value (relative to the current assembler line)
                     // since the branch instructions work by adding an offset to the current pc so they are inherently
                     // pc-relative jumps and the immediate value has to be a pc-relative value
-                    asm_line_array[i].offset_0 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * 4);
+                    switch (asm_line_array[i].instruction_type) {
+                        case IT_B:
+                        case IT_J:
+                        case IT_P:
+                            asm_line_array[i].offset_0 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * 4);
+                            break;
+                        default:
+                            asm_line_array[i].offset_0 = tuple_set_element->value;
+                            break;
+                    }
                     asm_line_array[i].offset_0_used = 1;
                 } else {
                     printf("direct_match \"%s\" label not defined!\n", asm_line_array[i].offset_0_expression->string_val);
@@ -525,8 +579,16 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
                 retrieve_by_key_greater_than_value_tuple_set(label_address_map, 20, asm_line_array[i].offset_1_expression->string_val, str_len-1, address, &tuple_set_element);
                 if (tuple_set_element != NULL) {
                     printf("greater_than: %d\n", tuple_set_element->value);
-                    //asm_line_array[i].offset_1 = tuple_set_element->value;
-                    asm_line_array[i].offset_1 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * 4);
+                    switch (asm_line_array[i].instruction_type) {
+                        case IT_B:
+                        case IT_J:
+                        case IT_P:
+                            asm_line_array[i].offset_1 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * 4);
+                            break;
+                        default:
+                            asm_line_array[i].offset_1 = tuple_set_element->value;
+                            break;
+                    }
                     asm_line_array[i].offset_1_used = 1;
                 } else {
                     printf("greater_than \"%s\" label not defined!\n", asm_line_array[i].offset_1_expression->string_val);
@@ -535,8 +597,16 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
                 retrieve_by_key_less_than_value_tuple_set(label_address_map, 20, asm_line_array[i].offset_1_expression->string_val, str_len-1, address, &tuple_set_element);
                 if (tuple_set_element != NULL) {
                     printf("less_than: %d\n", tuple_set_element->value);
-                    //asm_line_array[i].offset_1 = tuple_set_element->value;
-                    asm_line_array[i].offset_1 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * 4);
+                    switch (asm_line_array[i].instruction_type) {
+                        case IT_B:
+                        case IT_J:
+                        case IT_P:
+                            asm_line_array[i].offset_1 = tuple_set_element->value - ((asm_line_array[i].instruction_index - 1) * 4);
+                            break;
+                        default:
+                            asm_line_array[i].offset_1 = tuple_set_element->value;
+                            break;
+                    }
                     asm_line_array[i].offset_1_used = 1;
                 } else {
                     printf("less_than \"%s\" label not defined!\n", asm_line_array[i].offset_1_expression->string_val);
@@ -545,12 +615,19 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
                 retrieve_by_key_tuple_set(label_address_map, 20, asm_line_array[i].offset_1_expression->string_val, &tuple_set_element);
                 if (tuple_set_element != NULL) {
                     printf("direct_match: %d\n", tuple_set_element->value);
-                    //asm_line_array[i].offset_1 = tuple_set_element->value;
-
                     // convert the target label address into a relative value (relative to the current assembler line)
                     // since the branch instructions work by adding an offset to the current pc so they are inherently
                     // pc-relative jumps and the immediate value has to be a pc-relative value
-                    asm_line_array[i].offset_1 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * 4);
+                    switch (asm_line_array[i].instruction_type) {
+                        case IT_B:
+                        case IT_J:
+                        case IT_P:
+                            asm_line_array[i].offset_1 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * 4);
+                            break;
+                        default:
+                            asm_line_array[i].offset_1 = tuple_set_element->value;
+                            break;
+                    }
                     asm_line_array[i].offset_1_used = 1;
                 } else {
                     printf("direct_match \"%s\" label not defined!\n", asm_line_array[i].offset_1_expression->string_val);
@@ -569,9 +646,16 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
             if (strncmp(last_character, "f", 1) == 0) {
                 retrieve_by_key_greater_than_value_tuple_set(label_address_map, 20, asm_line_array[i].offset_2_expression->string_val, str_len-1, address, &tuple_set_element);
                 if (tuple_set_element != NULL) {
-                    //printf("greater_than: %d\n", tuple_set_element->value);
-                    //asm_line_array[i].offset_2 = tuple_set_element->value;
-                    asm_line_array[i].offset_2 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * 4);
+                    switch (asm_line_array[i].instruction_type) {
+                        case IT_B:
+                        case IT_J:
+                        case IT_P:
+                            asm_line_array[i].offset_2 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * 4);
+                            break;
+                        default:
+                            asm_line_array[i].offset_2 = tuple_set_element->value;
+                            break;
+                    }
                     asm_line_array[i].offset_2_used = 1;
                 } else {
                     printf("greater_than \"%s\" label not defined!\n", asm_line_array[i].offset_2_expression->string_val);
@@ -580,9 +664,16 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
             } else if (strncmp(last_character, "b", 1) == 0) {
                 retrieve_by_key_less_than_value_tuple_set(label_address_map, 20, asm_line_array[i].offset_2_expression->string_val, str_len-1, address, &tuple_set_element);
                 if (tuple_set_element != NULL) {
-                    //printf("less_than: %d\n", tuple_set_element->value);
-                    //asm_line_array[i].offset_2 = tuple_set_element->value;
-                    asm_line_array[i].offset_2 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * 4);
+                    switch (asm_line_array[i].instruction_type) {
+                        case IT_B:
+                        case IT_J:
+                        case IT_P:
+                            asm_line_array[i].offset_2 = tuple_set_element->value - ((asm_line_array[i].instruction_index - 1) * 4);
+                            break;
+                        default:
+                            asm_line_array[i].offset_2 = tuple_set_element->value;
+                            break;
+                    }
                     asm_line_array[i].offset_2_used = 1;
                 } else {
                     printf("less_than \"%s\" label not defined!\n", asm_line_array[i].offset_2_expression->string_val);
@@ -591,14 +682,19 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
             } else {
                 retrieve_by_key_tuple_set(label_address_map, 20, asm_line_array[i].offset_2_expression->string_val, &tuple_set_element);
                 if (tuple_set_element != NULL) {
-
-                    //printf("direct_match: %d\n", tuple_set_element->value);
-                    //asm_line_array[i].offset_2 = tuple_set_element->value;
-
                     // convert the target label address into a relative value (relative to the current assembler line)
                     // since the branch instructions work by adding an offset to the current pc so they are inherently
                     // pc-relative jumps and the immediate value has to be a pc-relative value
-                    asm_line_array[i].offset_2 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * 4);
+                    switch (asm_line_array[i].instruction_type) {
+                        case IT_B:
+                        case IT_J:
+                        case IT_P:
+                            asm_line_array[i].offset_2 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * 4);
+                            break;
+                        default:
+                            asm_line_array[i].offset_2 = tuple_set_element->value;
+                            break;
+                    }
                     asm_line_array[i].offset_2_used = 1;
                 } else {
                     printf("direct_match \"%s\" label not defined!\n", asm_line_array[i].offset_2_expression->string_val);

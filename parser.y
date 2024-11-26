@@ -54,12 +54,13 @@ void (*fp_emit)(asm_line_t*);
     node_t* expr_ptr;
 };
 
-%token <sym> EQU SECTION GLOBL GLOBAL TEXT DATA BYTE HALF WORD DWORD
+%token <sym> DOT_EQU DOT_SECTION DOT_GLOBL DOT_GLOBAL DOT_TEXT DOT_DATA DOT_BYTE DOT_HALF DOT_WORD DOT_DWORD DOT_FILE DOT_RODATA DOT_ASCIZ
 %token <sym> ADD ADDI AUIPC BEQ BEQZ BGE BLT BGT BNE BNEZ CALL J JALR LD LW LH LB LI LUI MUL MV RET SRLI SLLI SD SW SH SB
 %token <sym> NEW_LINE
 %token <sym> MODIFIER_HI MODIFIER_LO
 %token <int_val> NUMERIC
 %token <string_val> IDENTIFIER
+%token <string_val> STRING_LITERAL
 %token <sym> DOT COLON COMMA OPENING_BRACKET CLOSING_BRACKET
 %token <sym> REG_ZERO REG_RA REG_SP REG_GP REG_TP REG_T0 REG_T1 REG_T2 REG_T3 REG_T4 REG_T5 REG_T6 REG_FP REG_A0 REG_A1 REG_A2 REG_A3 REG_A4 REG_A5 REG_A6 REG_A7 REG_S0 REG_S1 REG_S2 REG_S3 REG_S4 REG_S5 REG_S6 REG_S7 REG_S8 REG_S9 REG_S10 REG_S11
 
@@ -174,9 +175,15 @@ asm_line :
     }
 
 modifier :
-    MODIFIER_HI { printf("test_123\n"); strncpy($$, "HI", 2); }
+    MODIFIER_HI {
+        /*printf("MODIFIER_HI\n");*/
+        strncpy($$, "HI", 2);
+    }
     |
-    MODIFIER_LO { printf("test_456\n"); strncpy($$, "LOW", 3); }
+    MODIFIER_LO {
+        /*printf("MODIFIER_LO\n");*/
+        strncpy($$, "LO", 2);
+    }
     ;
 
 params : param_1 COMMA param_2 COMMA param_3 {
@@ -349,6 +356,20 @@ expr:
         //     printf("expr - IDENTIFIER: not null!\n");
         // }
     }
+    |
+    STRING_LITERAL {
+        if (current_node == NULL) {
+
+            current_node = (node_t *)malloc(sizeof(node_t));
+
+            reset_node(current_node);
+
+            memset(current_node->string_val, 0, 100);
+            memcpy(current_node->string_val, $1, strlen($1));
+
+            $$ = current_node;
+        }
+    }
 
 csv_identifier_list :
     IDENTIFIER
@@ -356,7 +377,7 @@ csv_identifier_list :
     IDENTIFIER COMMA csv_identifier_list
 
 assembler_instruction :
-    EQU IDENTIFIER COMMA expr {
+    DOT_EQU IDENTIFIER COMMA expr {
 
         parser_asm_line.asm_instruction = AI_EQU;
 
@@ -374,7 +395,7 @@ assembler_instruction :
 
     }
     |
-    SECTION TEXT {
+    DOT_SECTION DOT_TEXT {
 
         parser_asm_line.asm_instruction = AI_SECTION;
 
@@ -386,7 +407,19 @@ assembler_instruction :
 
     }
     |
-    GLOBL csv_identifier_list {
+    DOT_SECTION DOT_RODATA {
+
+        parser_asm_line.asm_instruction = AI_SECTION;
+
+        memset(parser_asm_line.asm_instruction_symbol, 0, 100);
+        //memcpy(parser_asm_line.asm_instruction_symbol, $2, strlen($2));
+        memcpy(parser_asm_line.asm_instruction_symbol, ".rodata", strlen(".rodata"));
+
+        current_node = NULL;
+
+    }
+    |
+    DOT_GLOBL csv_identifier_list {
 
         parser_asm_line.asm_instruction = AI_GLOBL;
 
@@ -397,7 +430,7 @@ assembler_instruction :
 
     }
     |
-    GLOBAL csv_identifier_list {
+    DOT_GLOBAL csv_identifier_list {
 
         parser_asm_line.asm_instruction = AI_GLOBL;
 
@@ -408,7 +441,7 @@ assembler_instruction :
 
     }
     |
-    TEXT {
+    DOT_TEXT {
 
         parser_asm_line.asm_instruction = AI_TEXT;
 
@@ -416,7 +449,7 @@ assembler_instruction :
 
     }
     |
-    DATA {
+    DOT_DATA {
 
         parser_asm_line.asm_instruction = AI_DATA;
 
@@ -424,7 +457,7 @@ assembler_instruction :
 
     }
     |
-    BYTE expr {
+    DOT_BYTE expr {
 
         parser_asm_line.asm_instruction = AI_BYTE;
         parser_asm_line.asm_instruction_expr = $2;
@@ -433,7 +466,7 @@ assembler_instruction :
 
     }
     |
-    HALF expr {
+    DOT_HALF expr {
 
         parser_asm_line.asm_instruction = AI_HALF;
         parser_asm_line.asm_instruction_expr = $2;
@@ -442,7 +475,7 @@ assembler_instruction :
 
     }
     |
-    WORD expr {
+    DOT_WORD expr {
 
         parser_asm_line.asm_instruction = AI_WORD;
         parser_asm_line.asm_instruction_expr = $2;
@@ -451,9 +484,27 @@ assembler_instruction :
 
     }
     |
-    DWORD expr {
+    DOT_DWORD expr {
 
         parser_asm_line.asm_instruction = AI_DWORD;
+        parser_asm_line.asm_instruction_expr = $2;
+
+        current_node = NULL;
+
+    }
+    |
+    DOT_FILE expr {
+
+        parser_asm_line.asm_instruction = AI_FILE;
+        parser_asm_line.asm_instruction_expr = $2;
+
+        current_node = NULL;
+
+    }
+    |
+    DOT_ASCIZ expr {
+
+        parser_asm_line.asm_instruction = AI_ASCIZ;
         parser_asm_line.asm_instruction_expr = $2;
 
         current_node = NULL;

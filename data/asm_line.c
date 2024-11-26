@@ -651,6 +651,8 @@ const char* assembler_instruction_to_string(enum assembler_instruction data) {
         case AI_HALF: return "HALF";
         case AI_WORD: return "WORD";
         case AI_DWORD: return "DWORD";
+        case AI_FILE: return "FILE";
+        case AI_ASCIZ: return "ASCIZ";
 
         default: return "UNKNOWN ASSEMBLER INSTRUCTION!";
     }
@@ -752,9 +754,7 @@ const char* print_parameter_modifier(const enum parameter_modifier data) {
 
         default:
             return "PM_UNDEFINED";
-
     }
-
 }
 
 // called by the parser, when a mnemonic is parsed
@@ -1028,14 +1028,16 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
 
             int line_nr = data->line_nr;
 
-            // take the 32 bit value (data_0)
-            uint32_t data_0 = 0;
+            // // take the 32 bit value (data_0)
+            // uint32_t data_0 = 0;
 
-            if (data->offset_0_used) {
-                data_0 = data->offset_1;
-            } else {
-                data_0 = data->offset_1_expression->int_val;
-            }
+            // if (data->offset_0_used) {
+            //     data_0 = data->offset_1;
+            // } else {
+            //     data_0 = data->offset_1_expression->int_val;
+            // }
+
+            uint32_t data_0 = retrieve_immediate_part(data);
 
             // split it into a 20 bit (upper_data) and a lower twelve bit part (is ignored)
             uint32_t upper_data = ((data_0 & 0b11111111111111111111000000000000) >> 12);
@@ -1233,4 +1235,27 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
         }
         break;
     }
+}
+
+int32_t retrieve_immediate_part(asm_line_t* asm_line) {
+
+    int32_t imm = 0;
+
+    if (asm_line->offset_0_used) {
+        imm = asm_line->offset_0;
+    } else if (asm_line->offset_1_used) {
+        imm = asm_line->offset_1;
+    } else if (asm_line->offset_2_used) {
+        imm = asm_line->offset_2;
+    } else if (asm_line->offset_0_expression != NULL) {
+        imm = asm_line->offset_0_expression->int_val;
+    } else if (asm_line->offset_1_expression != NULL) {
+        imm = asm_line->offset_1_expression->int_val;
+    } else if (asm_line->offset_2_expression != NULL) {
+        imm = asm_line->offset_2_expression->int_val;
+    } else {
+        imm = asm_line->imm;
+    }
+
+    return imm;
 }

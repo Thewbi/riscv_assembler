@@ -3,28 +3,7 @@
 int asm_line_array_index = 0;
 asm_line_t asm_line_array[100];
 
-int32_t retrieve_immediate_part(asm_line_t* asm_line) {
 
-    int32_t imm = 0;
-
-    if (asm_line->offset_0_used) {
-        imm = asm_line->offset_0;
-    } else if (asm_line->offset_1_used) {
-        imm = asm_line->offset_1;
-    } else if (asm_line->offset_2_used) {
-        imm = asm_line->offset_2;
-    } else if (asm_line->offset_0_expression != NULL) {
-        imm = asm_line->offset_0_expression->int_val;
-    } else if (asm_line->offset_1_expression != NULL) {
-        imm = asm_line->offset_1_expression->int_val;
-    } else if (asm_line->offset_2_expression != NULL) {
-        imm = asm_line->offset_2_expression->int_val;
-    } else {
-        imm = asm_line->imm;
-    }
-
-    return imm;
-}
 
 // int32_t compute_relative_offset(int32_t imm, int32_t instruction_index) {
 //     return (imm - ((instruction_index + 0) * 4));
@@ -719,7 +698,6 @@ uint32_t encode_b_type(uint16_t imm, uint8_t rs2, uint8_t rs1, uint8_t funct3, u
     uint32_t imm_10_5 = (imm >> 5) & 0b111111;
     uint32_t imm_12 = (imm >> 11) & 0b1;
 
-
     return ((opcode & 0b1111111) << 0) |
            ((imm_11) << 7) |
            ((imm_4_1) << (7+1)) |
@@ -784,6 +762,10 @@ uint32_t encode(asm_line_t* asm_line) {
         // ADDIW is part of RV64I not RV32I. Only generate this instruction if the extension RV64I is enabled !!!
         case I_ADDIW:
             encoded_asm_line = encode_addiw(asm_line);
+            break;
+
+        case I_MUL:
+            encoded_asm_line = encode_mul(asm_line);
             break;
 
         case I_BEQ:

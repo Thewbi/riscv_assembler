@@ -105,6 +105,8 @@ enum assembler_instruction {
     AI_HALF,
     AI_WORD,
     AI_DWORD,
+    AI_FILE,
+    AI_ASCIZ,
 
     AI_UNDEFINED
 
@@ -242,5 +244,7 @@ const char* print_parameter_modifier(const enum parameter_modifier data);
 void set_instruction(asm_line_t *data, const enum instruction instr, const enum instruction_type type);
 
 void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int size, const int index);
+
+int32_t retrieve_immediate_part(asm_line_t* asm_line);
 
 #endif

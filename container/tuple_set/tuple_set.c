@@ -95,7 +95,7 @@ int retrieve_by_key_less_than_value_tuple_set(tuple_set_element_t* set,
         const tuple_set_element_t* element = set + i;
         if ((element->used == 1) && (strncmp(element->key, key, compare_size) == 0) && (element->value < value)) {
 
-            if (largest_value < element->value) {
+            if (largest_value <= element->value) {
 
                 largest_value = element->value;
                 largest_value_index = i;
@@ -130,7 +130,7 @@ int retrieve_by_key_greater_than_value_tuple_set(tuple_set_element_t* set,
         const tuple_set_element_t* element = set + i;
         if ((element->used == 1) && (strncmp(element->key, key, compare_size) == 0) && (element->value > value)) {
 
-            if (smallest_value > element->value) {
+            if (smallest_value >= element->value) {
 
                 smallest_value = element->value;
                 smallest_value_index = i;
