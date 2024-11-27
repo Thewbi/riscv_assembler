@@ -24,9 +24,13 @@
 // 1. Add the test files .c/.h to test\Makefile so that they get compiled
 enum instruction {
 
+    //
+    // RV32I
+    //
+
     // I-Type
     I_ADDI,
-    I_ADDIW, // part of RV64I (not part of RV32I), only generate this instruction if the extension is set to RV64I !!!
+
     I_SRLI,
     I_SLLI,
     I_SLTI,
@@ -51,6 +55,7 @@ enum instruction {
 
     // R-Type
     I_ADD,
+    I_AND,
     I_MUL,
 
     // S-Type
@@ -72,9 +77,24 @@ enum instruction {
     I_BNEZ, // pseudo instruction
     I_CALL, // pseudo instruction
     I_J, // pseudo instruction
+    I_JR, // pseudo instruction
     I_MV, // pseudo instruction
+    I_NOP, // pseudo instruction
+    I_NOT, // pseudo instruction
     I_RET, // pseudo instruction
     I_LI, // pseudo instruction
+
+    //
+    // RV64I
+    //
+
+    I_ADDIW, // part of RV64I (not part of RV32I), only generate this instruction if the extension is set to RV64I !!!
+
+    //
+    // PRIVILEDGED EXTENSION - https://riscv.org/wp-content/uploads/2017/05/riscv-privileged-v1.10.pdf
+    //
+
+    I_WFI, // Wait for Interrupt
 
     // undefined
     I_UNDEFINED_INSTRUCTION
@@ -83,6 +103,9 @@ enum instruction {
 
 enum instruction_type {
 
+    // RV32I
+    // RV64I
+
     IT_R,
     IT_I,
     IT_S,
@@ -90,6 +113,11 @@ enum instruction_type {
     IT_U,
     IT_J,
     IT_P, // (pseudoinstruction) you will not find P-Type in the RISC V specification!
+
+    // PRIVILEDGED - https://riscv.org/wp-content/uploads/2017/05/riscv-privileged-v1.10.pdf
+
+    IT_SYSTEM,
+
     IT_UNDEFINED_INSTRUCTION
 
 };
@@ -107,6 +135,8 @@ enum assembler_instruction {
     AI_DWORD,
     AI_FILE,
     AI_ASCIZ,
+    AI_SKIP,
+    AI_STRING,
 
     AI_UNDEFINED
 

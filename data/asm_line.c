@@ -533,6 +533,7 @@ const char* instruction_to_string(enum instruction data) {
             case I_ADD: return "ADD";
             case I_ADDI: return "ADDI";
             case I_ADDIW: return "ADDIW"; // part of RV64I
+            case I_AND: return "AND";
             case I_ANDI: return "ANDI";
             case I_AUIPC: return "AUIPC";
 
@@ -546,6 +547,7 @@ const char* instruction_to_string(enum instruction data) {
             case I_CALL: return "CALL"; // pseudo instruction
 
             case I_J: return "J"; // pseudo instruction
+            case I_JR: return "JR"; // pseudo instruction
             case I_JAL: return "JAL";
             case I_JALR: return "JALR";
 
@@ -561,6 +563,9 @@ const char* instruction_to_string(enum instruction data) {
             case I_MUL: return "MUL";
             case I_MV: return "MV"; // pseudo instruction
 
+            case I_NOP: return "NOP"; // pseudo instruction
+            case I_NOT: return "NOT"; // pseudo instruction
+
             case I_ORI: return "ORI";
 
             case I_RET: return "RET";
@@ -572,6 +577,8 @@ const char* instruction_to_string(enum instruction data) {
             case I_SW: return "SW";
             case I_SH: return "SH";
             case I_SB: return "SB";
+
+            case I_WFI: return "WFI";
 
             case I_XORI: return "XORI";
 
@@ -587,6 +594,7 @@ const char* instruction_to_string(enum instruction data) {
             case I_ADD: return "add";
             case I_ADDI: return "addi";
             case I_ADDIW: return "addiw"; // part of RV64I
+            case I_AND: return "and";
             case I_ANDI: return "andi";
             case I_AUIPC: return "auipc";
 
@@ -600,6 +608,7 @@ const char* instruction_to_string(enum instruction data) {
             case I_CALL: return "call"; // pseudo instruction
 
             case I_J: return "j"; // pseudo instruction
+            case I_JR: return "jr"; // pseudo instruction
             case I_JAL: return "jal";
             case I_JALR: return "jalr";
 
@@ -615,6 +624,9 @@ const char* instruction_to_string(enum instruction data) {
             case I_MUL: return "mul";
             case I_MV: return "mv"; // pseudo instruction
 
+            case I_NOP: return "nop"; // pseudo instruction
+            case I_NOT: return "not"; // pseudo instruction
+
             case I_ORI: return "ori";
 
             case I_RET: return "ret";
@@ -626,6 +638,8 @@ const char* instruction_to_string(enum instruction data) {
             case I_SW: return "sw";
             case I_SH: return "sh";
             case I_SB: return "sb";
+
+            case I_WFI: return "wfi";
 
             case I_XORI: return "xori";
 
@@ -653,6 +667,8 @@ const char* assembler_instruction_to_string(enum assembler_instruction data) {
         case AI_DWORD: return "DWORD";
         case AI_FILE: return "FILE";
         case AI_ASCIZ: return "ASCIZ";
+        case AI_SKIP: return "SKIP";
+        case AI_STRING: return "STRING";
 
         default: return "UNKNOWN ASSEMBLER INSTRUCTION!";
     }
@@ -803,6 +819,39 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
 
             reset_asm_line(data);
             copy_asm_line(data, &jal);
+        }
+        break;
+
+        case I_JR: {
+
+            int line_nr = data->line_nr;
+
+            // uint32_t imm_int_val = 0;
+            // if (data->offset_0_used) {
+            //     imm_int_val = data->offset_0;
+            // }
+
+            // Plain unconditional jumps (assembler pseudo-op J) are encoded as a JAL with rd=x0
+            asm_line_t jalr;
+            reset_asm_line(&jalr);
+            jalr.used = 1;
+            jalr.line_nr = line_nr;
+            jalr.instruction = I_JALR;
+            jalr.instruction_type = IT_I;
+            jalr.instruction_index = data->instruction_index;
+            jalr.reg_rd = R_ZERO;
+            jalr.reg_rs1 = data->reg_rs1;
+            jalr.imm = 0;
+
+            jalr.offset_0_used = data->offset_0_used;
+            jalr.offset_0 = data->offset_0;
+            jalr.offset_1_used = data->offset_1_used;
+            jalr.offset_1 = data->offset_1;
+            jalr.offset_2_used = data->offset_2_used;
+            jalr.offset_2 = data->offset_2;
+
+            reset_asm_line(data);
+            copy_asm_line(data, &jalr);
         }
         break;
 
@@ -1218,6 +1267,29 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             data->instruction_type = IT_B;
             data->reg_rs2 = R_ZERO;
             data->imm = 0;
+        }
+        break;
+
+        case I_NOP: {
+            reset_asm_line(data);
+            data->instruction = I_ADDI;
+            data->instruction_type = IT_I;
+            data->reg_rd = R_ZERO;
+            data->reg_rs1 = R_ZERO;
+            data->imm = 0;
+        }
+        break;
+
+        case I_NOT: {
+            // not rd, rs --> xori rd, rs, -1
+            // see: https://stackoverflow.com/questions/65006052/how-do-i-write-not-operation-for-the-risc-v-assembly-language
+            // see: https://riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf
+            data->instruction = I_XORI;
+            data->instruction_type = IT_I;
+            data->reg_rd = R_ZERO;
+            data->reg_rs1 = R_ZERO;
+            data->reg_rs2 = R_UNDEFINED_REGISTER;
+            data->imm = -1;
         }
         break;
 

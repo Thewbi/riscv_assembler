@@ -39,3 +39,51 @@ uint32_t sign_extend_20_bit_to_uint32_t(const uint32_t data) {
     }
     return data;
 }
+
+//
+// https://stackoverflow.com/questions/216823/how-to-trim-a-stdstring
+//
+
+// trim from start (in place)
+void ltrim(std::string &s) {
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }));
+}
+
+// trim from end (in place)
+void rtrim(std::string &s) {
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }).base(), s.end());
+}
+
+// trim from both ends (in place)
+void trim(std::string &s) {
+    rtrim(s);
+    ltrim(s);
+}
+
+// trim from start (copying)
+std::string ltrim_copy(std::string s) {
+    ltrim(s);
+    return s;
+}
+
+// trim from end (copying)
+std::string rtrim_copy(std::string s) {
+    rtrim(s);
+    return s;
+}
+
+// trim from both ends (copying)
+std::string trim_copy(std::string s) {
+    trim(s);
+    return s;
+}
+
+std::vector<std::string> split_string_by_delimiter(const std::string &s, char delim) {
+    std::vector<std::string> elems;
+    split_string_by_delimiter(s, delim, std::back_inserter(elems));
+    return elems;
+}

@@ -1,3 +1,29 @@
+# https://matrix89.github.io/writes/writes/experiments-in-riscv/
+#
+#
+#
+# typedef unsigned char uint8_t;
+#
+# static volatile uint8_t *uart = (void *)0x10000000;
+#
+# static int putchar(char ch) {
+#     static uint8_t THR    = 0x00;
+#     static uint8_t LSR    = 0x05;
+#     static uint8_t LSR_RI = 0x40;
+#
+#     while ((uart[LSR] & LSR_RI) == 0);
+#     return uart[THR] = ch;
+# }
+#
+# void puts(char *s) {
+#     while (*s) putchar(*s++);
+#     putchar('\n');
+# }
+#
+# void enter() {
+#     puts("Hello RISC-V");
+# }
+
 uart:
         .word   268435456
 putchar:
@@ -11,8 +37,8 @@ putchar:
 .L2:
         lui     a5,%hi(uart)
         lw      a5,%lo(uart)(a5)
-        lui     a4,%hi(ARD.2)
-        lbu     a4,%lo(ARD.2)(a4)
+        lui     a4,%hi(LSR.2)
+        lbu     a4,%lo(LSR.2)(a4)
         add     a5,a5,a4
         lbu     a5,0(a5)
         andi    a4,a5,0xff

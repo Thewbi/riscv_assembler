@@ -54,8 +54,8 @@ void (*fp_emit)(asm_line_t*);
     node_t* expr_ptr;
 };
 
-%token <sym> DOT_EQU DOT_SECTION DOT_GLOBL DOT_GLOBAL DOT_TEXT DOT_DATA DOT_BYTE DOT_HALF DOT_WORD DOT_DWORD DOT_FILE DOT_RODATA DOT_ASCIZ
-%token <sym> ADD ADDI AUIPC BEQ BEQZ BGE BLT BGT BNE BNEZ CALL J JALR LD LW LH LB LI LUI MUL MV RET SRLI SLLI SD SW SH SB
+%token <sym> DOT_EQU DOT_SECTION DOT_GLOBL DOT_GLOBAL DOT_TEXT DOT_DATA DOT_BYTE DOT_HALF DOT_WORD DOT_DWORD DOT_FILE DOT_RODATA DOT_ASCIZ DOT_SKIP DOT_STRING
+%token <sym> ADD ADDI AND ANDI AUIPC BEQ BEQZ BGE BLT BGT BNE BNEZ CALL J JR JALR LD LW LH LB LBU LI LUI MUL MV NOP NOT RET SRLI SLLI SD SW SH SB WFI
 %token <sym> NEW_LINE
 %token <sym> MODIFIER_HI MODIFIER_LO
 %token <int_val> NUMERIC
@@ -79,7 +79,6 @@ void (*fp_emit)(asm_line_t*);
 
 /* https://stackoverflow.com/questions/47687247/does-bison-allow-in-its-syntax */
 
-/**/
 asm_file :
     line_end asm_file
     |
@@ -175,12 +174,12 @@ asm_line :
     }
 
 modifier :
-    MODIFIER_HI {
+    MODIFIER_HI OPENING_BRACKET expr CLOSING_BRACKET {
         /*printf("MODIFIER_HI\n");*/
         strncpy($$, "HI", 2);
     }
     |
-    MODIFIER_LO {
+    MODIFIER_LO OPENING_BRACKET expr CLOSING_BRACKET {
         /*printf("MODIFIER_LO\n");*/
         strncpy($$, "LO", 2);
     }
@@ -228,6 +227,14 @@ param_1 :
         current_node = NULL;
     }
     |
+    modifier {
+        printf("modifier 1: '%s' \n", (char *) $1);
+        insert_modifier(&parser_asm_line, (char *)$1, 0);
+
+        insert_expr(&parser_asm_line, current_node, 0);
+        current_node = NULL;
+    }
+    |
     expr {
         insert_expr(&parser_asm_line, current_node, 0);
         current_node = NULL;
@@ -249,7 +256,15 @@ param_2 :
     }
     |
     modifier OPENING_BRACKET expr CLOSING_BRACKET {
-        printf("modifier 2: '%s' \n", (char *) $1);
+        //printf("modifier 2: '%s' \n", (char *) $1);
+        insert_modifier(&parser_asm_line, (char *)$1, 1);
+
+        insert_expr(&parser_asm_line, current_node, 1);
+        current_node = NULL;
+    }
+    |
+    modifier {
+        //printf("modifier 2: '%s' \n", (char *) $1);
         insert_modifier(&parser_asm_line, (char *)$1, 1);
 
         insert_expr(&parser_asm_line, current_node, 1);
@@ -277,7 +292,15 @@ param_3 :
     }
     |
     modifier OPENING_BRACKET expr CLOSING_BRACKET {
-        printf("modifier 3: '%s' \n", (char *) $1);
+        //printf("modifier 3: '%s' \n", (char *) $1);
+        insert_modifier(&parser_asm_line, (char *)$1, 2);
+
+        insert_expr(&parser_asm_line, current_node, 2);
+        current_node = NULL;
+    }
+    |
+    modifier {
+        //printf("modifier 3: '%s' \n", (char *) $1);
         insert_modifier(&parser_asm_line, (char *)$1, 2);
 
         insert_expr(&parser_asm_line, current_node, 2);
@@ -510,9 +533,43 @@ assembler_instruction :
         current_node = NULL;
 
     }
+    |
+    DOT_SKIP expr {
+
+        parser_asm_line.asm_instruction = AI_SKIP;
+        parser_asm_line.asm_instruction_expr = $2;
+
+        current_node = NULL;
+
+    }
+    |
+    DOT_STRING STRING_LITERAL {
+
+        parser_asm_line.asm_instruction = AI_STRING;
+        //parser_asm_line.asm_instruction_expr = $2;
+
+        insert_identifier_offset(&parser_asm_line, (char *)$2, 0);
+
+        // if (current_node == NULL) {
+
+        //     current_node = (node_t *)malloc(sizeof(node_t));
+
+        //     reset_node(current_node);
+
+        //     parser_asm_line.asm_instruction_expr = current_node;
+
+        //     memset(parser_asm_line.asm_instruction_expr->string_val, 0, 100);
+        //     memcpy(parser_asm_line.asm_instruction_expr->string_val, $2, strlen($2));
+        // }
+
+        current_node = NULL;
+
+    }
 
 mnemonic : ADD { /*printf("Parser-ADD: %d\n", I_ADD);*/ /*parser_asm_line.instruction = I_ADD; parser_asm_line.instruction_type = IT_R;*/ set_instruction(&parser_asm_line, I_ADD, IT_R); }
     | ADDI { /*printf("Parser-ADDI: %d\n", I_ADDI);*/ /*parser_asm_line.instruction = I_ADDI; parser_asm_line.instruction_type = IT_R;*/ set_instruction(&parser_asm_line, I_ADDI, IT_R); }
+    | AND { set_instruction(&parser_asm_line, I_AND, IT_R); }
+    | ANDI { set_instruction(&parser_asm_line, I_ANDI, IT_I); }
     | AUIPC { /*printf("Parser-AUIPC: %d\n", I_AUIPC);*/ /*parser_asm_line.instruction = I_AUIPC; parser_asm_line.instruction_type = IT_U;*/ set_instruction(&parser_asm_line, I_AUIPC, IT_U); }
     | BEQ { /*printf("Parser-BEQ: %d\n", I_BEQ);*/ /*parser_asm_line.instruction = I_BEQ; parser_asm_line.instruction_type = IT_B;*/ set_instruction(&parser_asm_line, I_BEQ, IT_B); }
     | BEQZ { /*printf("Parser-BEQZ: %d\n", I_BEQZ);*/ /*parser_asm_line.instruction = I_BEQZ; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_BEQZ, IT_P); }
@@ -523,8 +580,10 @@ mnemonic : ADD { /*printf("Parser-ADD: %d\n", I_ADD);*/ /*parser_asm_line.instru
     | BNEZ { /*printf("Parser-BNEZ: %d\n", I_BNEZ);*/ /*parser_asm_line.instruction = I_BNEZ; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_BNEZ, IT_P); }
     | CALL { /*printf("Parser-CALL: %d\n", I_CALL);*/ /*parser_asm_line.instruction = I_CALL; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_CALL, IT_P); }
     | J { /*printf("Parser-J: %d\n", I_J);*/ /*parser_asm_line.instruction = I_J; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_J, IT_P); }
+    | JR { /*printf("Parser-JR: %d\n", I_JR);*/ /*parser_asm_line.instruction = I_JR; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_JR, IT_P); }
     | JALR { /*printf("Parser-JALR: %d\n", I_JALR);*/ /*parser_asm_line.instruction = I_JALR; parser_asm_line.instruction_type = IT_J;*/ set_instruction(&parser_asm_line, I_JALR, IT_J); }
     | LB { /*printf("Parser-LB: %d\n", I_LB);*/ /*parser_asm_line.instruction = I_LB; parser_asm_line.instruction_type = IT_I;*/ set_instruction(&parser_asm_line, I_LB, IT_I); }
+    | LBU { set_instruction(&parser_asm_line, I_LBU, IT_I); }
     | LH { /*printf("Parser-LH: %d\n", I_LH);*/ /*parser_asm_line.instruction = I_LH; parser_asm_line.instruction_type = IT_I;*/ set_instruction(&parser_asm_line, I_LH, IT_I); }
     | LI { /*printf("Parser-LI: %d\n", I_LI);*/ /*parser_asm_line.instruction = I_LI; parser_asm_line.instruction_type = IT_I;*/ set_instruction(&parser_asm_line, I_LI, IT_P); }
     | LW { /*printf("Parser-LW: %d\n", I_LW);*/ /*parser_asm_line.instruction = I_LW; parser_asm_line.instruction_type = IT_I;*/ set_instruction(&parser_asm_line, I_LW, IT_I); }
@@ -532,6 +591,8 @@ mnemonic : ADD { /*printf("Parser-ADD: %d\n", I_ADD);*/ /*parser_asm_line.instru
     | LUI { /*printf("Parser-LUI: %d\n", I_LUI);*/ /*parser_asm_line.instruction = I_LUI; parser_asm_line.instruction_type = IT_U;*/ set_instruction(&parser_asm_line, I_LUI, IT_U); }
     | MUL { /*printf("Parser-LW: %d\n", I_MUL);*/ /*parser_asm_line.instruction = I_MUL; parser_asm_line.instruction_type = IT_R;*/ set_instruction(&parser_asm_line, I_MUL, IT_R); }
     | MV { /*printf("Parser-LW: %d\n", I_MV);*/ /*parser_asm_line.instruction = I_MV; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_MV, IT_P); }
+    | NOP { set_instruction(&parser_asm_line, I_NOP, IT_P); }
+    | NOT { /*printf("Parser-NOT: %d\n", I_NOT);*/ /*parser_asm_line.instruction = I_NOT; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_NOT, IT_P); }
     | RET { /*printf("Parser-RET: %d\n", I_RET);*/ /*parser_asm_line.instruction = I_RET; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_RET, IT_P); }
     | SRLI { /*printf("Parser-SRLI: %d\n", I_SRLI);*/ /*parser_asm_line.instruction = I_SRLI; parser_asm_line.instruction_type = IT_I;*/ set_instruction(&parser_asm_line, I_SRLI, IT_I); }
     | SLLI { /*printf("Parser-SLLI: %d\n", I_SLLI);*/ /*parser_asm_line.instruction = I_SLLI; parser_asm_line.instruction_type = IT_I;*/ set_instruction(&parser_asm_line, I_SLLI, IT_I); }
@@ -539,6 +600,7 @@ mnemonic : ADD { /*printf("Parser-ADD: %d\n", I_ADD);*/ /*parser_asm_line.instru
     | SW { /*printf("Parser-SW: %d\n", I_SW);*/ /*parser_asm_line.instruction = I_SW; parser_asm_line.instruction_type = IT_S;*/ set_instruction(&parser_asm_line, I_SW, IT_S); }
     | SH { /*printf("Parser-SH: %d\n", I_SH);*/ /*parser_asm_line.instruction = I_SH; parser_asm_line.instruction_type = IT_S;*/ set_instruction(&parser_asm_line, I_SH, IT_S); }
     | SB { /*printf("Parser-SB: %d\n", I_SB);*/ /*parser_asm_line.instruction = I_SB; parser_asm_line.instruction_type = IT_S;*/ set_instruction(&parser_asm_line, I_SB, IT_S); }
+    | WFI { set_instruction(&parser_asm_line, I_WFI, IT_SYSTEM); }
 
 register : REG_ZERO { /*printf("REG_ZERO\n");*/ insert_register(&parser_asm_line, R_ZERO); }
     | REG_RA { /*printf("REG_RA\n");*/ insert_register(&parser_asm_line, R_RA); }

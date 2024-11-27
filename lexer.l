@@ -32,9 +32,13 @@
 ".file"     { /*printf(".file\n");*/ return DOT_FILE; }
 ".rodata"   { /*printf(".rodata\n");*/ return DOT_RODATA; } /* read only data */
 ".asciz"    { /*printf(".asciz\n");*/ return DOT_ASCIZ; } /* ASCII string, zero terminated */
+".skip"     { /*printf(".skip\n");*/ return DOT_SKIP; }
+".string"   { /*printf(".string\n");*/ return DOT_STRING; }
 
-"add"	    { /*printf("ADD\n");*/ return ADD; }
-"addi"	    { /*printf("ADDI\n");*/ return ADDI; }
+"add"       { /*printf("ADD\n");*/ return ADD; }
+"addi"      { /*printf("ADDI\n");*/ return ADDI; }
+"and"       { /*printf("AND\n");*/ return AND; }
+"andi"	    { /*printf("ANDI\n");*/ return ANDI; }
 "auipc"	    { /*printf("ADDI\n");*/ return AUIPC; }
 
 "beq"       { /*printf("BEQ\n");*/ return BEQ; }
@@ -48,17 +52,22 @@
 "call"      { /*printf("CALL\n");*/ return CALL; }
 
 "j"         { /*printf("J\n");*/ return J; }
+"jr"        { /*printf("JR\n");*/ return JR; }
 "jalr"      { /*printf("JALR\n");*/ return JALR; }
 
 "ld"        { /*printf("LD\n");*/ return LD; }
 "lw"        { /*printf("LW\n");*/ return LW; }
 "lh"	    { /*printf("LH\n");*/ return LH; }
 "lb"	    { /*printf("LB\n");*/ return LB; }
+"lbu"	    { /*printf("LBU\n");*/ return LBU; }
 "li"        { /*printf("LI\n");*/ return LI; }
 "lui"       { /*printf("LUI\n");*/ return LUI; }
 
 "mul"       { /*printf("MUL\n");*/ return MUL; }
 "mv"        { /*printf("MV\n");*/ return MV; }
+
+"nop"       { /*printf("NOP\n");*/ return NOP; }
+"not"       { /*printf("NOT\n");*/ return NOT; }
 
 "ret"       { /*printf("RET\n");*/ return RET; }
 
@@ -68,6 +77,8 @@
 "sw"        { /*printf("SW\n");*/ return SW; }
 "sh"        { /*printf("SH\n");*/ return SH; }
 "sb"        { /*printf("SB\n");*/ return SB; }
+
+"wfi"       { /*printf("WFI\n");*/ return WFI; }
 
 "zero"      { /*printf("zero\n");*/ return REG_ZERO; }
 "ra"        { /*printf("ra\n");*/ return REG_RA; }
@@ -152,7 +163,9 @@
 [/][*][^*]*[*]+([^*/][^*]*[*]+)*[/]       { /* DO NOTHING */ }
 [/][*]                                    { /*printf("Unterminated comment");*/ }
 
-[0-9]+[fb] {
+[\.]?[a-zA-Z_][a-zA-Z0-9_]*([\.][a-zA-Z0-9_]*)* {
+
+    /* FLEX regex tester - https://regex101.com/r/wG3hF4/1 */
 
     // DEBUG
     //printf("lexer::identifier: %s\n", yytext);
@@ -165,7 +178,7 @@
     return IDENTIFIER;
 }
 
-("."?[a-zA-Z_][a-zA-Z_0-9]*)+ {
+[0-9]+[fb] {
 
     // DEBUG
     //printf("lexer::identifier: %s\n", yytext);

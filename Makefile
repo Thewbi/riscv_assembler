@@ -15,6 +15,8 @@ assembler: assembler.c \
 	data/asm_line.c \
 	encoder/encoder.h \
 	encoder/encoder.c \
+	preprocessor/preprocessor.h \
+	preprocessor/preprocessor.c \
 	common/common.c \
 	common/common.h \
 	common/register.h \
@@ -46,6 +48,8 @@ emulator: common/common.c \
 	common/register.c \
 	common/node.h \
 	common/node.c \
+	preprocessor/preprocessor.h \
+	preprocessor/preprocessor.c \
 	container\trivial_map\trivial_map.h \
 	container\trivial_map\trivial_map.c \
 	container\tuple_set\tuple_set.h \
@@ -70,8 +74,9 @@ emulator: common/common.c \
 	common/common.c \
 	common/register.c \
 	common/node.c \
-	container\trivial_map\trivial_map.c \
-	container\tuple_set\tuple_set.c \
+	preprocessor/preprocessor.c \
+	container/trivial_map/trivial_map.c \
+	container/tuple_set/tuple_set.c \
 	emulator.c \
 	assembler.c \
 	parser.c \

@@ -85,6 +85,17 @@
         "format": "c",
         "xmemory": "c",
         "xlocmon": "c",
-        "xlocale": "c"
+        "xlocale": "c",
+        "xlocmes": "c",
+        "filesystem": "c",
+        "forward_list": "c",
+        "ios": "c",
+        "locale": "c",
+        "xfacet": "c",
+        "xlocbuf": "c",
+        "xlocinfo": "c",
+        "xlocnum": "c",
+        "xloctime": "c",
+        "xtree": "c"
     }
 }

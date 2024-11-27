@@ -142,7 +142,6 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
     uint32_t constants_address = 0x00010000;
 
     reset_asm_line(&parser_asm_line);
-
     reset_asm_lines(asm_line_array, 100);
 
     fp_emit = &encoder_callback;

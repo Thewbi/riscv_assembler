@@ -1,7 +1,11 @@
+#include <iostream>
+#include <fstream>
+
 #include <asm_line.h>
 #include <ihex_loader.h>
 #include <assembler.h>
 #include <cpu.h>
+#include <preprocessor/preprocessor.h>
 
 //#define BUILD_ASSEMBLER 1
 #define BUILD_EMULATOR 1
@@ -87,6 +91,15 @@ int main(int argc, char **argv)
     //std::string source_file = "test/resources/blinker.s";
     //std::string source_file = "test/resources/loads.s";
     std::string source_file = "test/resources/scratchpad.s";
+
+    std::string destination_filename = "test/resources/preprocessed.s";
+    std::ofstream destination_ofstream;
+    destination_ofstream.open(destination_filename);
+    //destination_ofstream << "Writing this to a file.\n";
+
+    preprocess(&source_file, &destination_ofstream);
+
+    destination_ofstream.close();
 
     uint32_t machine_code[100];
     memset(machine_code, 0, 100);
