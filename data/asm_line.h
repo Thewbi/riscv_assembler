@@ -162,6 +162,9 @@ typedef struct asm_line {
     int32_t instruction_index;
     //uint8_t size_in_bytes;
 
+    uint8_t use_raw_data;
+    uint32_t raw_data;
+
     //
     // Label to jump to in assembler code
     //

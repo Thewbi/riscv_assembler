@@ -147,7 +147,7 @@ asm_line :
     }
     |
     label assembler_instruction {
-        printf("assembler_instruction  with label\n");
+        printf("assembler_instruction with label\n");
         //printf("Line: %d\n", yylineno);
 
         parser_asm_line.line_nr = yylineno;
@@ -293,6 +293,8 @@ param_3 :
     |
     modifier OPENING_BRACKET expr CLOSING_BRACKET {
         //printf("modifier 3: '%s' \n", (char *) $1);
+
+
         insert_modifier(&parser_asm_line, (char *)$1, 2);
 
         insert_expr(&parser_asm_line, current_node, 2);
@@ -301,6 +303,8 @@ param_3 :
     |
     modifier {
         //printf("modifier 3: '%s' \n", (char *) $1);
+
+
         insert_modifier(&parser_asm_line, (char *)$1, 2);
 
         insert_expr(&parser_asm_line, current_node, 2);
@@ -404,16 +408,10 @@ assembler_instruction :
 
         parser_asm_line.asm_instruction = AI_EQU;
 
-        //printf("AAA: %s\n", $2);
-
-        //parser_asm_line.asm_instruction_symbol = $2,
         memset(parser_asm_line.asm_instruction_symbol, 0, 100);
         memcpy(parser_asm_line.asm_instruction_symbol, $2, strlen($2));
 
-        //printf("BBB: %s\n", parser_asm_line.asm_instruction_symbol);
-
         parser_asm_line.asm_instruction_expr = $4;
-        //parser_asm_line.asm_instruction_expr = NULL;
         current_node = NULL;
 
     }
@@ -423,7 +421,6 @@ assembler_instruction :
         parser_asm_line.asm_instruction = AI_SECTION;
 
         memset(parser_asm_line.asm_instruction_symbol, 0, 100);
-        //memcpy(parser_asm_line.asm_instruction_symbol, $2, strlen($2));
         memcpy(parser_asm_line.asm_instruction_symbol, ".text", strlen(".text"));
 
         current_node = NULL;
@@ -435,7 +432,6 @@ assembler_instruction :
         parser_asm_line.asm_instruction = AI_SECTION;
 
         memset(parser_asm_line.asm_instruction_symbol, 0, 100);
-        //memcpy(parser_asm_line.asm_instruction_symbol, $2, strlen($2));
         memcpy(parser_asm_line.asm_instruction_symbol, ".rodata", strlen(".rodata"));
 
         current_node = NULL;

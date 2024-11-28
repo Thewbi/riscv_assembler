@@ -1,5 +1,6 @@
 # https://matrix89.github.io/writes/writes/experiments-in-riscv/
 #
+# Compile with https://godbolt.org/ (SourceLanguage: C, TargetLanguage: RISC-V (32-bits) gcc (trunk))
 #
 #
 # typedef unsigned char uint8_t;
@@ -25,7 +26,8 @@
 # }
 
 uart:
-        .word   268435456
+        #.word   268435456
+        .word   0x10000000
 putchar:
         addi    sp,sp,-32
         sw      ra,28(sp)
@@ -99,6 +101,8 @@ enter:
         lw      s0,8(sp)
         addi    sp,sp,16
         jr      ra
+THR.0:
+        .byte   0
 LSR.2:
         .byte   5
 LSR_RI.1:

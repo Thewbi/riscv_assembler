@@ -12,6 +12,9 @@ void reset_asm_line(asm_line_t *data) {
     data->line_nr = 0;
     data->instruction_index = -1;
 
+    data->use_raw_data = 0;
+    data->raw_data = 0;
+
     //
     // Label to jump to in assembler code
     //
@@ -79,6 +82,9 @@ void copy_asm_line(asm_line_t* target, asm_line_t* source) {
     target->line_nr = source->line_nr;
     target->instruction_index = source->instruction_index;
     //target->size_in_bytes = source->size_in_bytes;
+
+    target->use_raw_data = source->use_raw_data;
+    target->raw_data = source->raw_data;
 
     //
     // Label to jump to in assembler code
@@ -509,9 +515,9 @@ void insert_modifier(asm_line_t *data, char* modifier, uint8_t index) {
     }
 
     switch(index) {
-        case 0: data->parameter_modifier_0 = parameter_modifier_temp;  break;
-        case 1: data->parameter_modifier_1 = parameter_modifier_temp;  break;
-        case 2: data->parameter_modifier_2 = parameter_modifier_temp;  break;
+        case 0: data->parameter_modifier_0 = parameter_modifier_temp; break;
+        case 1: data->parameter_modifier_1 = parameter_modifier_temp; break;
+        case 2: data->parameter_modifier_2 = parameter_modifier_temp; break;
         default:
             break;
     }
@@ -1240,7 +1246,6 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             data->instruction = I_BNE;
             data->instruction_type = IT_I;
             data->reg_rs1 = data->reg_rd;
-            //data->reg_rs2 = data->reg_rd;
             data->reg_rs2 = R_ZERO;
             data->imm = 0;
         }
@@ -1271,11 +1276,15 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
         break;
 
         case I_NOP: {
+            int line_nr = data->line_nr;
             reset_asm_line(data);
+            data->used = 1;
+            data->line_nr = line_nr;
             data->instruction = I_ADDI;
             data->instruction_type = IT_I;
             data->reg_rd = R_ZERO;
             data->reg_rs1 = R_ZERO;
+            data->reg_rs2 = R_UNDEFINED_REGISTER;
             data->imm = 0;
         }
         break;

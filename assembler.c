@@ -244,7 +244,7 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
 
     }
 
-    int current_address = 0x0000;
+    uint32_t current_address = 0;
     int32_t instruction_index = 0;
 
     for (int i = 0; i < asm_line_array_index; i++) {
@@ -291,20 +291,80 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
         }
     }
 
-    // DEBUG
-    printf("\n");
-    printf("label map:\n");
-    //print_trivial_map(label_address_map, 20);
-    print_tuple_set(label_address_map, 20);
+    //
+    // Process modifiers %hi, %lo
+    //
+
+    for (int i = 0; i < asm_line_array_index; i++) {
+
+        printf("test\n");
+
+        asm_line_t* asm_line = &asm_line_array[i];
+
+        switch (asm_line->parameter_modifier_0) {
+
+            case PM_HI:
+                printf("HI\n");
+                break;
+
+            case PM_LO:
+                printf("LO\n");
+                break;
+
+            case PM_UNDEFINED:
+            default:
+                // nop
+                break;
+        }
+
+        switch (asm_line->parameter_modifier_1) {
+
+            case PM_HI:
+                printf("HI\n");
+                break;
+
+            case PM_LO:
+                printf("LO\n");
+                break;
+
+            case PM_UNDEFINED:
+            default:
+                // nop
+                break;
+        }
+
+        switch (asm_line->parameter_modifier_2) {
+
+            case PM_HI:
+                printf("HI\n");
+                break;
+
+            case PM_LO:
+                printf("LO\n");
+                break;
+
+            case PM_UNDEFINED:
+            default:
+                // nop
+                break;
+        }
+
+    }
 
     //
+    // Process Assembler Instructions
+    //
     // collect all .equ assembler instructions and store them inside the equ_map
+    // process assembler instructions: .byte, .half, .word, and .dword
     //
 
     trivial_map_element_t equ_map[20];
     initialize_trivial_map(equ_map, 20);
 
+    current_address = 0;
+
     for (int i = 0; i < asm_line_array_index; i++) {
+
         if (asm_line_array[i].asm_instruction == AI_EQU) {
             //printf("key:%s value:%d\n", asm_line_array[i].asm_instruction_symbol, asm_line_array[i].asm_instruction_expr->int_val);
             if (!insert_or_replace_trivial_map(equ_map, 20,
@@ -319,26 +379,89 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
         //
         // 1. place constant values into memory
         // 2. retrieve the address, where the constants have been placed
-        // 3. Insert the label as a key and the address as a value into the
-        //    equ map.
-        if ( (asm_line_array[i].asm_instruction == AI_BYTE) ||
-                (asm_line_array[i].asm_instruction == AI_HALF) ||
-                (asm_line_array[i].asm_instruction == AI_WORD)) {
+        // 3. Insert the label as a key and the address as a value into the equ map.
 
-            //printf("key:%s value:%d\n", asm_line_array[i].asm_instruction_symbol, asm_line_array[i].asm_instruction_expr->int_val);
+        switch (asm_line_array[i].asm_instruction) {
 
-            mem_preload_value(segments, equ_map, &asm_line_array[i], constants_address, asm_line_array[i].asm_instruction_expr->int_val, true);
+            case AI_BYTE:
+            case AI_HALF:
+            case AI_WORD:
+            {
 
-        } else if (asm_line_array[i].asm_instruction == AI_DWORD) {
+            // the assembler instruction .byte, .half and .word place the
+            // data into the text segment!
+            //asm_line_array[i].asm_instruction = AI_UNDEFINED;
+            asm_line_array[i].use_raw_data = 1;
+            asm_line_array[i].raw_data = asm_line_array[i].asm_instruction_expr->int_val;
 
-            uint32_t high = (asm_line_array[i].asm_instruction_expr->int_val & 0xFFFFFFFF00000000) >> 32;
-            uint32_t low = (asm_line_array[i].asm_instruction_expr->int_val & 0x00000000FFFFFFFF) >> 0;
+            // get the label which might be stored in the previous line
+            char use_label[100];
+            int use_address = current_address;
+            memset(use_label, 0, 100);
+            memcpy(use_label, asm_line_array[i].label, 100);
+            if (strnlen(asm_line_array[i].label, 100) == 0) {
+                memcpy(use_label, asm_line_array[i - 1].label, 100);
+                use_address -= 4;
+            }
 
-            mem_preload_value(segments, equ_map, &asm_line_array[i], constants_address, high, true);
-            mem_preload_value(segments, equ_map, &asm_line_array[i], constants_address, low, false);
+            if (!insert_tuple_set(label_address_map,
+                20,
+                use_label,
+                use_address))
+            {
+                printf("Insert .equ failed!\n");
+                abort();
+            }
 
+
+            current_address += 4;
+
+            //printf("key:%s value:%d\n", asm_line_array[i].asm_instruction_symbol,
+            //    asm_line_array[i].asm_instruction_expr->int_val);
+
+            //mem_preload_value(segments, equ_map, &asm_line_array[i], constants_address, asm_line_array[i].asm_instruction_expr->int_val, true);
+            }
+            break;
+
+            case AI_DWORD:
+            {
+
+                uint32_t high = (asm_line_array[i].asm_instruction_expr->int_val & 0xFFFFFFFF00000000) >> 32;
+                uint32_t low = (asm_line_array[i].asm_instruction_expr->int_val & 0x00000000FFFFFFFF) >> 0;
+
+                // TODO: place data into the code segment
+
+                // mem_preload_value(segments, equ_map, &asm_line_array[i], constants_address, high, true);
+                // mem_preload_value(segments, equ_map, &asm_line_array[i], constants_address, low, false);
+
+                current_address += 8;
+
+            }
+            break;
+
+            case AI_UNDEFINED:
+                // nop
+                break;
+
+            default:
+                enum assembler_instruction ai = asm_line_array[i].asm_instruction;
+                printf("Unknown Assembler Instruction: %s\n", assembler_instruction_to_string(ai));
+                break;
         }
+
+        uint32_t label_exists_in_file = 0;
+        if (asm_line_array[i].offset_0_expression != NULL) {
+            label_exists_in_file = retrieve_by_key_tuple_set(label_address_map, 20, asm_line_array[i].offset_0_expression->string_val, NULL);
+        }
+
+        current_address = current_address + determine_instruction_size(&asm_line_array[i], label_exists_in_file);
     }
+
+    // DEBUG
+    printf("\n");
+    printf("label map:\n");
+    //print_trivial_map(label_address_map, 20);
+    print_tuple_set(label_address_map, 20);
 
     // DEBUG
     printf("\n");
@@ -752,8 +875,22 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
 
     instruction_index = 0;
     for (int i = 0; i < 100; i++) {
+
         //printf("line %d\n", i);
-        if ((asm_line_array[i].used != 0) && (asm_line_array[i].instruction != I_UNDEFINED_INSTRUCTION)) {
+
+        // encode RISC-V instructions, but also encode assembler instructions
+        // if they place data into the .text segment like .byte, .half, .word,  .dword
+        if ((asm_line_array[i].used != 0) && (
+            asm_line_array[i].instruction != I_UNDEFINED_INSTRUCTION
+            ||
+            asm_line_array[i].asm_instruction == AI_BYTE
+            ||
+            asm_line_array[i].asm_instruction == AI_HALF
+            ||
+            asm_line_array[i].asm_instruction == AI_WORD
+            ||
+            asm_line_array[i].asm_instruction == AI_DWORD)) {
+
             //printf("%d\n", encode(&asm_line_array[i]));
 
             uint32_t machine_code_for_instruction = encode(&asm_line_array[i]);
