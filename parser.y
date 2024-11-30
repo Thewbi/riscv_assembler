@@ -71,6 +71,7 @@ void (*fp_emit)(asm_line_t*);
 %type <expr_ptr> expr; // the expr rule will return a node_t pointer
 %type <string_val> label;
 %type <string_val> csv_identifier_list;
+%type <int_val> csv_numeric_list;
 %type <string_val> modifier;
 
 //-- SECTION 3: GRAMMAR RULES ---------------------------------------
@@ -403,6 +404,17 @@ csv_identifier_list :
     |
     IDENTIFIER COMMA csv_identifier_list
 
+csv_numeric_list :
+    NUMERIC
+    {
+        insert_numeric_list_raw_data(&parser_asm_line, $1);
+    }
+    |
+    csv_numeric_list COMMA NUMERIC
+    {
+        insert_numeric_list_raw_data(&parser_asm_line, $3);
+    }
+
 assembler_instruction :
     DOT_EQU IDENTIFIER COMMA expr {
 
@@ -476,12 +488,14 @@ assembler_instruction :
 
     }
     |
-    DOT_BYTE expr {
+    DOT_BYTE csv_numeric_list {
 
         parser_asm_line.asm_instruction = AI_BYTE;
-        parser_asm_line.asm_instruction_expr = $2;
 
-        current_node = NULL;
+        insert_numeric_list_end_raw_data(&parser_asm_line, $2);
+        //parser_asm_line.asm_instruction_expr = $2;
+
+        //current_node = NULL;
 
     }
     |
@@ -540,6 +554,8 @@ assembler_instruction :
     }
     |
     DOT_STRING STRING_LITERAL {
+
+        printf("DOT_STRING STRING_LITERAL %s, %d \n\n", __FILE__, __LINE__);
 
         parser_asm_line.asm_instruction = AI_STRING;
         //parser_asm_line.asm_instruction_expr = $2;

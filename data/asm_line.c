@@ -17,6 +17,9 @@ void reset_asm_line(asm_line_t *data) {
     data->raw_data_length = 0;
     memset(data->raw_data, 0, 100);
 
+    data->numeric_csv_index = 0;
+    memset(data->numeric_csv, 0, 100);
+
     //
     // Label to jump to in assembler code
     //
@@ -363,6 +366,28 @@ void print_expression(const node_t* data, char* buffer) {
     //printf("0x%" PRIx64 "", data->int_val);
 
     snprintf(buffer, 100, "0x%" PRIx64 "", data->int_val);
+}
+
+void insert_numeric_list_raw_data(asm_line_t *data, uint32_t numeric) {
+    printf("insert_numeric_list_raw_data\n");
+
+    data->numeric_csv[data->numeric_csv_index] = numeric;
+    data->numeric_csv_index++;
+}
+
+void insert_numeric_list_end_raw_data(asm_line_t *data, uint32_t numeric) {
+    printf("insert_numeric_list_end_raw_data\n");
+
+    // copy numeric csv data into raw data
+    for (int i = 0; i < data->numeric_csv_index; i++) {
+        data->raw_data[i] = (uint8_t) data->numeric_csv[i];
+    }
+    data->use_raw_data = 1;
+    data->raw_data_length = data->numeric_csv_index;
+
+    // clear
+    data->numeric_csv_index = 0;
+    memset(data->numeric_csv, 0, 100);
 }
 
 void insert_register(asm_line_t *data, enum register_ reg) {

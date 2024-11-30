@@ -167,6 +167,9 @@ typedef struct asm_line {
     uint8_t raw_data[100];
     //uint32_t raw_data;
 
+    uint32_t numeric_csv_index;
+    uint32_t numeric_csv[100];
+
     //
     // Label to jump to in assembler code
     //
@@ -260,6 +263,9 @@ void serialize_asm_line(const asm_line_t *data);
  *
  */
 void print_expression(const node_t* data, char* buffer);
+
+void insert_numeric_list_raw_data(asm_line_t *data, uint32_t numeric);
+void insert_numeric_list_end_raw_data(asm_line_t *data, uint32_t numeric);
 
 /**
  * Converts the instruction enum to a string.

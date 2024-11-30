@@ -101,18 +101,41 @@ int main(int argc, char **argv)
 
     destination_ofstream.close();
 
-    uint32_t machine_code[100];
-    memset(machine_code, 0, 100);
+    uint8_t machine_code[100*4];
+    memset(machine_code, 0, 100*4);
 
-    assemble(source_file.c_str(), machine_code, &segments);
-    printf("\n\n");
+    uint32_t machine_code_size = assemble(source_file.c_str(), machine_code, &segments);
+
 
 #endif
+
+    //
+    // DEBUG print machine code
+    //
+
+    printf("\n\n");
+    printf("DEBUG print machine code\n");
+
+    for (int i = 0; i < machine_code_size; i++) {
+
+        if ((i % 4) == 0) {
+
+            uint32_t temp;
+            memcpy(&temp, &machine_code[i], 4);
+
+            printf("0x%08" PRIx64 "\n", temp);
+        }
+    }
+
+    //
+    // Execute
+    //
+
+    printf("\n\n");
 
     // // DEBUG
     // cpu.reg[R_T0] = 2;
     // cpu.reg[R_A0] = 3;
-
     cpu.reg[R_A1] = 2;
     cpu.reg[R_A2] = 3;
 

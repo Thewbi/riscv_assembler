@@ -135,7 +135,7 @@ uint32_t determine_instruction_size(asm_line_t* data, int label_exists_in_file) 
     return 4;
 }
 
-int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, uint32_t*>* segments) {
+int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uint32_t*>* segments) {
 
     // this is the address where constants defined by assembler instructions .byte, .half, .word, .dword are placed
     //uint32_t constants_address = 0x00CC0000;
@@ -169,8 +169,8 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
 
     for (int i = 0; i < (asm_line_array_index - 1); i++) {
 
-        print_asm_line(&asm_line_array[i]);
-        print_asm_line(&asm_line_array[i + 1]);
+        //print_asm_line(&asm_line_array[i]);
+        //print_asm_line(&asm_line_array[i + 1]);
 
         //
         // optimization: recombine lui, addi into li so that li can be optimized by the encoder
@@ -244,8 +244,12 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
 
     }
 
+    //
+    // determine instruction sizes and store them into the instructions
+    //
+
     uint32_t current_address = 0;
-    int32_t instruction_index = 0;
+    int8_t byte_index = 0;
 
     for (int i = 0; i < asm_line_array_index; i++) {
 
@@ -268,7 +272,6 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
             }
 
             tuple_set_element->value = current_address;
-
         }
         //else {
             //printf("size_in_bytes:%d\n", asm_line_array[i].size_in_bytes);
@@ -283,11 +286,12 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
             label_exists_in_file = retrieve_by_key_tuple_set(label_address_map, 20, asm_line_array[i].offset_0_expression->string_val, NULL);
         }
 
-        current_address = current_address + determine_instruction_size(&asm_line_array[i], label_exists_in_file);
+        uint32_t instr_size = determine_instruction_size(&asm_line_array[i], label_exists_in_file);
+        current_address += instr_size;
 
         if (asm_line_array[i].instruction != I_UNDEFINED_INSTRUCTION) {
-            asm_line_array[i].instruction_index = instruction_index;
-            instruction_index++;
+            asm_line_array[i].instruction_index = byte_index;
+            byte_index += instr_size;
         }
     }
 
@@ -457,9 +461,43 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
             case AI_BYTE:
             {
                 printf("AI_BYTE\n");
-            }
 
-            //case AI_HALF:
+                //asm_line_array[i].use_raw_data = 1;
+                //asm_line_array[i].raw_data_length = 1;
+
+                if (strnlen(asm_line_array[i].label, 100) != 0) {
+
+                    // get the label which might be stored in the previous line
+                    char use_label[100];
+                    int use_address = current_address;
+                    memset(use_label, 0, 100);
+                    memcpy(use_label, asm_line_array[i].label, 100);
+                    if (strnlen(asm_line_array[i].label, 100) == 0) {
+                        memcpy(use_label, asm_line_array[i - 1].label, 100);
+                        use_address -= 4;
+                    }
+
+                    if (!insert_tuple_set(label_address_map,
+                        20,
+                        use_label,
+                        use_address))
+                    {
+                        printf("Insert .equ failed!\n");
+                        abort();
+                    }
+
+                }
+
+                current_address += asm_line_array[i].raw_data_length;
+            }
+            break;
+
+            case AI_HALF: {
+                printf("AI_HALF %s, %d\n", __FILE__, __LINE__);
+                abort();
+            }
+            break;
+
             case AI_WORD:
             {
                 int length = 4;
@@ -508,6 +546,8 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
 
             case AI_DWORD:
             {
+                printf("AI_HALF %s, %d\n", __FILE__, __LINE__);
+                abort();
 
                 uint32_t high = (asm_line_array[i].asm_instruction_expr->int_val & 0xFFFFFFFF00000000) >> 32;
                 uint32_t low = (asm_line_array[i].asm_instruction_expr->int_val & 0x00000000FFFFFFFF) >> 0;
@@ -1009,7 +1049,7 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
     printf("\n\n");
     printf("machine code:\n");
 
-    instruction_index = 0;
+    byte_index = 0;
     for (int i = 0; i < 100; i++) {
 
         //printf("line %d\n", i);
@@ -1027,23 +1067,33 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
                 switch (asm_line->asm_instruction)
                 {
                     case AI_BYTE:
+                    {
                         printf("AI_BYTE %s, %d\n", __FILE__, __LINE__);
 
-                        uint32_t machine_code_for_instruction = asm_line->raw_data[0] << 24; // | asm_line->raw_data[1] << 16 | asm_line->raw_data[2] << 8 | asm_line->raw_data[3] << 0;
+                        //uint32_t machine_code_for_instruction = asm_line->raw_data[0] << 24; // | asm_line->raw_data[1] << 16 | asm_line->raw_data[2] << 8 | asm_line->raw_data[3] << 0;
 
                         //printf("%d) %08" PRIx64 "\n", instruction_index, machine_code_for_instruction);
-                        printf("%08" PRIx64 "\n", machine_code_for_instruction);
+                        //printf("%08" PRIx64 "\n", machine_code_for_instruction);
 
-                        machine_code[instruction_index] = machine_code_for_instruction;
-                        instruction_index++;
+                        for (int j = 0; j < asm_line->raw_data_length; j++) {
+
+                            uint8_t machine_code_for_instruction = asm_line->raw_data[j];
+
+                            machine_code[byte_index] = machine_code_for_instruction;
+                            byte_index += sizeof(uint8_t);
+
+                        }
 
                         //abort();
-                        break;
+                    }
+                    break;
 
                     case AI_HALF:
+                    {
                         printf("AI_HALF %s, %d\n", __FILE__, __LINE__);
                         abort();
-                        break;
+                    }
+                    break;
 
                     case AI_WORD: {
                         //printf("AI_WORD\n");
@@ -1053,8 +1103,8 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
                         //printf("%d) %08" PRIx64 "\n", instruction_index, machine_code_for_instruction);
                         printf("%08" PRIx64 "\n", machine_code_for_instruction);
 
-                        machine_code[instruction_index] = machine_code_for_instruction;
-                        instruction_index++;
+                        machine_code[byte_index] = machine_code_for_instruction;
+                        byte_index += sizeof(uint32_t);
                     }
                     break;
 
@@ -1069,39 +1119,15 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
                         uint32_t stop_data = 0x00;
                         if (asm_line->use_raw_data)
                         {
-
-                            int stop = 0;
                             for (int j = 0; j < asm_line->raw_data_length; j++)
                             {
-                                stop_data >>= 8;
-                                stop_data |= (asm_line->raw_data[j] << 24);
-
-                                stop++;
-
-                                if (stop == 4)
-                                {
-                                    //printf("%d) %08" PRIx64 "\n", instruction_index, stop_data);
-                                    printf("%08" PRIx64 "\n", stop_data);
-
-                                    machine_code[instruction_index] = stop_data;
-                                    instruction_index++;
-
-                                    stop = 0;
-                                    stop_data = 0x00;
-                                }
+                                machine_code[byte_index] = asm_line->raw_data[j];
+                                byte_index += sizeof(uint8_t);
                             }
 
-                            if (stop != 0)
-                            {
-                                //printf("%d) %08" PRIx64 "\n", instruction_index, stop_data);
-                                printf("%08" PRIx64 "\n", stop_data);
-
-                                machine_code[instruction_index] = stop_data;
-                                instruction_index++;
-
-                                stop = 0;
-                                stop_data = 0x00;
-                            }
+                            // add zero termination of string data
+                            machine_code[byte_index] = 0x00;
+                            byte_index += sizeof(uint8_t);
                         }
                     }
                     break;
@@ -1115,8 +1141,15 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
                     //printf("%d) %08" PRIx64 "\n", instruction_index, machine_code_for_instruction);
                     printf("%08" PRIx64 "\n", machine_code_for_instruction);
 
-                    machine_code[instruction_index] = machine_code_for_instruction;
-                    instruction_index++;
+                    for (int j = 0; j < 4; j++) {
+
+                        machine_code[byte_index] = (machine_code_for_instruction & 0xFF);
+                        byte_index += 1;
+
+                        machine_code_for_instruction >>= 8;
+                    }
+
+
                 }
 
             }
@@ -1146,8 +1179,7 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
     printf("retrieved: %d, value: %d\n", retrieved, retrieved_value);
 */
 
-    return 0;
-
+    return byte_index;
 }
 
 // //#define DBUILD_ASSEMBLER 1
