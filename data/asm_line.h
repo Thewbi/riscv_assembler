@@ -9,6 +9,7 @@
 #include "../common/common.h"
 #include "../common/register.h"
 #include "../common/node.h"
+#include "../container/tuple_set/tuple_set.h"
 
 // Adding new instruction
 //
@@ -169,6 +170,8 @@ typedef struct asm_line {
 
     uint32_t numeric_csv_index;
     uint32_t numeric_csv[100];
+
+    tuple_set_element_t* tuple_set_element;
 
     //
     // Label to jump to in assembler code

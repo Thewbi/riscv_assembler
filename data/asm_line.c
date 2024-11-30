@@ -2,8 +2,6 @@
 
 void reset_asm_line(asm_line_t *data) {
 
-    //printf("reset\n");
-
     //
     // general
     //
@@ -13,12 +11,13 @@ void reset_asm_line(asm_line_t *data) {
     data->instruction_index = -1;
 
     data->use_raw_data = 0;
-    //data->raw_data = 0;
     data->raw_data_length = 0;
     memset(data->raw_data, 0, 100);
 
     data->numeric_csv_index = 0;
     memset(data->numeric_csv, 0, 100);
+
+    data->tuple_set_element = NULL;
 
     //
     // Label to jump to in assembler code
@@ -96,6 +95,8 @@ void copy_asm_line(asm_line_t* target, asm_line_t* source) {
     //target->raw_data = source->raw_data;
     target->raw_data_length = source->raw_data_length;
     memcpy(target->raw_data, source->raw_data, 100);
+
+    target->tuple_set_element = source->tuple_set_element;
 
     //
     // Label to jump to in assembler code

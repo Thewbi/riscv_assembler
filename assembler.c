@@ -199,9 +199,6 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                 data_1->instruction = I_LI;
                 data_1->reg_rd = data_2->reg_rd;
 
-                // data_1->offset_1_used = 1;
-                // data_1->offset_identifier_0 = "";
-
                 data_1->offset_1_expression = data_2->offset_2_expression;
 
                 // second line is erased
@@ -220,7 +217,8 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
 //#endif
 
     //
-    // collect all labels and store them inside the label_address_map
+    // collect all labels and store them inside the label_address_map.
+    // In this step, no real address is inserted. The dummy value 0x00 is inserted.
     //
 
     tuple_set_element_t label_address_map[20];
@@ -229,19 +227,16 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
     // determine all labels that are defined within this file
     for (int i = 0; i < asm_line_array_index; i++) {
 
-        // ignore assembler instructions (why???)
-        // assembler instructions cannot be ignored because of this example: 'uart: .word 0x10000000'
-        // if (asm_line_array[i].asm_instruction != AI_UNDEFINED) {
-        //     continue;
-        // }
-
         // if there is a label
         if (strnlen(asm_line_array[i].label, 100) > 0) {
 
-            if (!insert_tuple_set(label_address_map, 20, asm_line_array[i].label, 0x00)) {
+            tuple_set_element_t* tuple_set_element = NULL;
+            if (!insert_tuple_set(label_address_map, 20, asm_line_array[i].label, 0x00, &tuple_set_element)) {
                 printf("Insert label address mapping failed!\n");
                 break;
             }
+
+            asm_line_array[i].tuple_set_element = tuple_set_element;
         }
 
     }
@@ -265,15 +260,17 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
 
         if (strnlen(asm_line_array[i].label, 100) > 0) {
 
-            tuple_set_element_t* tuple_set_element = NULL;
-            retrieve_by_key_tuple_set(label_address_map, 20, asm_line_array[i].label, &tuple_set_element);
+            // tuple_set_element_t* tuple_set_element = NULL;
+            // retrieve_by_key_tuple_set(label_address_map, 20, asm_line_array[i].label, &tuple_set_element);
+            //
+            // if (tuple_set_element == NULL) {
+            //     printf("Retrieving \"%s\" from label address mapping failed!\n", asm_line_array[i].label);
+            //     abort();
+            // }
+            //
+            //tuple_set_element->value = current_address;
 
-            if (tuple_set_element == NULL) {
-                printf("Retrieving \"%s\" from label address mapping failed!\n", asm_line_array[i].label);
-                abort();
-            }
-
-            tuple_set_element->value = current_address;
+            asm_line_array[i].tuple_set_element->value = current_address;
         }
 
         uint32_t label_exists_in_file = 0;
@@ -291,6 +288,10 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
         }
     }
 
+    // DEBUG
+    printf("\n\nlabel map #1:\n");
+    print_tuple_set(label_address_map, 20);
+
     //
     // Process modifiers %hi, %lo
     //
@@ -305,10 +306,12 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
 
             case PM_HI:
                 printf("Process Modifier 0 - HI\n");
+                abort();
                 break;
 
             case PM_LO:
                 printf("Process Modifier 0 - LO\n");
+                abort();
                 break;
 
             case PM_UNDEFINED:
@@ -401,10 +404,12 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
 
             case PM_HI:
                 printf("Process Modifier 2 - HI\n");
+                abort();
                 break;
 
             case PM_LO:
                 printf("Process Modifier 2 - LO\n");
+                abort();
                 break;
 
             case PM_UNDEFINED:
@@ -421,6 +426,10 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
         current_address = current_address + determine_instruction_size(&asm_line_array[i], label_exists_in_file);
 
     }
+
+    // DEBUG
+    printf("\n\nlabel map #2:\n");
+    print_tuple_set(label_address_map, 20);
 
     //
     // Process Assembler Instructions
@@ -476,7 +485,8 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                     if (!insert_tuple_set(label_address_map,
                         20,
                         use_label,
-                        use_address))
+                        use_address,
+                        NULL))
                     {
                         printf("Insert .equ failed!\n");
                         abort();
@@ -523,7 +533,8 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                 if (!insert_tuple_set(label_address_map,
                     20,
                     use_label,
-                    use_address))
+                    use_address,
+                    NULL))
                 {
                     printf("Insert .equ failed!\n");
                     abort();
@@ -633,7 +644,8 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                 if (!insert_tuple_set(label_address_map,
                     20,
                     use_label,
-                    use_address))
+                    use_address,
+                    NULL))
                 {
                     printf("Insert .equ failed!\n");
                     abort();
@@ -663,14 +675,11 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
     }
 
     // DEBUG
-    printf("\n");
-    printf("label map:\n");
-    //print_trivial_map(label_address_map, 20);
+    printf("\n\nlabel map #3:\n");
     print_tuple_set(label_address_map, 20);
 
     // DEBUG
-    printf("\n");
-    printf("equ map:\n");
+    printf("\n\nequ map:\n");
     print_trivial_map(equ_map, 20);
 
     //
@@ -767,9 +776,10 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
 
     for (int i = 0; i < asm_line_array_index; i++) {
 
-        if (asm_line_array[i].instruction == I_J) {
-             printf("abx\n");
-        }
+        // // DEBUG
+        // if (asm_line_array[i].instruction == I_J) {
+        //      printf("abx\n");
+        // }
 
         address += determine_instruction_size(&asm_line_array[i], 1);
 
@@ -859,7 +869,7 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                         case IT_B:
                         case IT_J:
                         case IT_P:
-                            asm_line_array[i].offset_0 = tuple_set_element->value - ((asm_line_array[i].instruction_index -1) * FACTOR);
+                            asm_line_array[i].offset_0 = tuple_set_element->value - ((asm_line_array[i].instruction_index - 0) * FACTOR);
                             break;
                         default:
                             asm_line_array[i].offset_0 = tuple_set_element->value;
@@ -928,7 +938,7 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                         case IT_B:
                         case IT_J:
                         case IT_P:
-                            asm_line_array[i].offset_1 = tuple_set_element->value - ((asm_line_array[i].instruction_index - 1) * FACTOR);
+                            asm_line_array[i].offset_1 = tuple_set_element->value - ((asm_line_array[i].instruction_index - 0) * FACTOR);
                             break;
                         default:
                             asm_line_array[i].offset_1 = tuple_set_element->value;
@@ -995,7 +1005,7 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                         case IT_B:
                         case IT_J:
                         case IT_P:
-                            asm_line_array[i].offset_2 = tuple_set_element->value - ((asm_line_array[i].instruction_index - 1) * FACTOR);
+                            asm_line_array[i].offset_2 = tuple_set_element->value - ((asm_line_array[i].instruction_index - 0) * FACTOR);
                             break;
                         default:
                             asm_line_array[i].offset_2 = tuple_set_element->value;

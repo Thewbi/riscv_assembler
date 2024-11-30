@@ -43,7 +43,7 @@ void initialize_tuple_set(tuple_set_element_t* set, const int size);
 int contains_key_tuple_set(const tuple_set_element_t* set, const int size, const char* key);
 
 // if the { key, value } tuple is contained already, nothing happens
-int insert_tuple_set(tuple_set_element_t* set, const int size, const char* key, const uint32_t value);
+int insert_tuple_set(tuple_set_element_t* set, const int size, const char* key, const uint32_t value, tuple_set_element_t** result);
 
 // returns 0 if there exists no tuple satisfying the condition ( tuple.key == key )
 // returns 1 if a tuple was found. The tuple is returned in the value [out] parameter.

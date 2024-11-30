@@ -24,7 +24,7 @@ int contains_key_tuple_set(const tuple_set_element_t* set, const int size, const
 
 // if the { key, value } tuple is contained already, nothing happens
 int insert_tuple_set(tuple_set_element_t* set,
-    const int size, const char* key, const uint32_t value) {
+    const int size, const char* key, const uint32_t value, tuple_set_element_t** result) {
 
     int first_free_index = -1;
 
@@ -45,6 +45,10 @@ int insert_tuple_set(tuple_set_element_t* set,
         strncpy(element->key, key, 100);
         element->value = value;
         element->used = 1;
+
+        if (result != NULL) {
+            *result = element;
+        }
 
         return 1;
     }
