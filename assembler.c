@@ -156,7 +156,7 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
     yyparse();
 
     // DEBUG
-    printf("asm_lines after parse: %d\n", asm_line_array_index);
+    printf("\n\nasm_lines after parse: %d\n", asm_line_array_index);
     for (int i = 0; i < asm_line_array_index; i++) {
         //printf("line %d\n", i);
         print_asm_line(&asm_line_array[i]);
@@ -210,8 +210,7 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
     }
 
     // DEBUG
-    printf("\n\n");
-    printf("asm_lines after optimize\n");
+    printf("\n\nasm_lines after optimize\n");
     for (int i = 0; i < asm_line_array_index; i++) {
         //printf("line %d\n", i);
         print_asm_line(&asm_line_array[i]);
@@ -228,10 +227,11 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
     // determine all labels that are defined within this file
     for (int i = 0; i < asm_line_array_index; i++) {
 
-        // ignore assembler instructions
-        if (asm_line_array[i].asm_instruction != AI_UNDEFINED) {
-            continue;
-        }
+        // ignore assembler instructions (why???)
+        // assembler instructions cannot be ignored because of this example: 'uart: .word 0x10000000'
+        // if (asm_line_array[i].asm_instruction != AI_UNDEFINED) {
+        //     continue;
+        // }
 
         // if there is a label
         if (strnlen(asm_line_array[i].label, 100) > 0) {
@@ -295,20 +295,20 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
     // Process modifiers %hi, %lo
     //
 
-    for (int i = 0; i < asm_line_array_index; i++) {
+    current_address = 0;
 
-        printf("test\n");
+    for (int i = 0; i < asm_line_array_index; i++) {
 
         asm_line_t* asm_line = &asm_line_array[i];
 
         switch (asm_line->parameter_modifier_0) {
 
             case PM_HI:
-                printf("HI\n");
+                printf("Process Modifier 0 - HI\n");
                 break;
 
             case PM_LO:
-                printf("LO\n");
+                printf("Process Modifier 0 - LO\n");
                 break;
 
             case PM_UNDEFINED:
@@ -319,13 +319,77 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
 
         switch (asm_line->parameter_modifier_1) {
 
-            case PM_HI:
-                printf("HI\n");
-                break;
+            case PM_HI: {
 
-            case PM_LO:
-                printf("LO\n");
-                break;
+                // %hi(symbol)
+                // The high 20 bits of absolute address for symbol.
+
+                printf("Process Modifier 1 - HI on symbol: '%s'\n", asm_line->offset_1_expression->string_val);
+
+                tuple_set_element_t* tuple_set_element = NULL;
+
+                int str_len = strnlen(asm_line->offset_1_expression->string_val, 100);
+                int label_found = retrieve_by_key_tuple_set(label_address_map, 20, asm_line->offset_1_expression->string_val, &tuple_set_element);
+
+                if (!label_found) {
+                    printf("Label not found!\n");
+                    abort();
+                }
+
+                uint32_t address = tuple_set_element->value;
+                printf("%08" PRIx64 "\n", address);
+
+                reset_offsets_and_modifiers(asm_line);
+
+                asm_line->imm = (address >> 12) & 0xFFFFF;
+                asm_line->offset_1 = (address >> 12) & 0xFFFFF; // this is for the LBU instruction which encode offset_1 into imm12
+
+                // TODO:
+                // %lo(symbol)
+                // The low 12 bits of absolute address for symbol.
+                //
+                // %hi(symbol)
+                // The high 20 bits of absolute address for symbol.
+
+                //asm_line->offset_1 = 1;
+                //asm_line->offset_1_expression->int_val = 0x00;
+            }
+            break;
+
+            case PM_LO: {
+
+                // %lo(symbol)
+                // The low 12 bits of absolute address for symbol.
+
+                printf("Process Modifier 1 - LO on symbol: '%s'\n", asm_line->offset_1_expression->string_val);
+
+                tuple_set_element_t* tuple_set_element = NULL;
+
+                int str_len = strnlen(asm_line->offset_1_expression->string_val, 100);
+                int label_found = retrieve_by_key_tuple_set(label_address_map, 20, asm_line->offset_1_expression->string_val, &tuple_set_element);
+
+                if (!label_found) {
+                    printf("Label not found!\n");
+                    abort();
+                }
+
+                uint32_t address = tuple_set_element->value;
+                //uint32_t address = 278; // hex 116
+                printf("%08" PRIx64 "\n", address);
+
+                reset_offsets_and_modifiers(asm_line);
+
+                asm_line->imm = address & 0xFFF;
+                asm_line->offset_1 = address & 0xFFF; // this is for the LBU instruction which encode offset_1 into imm12
+
+                // TODO:
+                // %lo(symbol)
+                // The low 12 bits of absolute address for symbol.
+                //
+                // %hi(symbol)
+                // The high 20 bits of absolute address for symbol.
+            }
+            break;
 
             case PM_UNDEFINED:
             default:
@@ -336,11 +400,11 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
         switch (asm_line->parameter_modifier_2) {
 
             case PM_HI:
-                printf("HI\n");
+                printf("Process Modifier 2 - HI\n");
                 break;
 
             case PM_LO:
-                printf("LO\n");
+                printf("Process Modifier 2 - LO\n");
                 break;
 
             case PM_UNDEFINED:
@@ -348,6 +412,13 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
                 // nop
                 break;
         }
+
+        uint32_t label_exists_in_file = 0;
+        if (asm_line_array[i].offset_0_expression != NULL) {
+            label_exists_in_file = retrieve_by_key_tuple_set(label_address_map, 20, asm_line_array[i].offset_0_expression->string_val, NULL);
+        }
+
+        current_address = current_address + determine_instruction_size(&asm_line_array[i], label_exists_in_file);
 
     }
 
@@ -384,42 +455,54 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
         switch (asm_line_array[i].asm_instruction) {
 
             case AI_BYTE:
-            case AI_HALF:
+            {
+                printf("AI_BYTE\n");
+            }
+
+            //case AI_HALF:
             case AI_WORD:
             {
+                int length = 4;
 
-            // the assembler instruction .byte, .half and .word place the
-            // data into the text segment!
-            //asm_line_array[i].asm_instruction = AI_UNDEFINED;
-            asm_line_array[i].use_raw_data = 1;
-            asm_line_array[i].raw_data = asm_line_array[i].asm_instruction_expr->int_val;
+                // the assembler instruction .byte, .half and .word place the
+                // data directly into the text segment!
+                //asm_line_array[i].asm_instruction = AI_UNDEFINED;
+                asm_line_array[i].use_raw_data = 1;
+                asm_line_array[i].raw_data_length = length;
+                //asm_line_array[i].raw_data = asm_line_array[i].asm_instruction_expr->int_val;
 
-            // get the label which might be stored in the previous line
-            char use_label[100];
-            int use_address = current_address;
-            memset(use_label, 0, 100);
-            memcpy(use_label, asm_line_array[i].label, 100);
-            if (strnlen(asm_line_array[i].label, 100) == 0) {
-                memcpy(use_label, asm_line_array[i - 1].label, 100);
-                use_address -= 4;
-            }
+                int64_t int_val = asm_line_array[i].asm_instruction_expr->int_val;
+                for (int j = 0; j < length; j++) {
 
-            if (!insert_tuple_set(label_address_map,
-                20,
-                use_label,
-                use_address))
-            {
-                printf("Insert .equ failed!\n");
-                abort();
-            }
+                    uint8_t temp = (int_val >> (8*(length-1-j))) & 0xFF;
+                    asm_line_array[i].raw_data[j] = temp;
+                }
 
+                // get the label which might be stored in the previous line
+                char use_label[100];
+                int use_address = current_address;
+                memset(use_label, 0, 100);
+                memcpy(use_label, asm_line_array[i].label, 100);
+                if (strnlen(asm_line_array[i].label, 100) == 0) {
+                    memcpy(use_label, asm_line_array[i - 1].label, 100);
+                    use_address -= 4;
+                }
 
-            current_address += 4;
+                if (!insert_tuple_set(label_address_map,
+                    20,
+                    use_label,
+                    use_address))
+                {
+                    printf("Insert .equ failed!\n");
+                    abort();
+                }
 
-            //printf("key:%s value:%d\n", asm_line_array[i].asm_instruction_symbol,
-            //    asm_line_array[i].asm_instruction_expr->int_val);
+                current_address += length;
 
-            //mem_preload_value(segments, equ_map, &asm_line_array[i], constants_address, asm_line_array[i].asm_instruction_expr->int_val, true);
+                //printf("key:%s value:%d\n", asm_line_array[i].asm_instruction_symbol,
+                //    asm_line_array[i].asm_instruction_expr->int_val);
+
+                //mem_preload_value(segments, equ_map, &asm_line_array[i], constants_address, asm_line_array[i].asm_instruction_expr->int_val, true);
             }
             break;
 
@@ -435,6 +518,59 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
                 // mem_preload_value(segments, equ_map, &asm_line_array[i], constants_address, low, false);
 
                 current_address += 8;
+
+            }
+            break;
+
+            case AI_STRING:
+            {
+
+                printf("String\n");
+
+                int length = strnlen(asm_line_array[i].offset_identifier_0, 100);
+
+                // the assembler instruction .byte, .half and .word place the
+                // data directly into the text segment!
+                //asm_line_array[i].asm_instruction = AI_UNDEFINED;
+                asm_line_array[i].use_raw_data = 1;
+
+                // subtract the two quotes which are only used to delimit the
+                // string but will not be placed into the text segment
+                asm_line_array[i].raw_data_length = length - 2;
+                //asm_line_array[i].raw_data = asm_line_array[i].asm_instruction_expr->int_val;
+
+                uint8_t* string_val = (uint8_t*)asm_line_array[i].offset_identifier_0;
+
+                // remove preceding quotes
+                string_val++;
+
+                // iterate for one character less to skip the trailing space
+                for (int j = 0; j < length-2; j++) {
+                    //asm_line_array[i].raw_data[j] = (int_val >> (8*(length-1-i))) & 0xFF;
+                    asm_line_array[i].raw_data[j] = *string_val;
+                    string_val++;
+                }
+
+                // get the label which might be stored in the previous line
+                char use_label[100];
+                int use_address = current_address;
+                memset(use_label, 0, 100);
+                memcpy(use_label, asm_line_array[i].label, 100);
+                if (strnlen(asm_line_array[i].label, 100) == 0) {
+                    memcpy(use_label, asm_line_array[i - 1].label, 100);
+                    use_address -= 4;
+                }
+
+                if (!insert_tuple_set(label_address_map,
+                    20,
+                    use_label,
+                    use_address))
+                {
+                    printf("Insert .equ failed!\n");
+                    abort();
+                }
+
+                current_address += length;
 
             }
             break;
@@ -878,28 +1014,111 @@ int assemble(const char* filename, uint32_t* machine_code, std::map<uint32_t, ui
 
         //printf("line %d\n", i);
 
+        asm_line_t* asm_line = &asm_line_array[i];
+
         // encode RISC-V instructions, but also encode assembler instructions
         // if they place data into the .text segment like .byte, .half, .word,  .dword
-        if ((asm_line_array[i].used != 0) && (
-            asm_line_array[i].instruction != I_UNDEFINED_INSTRUCTION
-            ||
-            asm_line_array[i].asm_instruction == AI_BYTE
-            ||
-            asm_line_array[i].asm_instruction == AI_HALF
-            ||
-            asm_line_array[i].asm_instruction == AI_WORD
-            ||
-            asm_line_array[i].asm_instruction == AI_DWORD)) {
+        if (asm_line->used == 1)
+        {
 
-            //printf("%d\n", encode(&asm_line_array[i]));
+            if (asm_line->instruction == I_UNDEFINED_INSTRUCTION)
+            {
 
-            uint32_t machine_code_for_instruction = encode(&asm_line_array[i]);
-            if (machine_code_for_instruction != 0) {
-                //printf("%d) %08" PRIx64 "\n", i, machine_code_for_instruction);
-                printf("%08" PRIx64 "\n", machine_code_for_instruction);
+                switch (asm_line->asm_instruction)
+                {
+                    case AI_BYTE:
+                        printf("AI_BYTE %s, %d\n", __FILE__, __LINE__);
 
-                machine_code[instruction_index] = machine_code_for_instruction;
-                instruction_index++;
+                        uint32_t machine_code_for_instruction = asm_line->raw_data[0] << 24; // | asm_line->raw_data[1] << 16 | asm_line->raw_data[2] << 8 | asm_line->raw_data[3] << 0;
+
+                        //printf("%d) %08" PRIx64 "\n", instruction_index, machine_code_for_instruction);
+                        printf("%08" PRIx64 "\n", machine_code_for_instruction);
+
+                        machine_code[instruction_index] = machine_code_for_instruction;
+                        instruction_index++;
+
+                        //abort();
+                        break;
+
+                    case AI_HALF:
+                        printf("AI_HALF %s, %d\n", __FILE__, __LINE__);
+                        abort();
+                        break;
+
+                    case AI_WORD: {
+                        //printf("AI_WORD\n");
+
+                        uint32_t machine_code_for_instruction = asm_line->raw_data[0] << 24 | asm_line->raw_data[1] << 16 | asm_line->raw_data[2] << 8 | asm_line->raw_data[3] << 0;
+
+                        //printf("%d) %08" PRIx64 "\n", instruction_index, machine_code_for_instruction);
+                        printf("%08" PRIx64 "\n", machine_code_for_instruction);
+
+                        machine_code[instruction_index] = machine_code_for_instruction;
+                        instruction_index++;
+                    }
+                    break;
+
+                    case AI_DWORD:
+                        printf("AI_DWORD\n");
+                        break;
+
+                    case AI_STRING:
+                    {
+                        //printf("%d\n", encode(&asm_line_array[i]));
+
+                        uint32_t stop_data = 0x00;
+                        if (asm_line->use_raw_data)
+                        {
+
+                            int stop = 0;
+                            for (int j = 0; j < asm_line->raw_data_length; j++)
+                            {
+                                stop_data >>= 8;
+                                stop_data |= (asm_line->raw_data[j] << 24);
+
+                                stop++;
+
+                                if (stop == 4)
+                                {
+                                    //printf("%d) %08" PRIx64 "\n", instruction_index, stop_data);
+                                    printf("%08" PRIx64 "\n", stop_data);
+
+                                    machine_code[instruction_index] = stop_data;
+                                    instruction_index++;
+
+                                    stop = 0;
+                                    stop_data = 0x00;
+                                }
+                            }
+
+                            if (stop != 0)
+                            {
+                                //printf("%d) %08" PRIx64 "\n", instruction_index, stop_data);
+                                printf("%08" PRIx64 "\n", stop_data);
+
+                                machine_code[instruction_index] = stop_data;
+                                instruction_index++;
+
+                                stop = 0;
+                                stop_data = 0x00;
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+            else
+            {
+                uint32_t machine_code_for_instruction = encode(&asm_line_array[i]);
+                if (machine_code_for_instruction != 0)
+                {
+                    //printf("%d) %08" PRIx64 "\n", instruction_index, machine_code_for_instruction);
+                    printf("%08" PRIx64 "\n", machine_code_for_instruction);
+
+                    machine_code[instruction_index] = machine_code_for_instruction;
+                    instruction_index++;
+                }
+
             }
         }
     }

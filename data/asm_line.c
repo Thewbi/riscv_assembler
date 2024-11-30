@@ -13,7 +13,9 @@ void reset_asm_line(asm_line_t *data) {
     data->instruction_index = -1;
 
     data->use_raw_data = 0;
-    data->raw_data = 0;
+    //data->raw_data = 0;
+    data->raw_data_length = 0;
+    memset(data->raw_data, 0, 100);
 
     //
     // Label to jump to in assembler code
@@ -40,6 +42,11 @@ void reset_asm_line(asm_line_t *data) {
     data->reg_rs1 = R_UNDEFINED_REGISTER;
     data->reg_rs2 = R_UNDEFINED_REGISTER;
 
+    reset_offsets_and_modifiers(data);
+}
+
+void reset_offsets_and_modifiers(asm_line_t *data) {
+
     data->imm = 0;
 
     data->offset_0 = 0;
@@ -61,7 +68,6 @@ void reset_asm_line(asm_line_t *data) {
     data->parameter_modifier_0 = PM_UNDEFINED;
     data->parameter_modifier_1 = PM_UNDEFINED;
     data->parameter_modifier_2 = PM_UNDEFINED;
-
 }
 
 void reset_asm_lines(asm_line_t *data, const int size) {
@@ -84,7 +90,9 @@ void copy_asm_line(asm_line_t* target, asm_line_t* source) {
     //target->size_in_bytes = source->size_in_bytes;
 
     target->use_raw_data = source->use_raw_data;
-    target->raw_data = source->raw_data;
+    //target->raw_data = source->raw_data;
+    target->raw_data_length = source->raw_data_length;
+    memcpy(target->raw_data, source->raw_data, 100);
 
     //
     // Label to jump to in assembler code
@@ -166,10 +174,10 @@ void print_asm_line(const asm_line_t *data) {
         print_expression(data->offset_1_expression, buffer_1);
         print_expression(data->offset_2_expression, buffer_2);
 
-        printf("[(%d) InstrIdx: %d Label: %s, Instr: %s Imm: %d Used: %d \n \
-    0:{offset_0_used:%d offset:%d offset_ident:%s register:%s offset_0_expr:%s modifier:%s}\n \
-    1:{offset_1_used:%d offset:%d offset_ident:%s register:%s offset_1_expr:%s modifier:%s}\n \
-    2:{offset_2_used:%d offset:%d offset_ident:%s register:%s offset_2_expr:%s modifier:%s}\n \
+        printf("[(%d) InstrIdx: %d, Label: %s, Instr: %s, Imm: %d, Used: %d \n \
+    0:{offset_0_used:%d, offset:%d, offset_ident:%s, register:%s, offset_0_expr:%s, modifier:%s}\n \
+    1:{offset_1_used:%d, offset:%d, offset_ident:%s, register:%s, offset_1_expr:%s, modifier:%s}\n \
+    2:{offset_2_used:%d, offset:%d, offset_ident:%s, register:%s, offset_2_expr:%s, modifier:%s}\n \
 ]\n",
             data->line_nr,
             data->instruction_index,
@@ -428,22 +436,18 @@ void insert_identifier_offset(asm_line_t *data, char* offset, uint8_t index) {
     switch(index) {
 
         case 0: {
-
-            //data->offset_identifier_0 = offset;
             memcpy(data->offset_identifier_0, offset, strnlen(offset, 100));
             data->offset_0_used = 1;
         }
         break;
 
         case 1: {
-            //data->offset_identifier_1 = offset;
             memcpy(data->offset_identifier_1, offset, strnlen(offset, 100));
             data->offset_1_used = 1;
         }
         break;
 
         case 2: {
-            //data->offset_identifier_2 = offset;
             memcpy(data->offset_identifier_2, offset, strnlen(offset, 100));
             data->offset_2_used = 1;
         }
@@ -832,12 +836,7 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
 
             int line_nr = data->line_nr;
 
-            // uint32_t imm_int_val = 0;
-            // if (data->offset_0_used) {
-            //     imm_int_val = data->offset_0;
-            // }
-
-            // Plain unconditional jumps (assembler pseudo-op J) are encoded as a JAL with rd=x0
+            // Plain unconditional jumps (assembler pseudo-op JR) are encoded as a JALR with rd=x0
             asm_line_t jalr;
             reset_asm_line(&jalr);
             jalr.used = 1;
@@ -846,7 +845,7 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             jalr.instruction_type = IT_I;
             jalr.instruction_index = data->instruction_index;
             jalr.reg_rd = R_ZERO;
-            jalr.reg_rs1 = data->reg_rs1;
+            jalr.reg_rs1 = data->reg_rd;
             jalr.imm = 0;
 
             jalr.offset_0_used = data->offset_0_used;
@@ -886,7 +885,6 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
             beq.reg_rs1 = data->reg_rd;
             beq.reg_rs2 = R_ZERO;
 
-
             int32_t relative_offset = imm_int_val;
             beq.imm = relative_offset;
 
@@ -912,15 +910,20 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
 
             int line_nr = data->line_nr;
 
-            uint32_t imm_int_val = 0;
+            int32_t imm_int_val = 0;
             if (data->offset_0_used) {
                 imm_int_val = data->offset_0;
             }
 
-            uint32_t data_0 = (imm_int_val & 0xFFFFF000) >> 12;
-            uint32_t data_1 = (imm_int_val & 0xFFF);
+            int32_t data_0 = (imm_int_val >> 12) & 0xFFFFF;
+            int32_t data_1 = (imm_int_val >> 0) & 0xFFF;
 
-            if (data_0 == 0) {
+            uint32_t abs_imm_int_val = abs(imm_int_val);
+
+            uint32_t abs_imm_int_val_hi = (abs_imm_int_val >> 12) & 0xFFFFF;
+            uint32_t abs_imm_int_val_lo = (abs_imm_int_val >> 0) & 0xFFF;
+
+            if (abs_imm_int_val_hi == 0) {
 
                 printf("CALL: Short jump detected\n");
 

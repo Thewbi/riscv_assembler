@@ -73,6 +73,31 @@ uint32_t encode_addiw(asm_line_t* asm_line) {
     return encode_i_type(imm, rs1, funct3, rd, opcode);
 }
 
+uint32_t encode_and(asm_line_t* asm_line) {
+
+    uint8_t funct7 = 0b0000001;
+    uint8_t funct3 = 0b111;
+    uint8_t opcode = 0b0110011;
+
+    uint8_t rs1 = encode_register(asm_line->reg_rs1);
+    uint8_t rs2 = encode_register(asm_line->reg_rs2);
+    uint8_t rd = encode_register(asm_line->reg_rd);
+
+    return encode_r_type(funct7, rs2, rs1, funct3, rd, opcode);
+}
+
+uint32_t encode_andi(asm_line_t* asm_line) {
+
+    uint8_t funct3 = 0b111;
+    uint8_t opcode = 0b0010011;
+
+    uint8_t rs1 = encode_register(asm_line->reg_rs1);
+    uint8_t rd = encode_register(asm_line->reg_rd);
+    int32_t imm = retrieve_immediate_part(asm_line);
+
+    return encode_i_type(imm, rs1, funct3, rd, opcode);
+}
+
 uint32_t encode_auipc(asm_line_t* asm_line) {
 
     uint8_t opcode = 0b0010111;
@@ -328,6 +353,22 @@ uint32_t encode_lb(asm_line_t* asm_line) {
     uint8_t rs1 = encode_register(asm_line->reg_rs1);
     uint8_t rd = encode_register(asm_line->reg_rd);
     //int64_t imm = asm_line->offset_1_expression->int_val;
+    int64_t imm = asm_line->offset_1;
+
+    return encode_i_type(imm, rs1, funct3, rd, opcode);
+}
+
+uint32_t encode_lbu(asm_line_t* asm_line) {
+
+    uint8_t funct3 = 0b100;
+    uint8_t opcode = 0b0000011;
+
+    if (asm_line->reg_rs1 == R_UNDEFINED_REGISTER) {
+        asm_line->reg_rs1 = R_ZERO;
+    }
+
+    uint8_t rs1 = encode_register(asm_line->reg_rs1);
+    uint8_t rd = encode_register(asm_line->reg_rd);
     int64_t imm = asm_line->offset_1;
 
     return encode_i_type(imm, rs1, funct3, rd, opcode);
@@ -634,7 +675,8 @@ uint32_t encode(asm_line_t* asm_line) {
     //print_asm_line(asm_line);
 
     if (asm_line->use_raw_data) {
-        return asm_line->raw_data;
+        //return asm_line->raw_data;
+        return 0;
     }
 
     uint32_t encoded_asm_line = 0;
@@ -657,6 +699,14 @@ uint32_t encode(asm_line_t* asm_line) {
         // ADDIW is part of RV64I not RV32I. Only generate this instruction if the extension RV64I is enabled !!!
         case I_ADDIW:
             encoded_asm_line = encode_addiw(asm_line);
+            break;
+
+        case I_AND:
+            encoded_asm_line = encode_and(asm_line);
+            break;
+
+        case I_ANDI:
+            encoded_asm_line = encode_andi(asm_line);
             break;
 
         case I_MUL:
@@ -693,6 +743,10 @@ uint32_t encode(asm_line_t* asm_line) {
 
         case I_LB:
             encoded_asm_line = encode_lb(asm_line);
+            break;
+
+        case I_LBU:
+            encoded_asm_line = encode_lbu(asm_line);
             break;
 
         case I_LH:

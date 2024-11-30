@@ -1,3 +1,6 @@
+# source: https://matrix89.github.io/writes/writes/experiments-in-riscv/
+# assemble with: https://riscvasm.lucasteske.dev/#
+
 .equ STACK_SIZE, 1024
 
 .global _start

@@ -10,4 +10,4 @@
 # This is usually used with the %lo modifier to represent a 32-bit absolute address.
 
 uart:   .word   0x10000000
-lui     a5, %hi(uart)
+        lui     a5, %hi(uart)

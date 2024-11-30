@@ -27,6 +27,10 @@ uint32_t encode_add(asm_line_t* asm_line);
 
 uint32_t encode_addi(asm_line_t* asm_line);
 
+uint32_t encode_and(asm_line_t* asm_line);
+
+uint32_t encode_andi(asm_line_t* asm_line);
+
 uint32_t encode_auipc(asm_line_t* asm_line);
 
 uint32_t encode_beq(asm_line_t* asm_line);

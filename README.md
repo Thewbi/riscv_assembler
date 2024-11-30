@@ -2,6 +2,134 @@
 
 RISCV assembler
 
+## Usage
+
+Go to the releases section on github https://github.com/Thewbi/riscv_assembler.
+Download the executable.
+
+To assemble a RISC-V assembler file.
+
+```
+assembler <INPUT_FILE>
+```
+
+## Functions of an Assembler
+
+The basic function of an assembler is to encode mnemonic / RISC-V instructions
+into machine code that can be executed by the CPU.
+
+Extended functions are to output the machine code in a relocateable output file
+format such as (ELF, MachO or PE). This is usually stored in object files using
+the file extension .o. Object files are the input to a linker.
+
+Further extended functions are
+* Filling sections with data
+* Resolving Pseudo instructions to actual instructions
+* Optimize instructions
+* Execute assembler instructions (.include, .equ, .BYTE, .HALF, .WORD, .DWORD) (as opposed to mnemonics)
+* Perform preprocessor functionality such as including files via .include
+* Resolving labels into addresses and replacing the labels inside the instructions
+* Executing %hi, %lo modifiers inside instructions
+
+### Filling Sections with Data
+
+A CPU has a consecutive address space. For microcontrollers without a
+Memory Management Unit (MMU) the CPU actually works on this consecutive
+address space. For CPUs with MMU, the individual applications see a virtual
+consecutive address space.
+
+When an application is executed, the executable (.elf format) specifies
+where to place data into that address space so that the applcation finds
+it's code and data. The loader has to check the .elf file, read all sections
+and place the data into memory.
+
+The assembler has to work towards this goal by assuming sections and placing
+code into these sections.
+
+There are the sections .text, .data, .rodata, .bss, .ascii, ...
+
+The assembler initially uses the .text segment, which is where machine code
+goes. The assembler will fill the current section byte by byte. A normal
+32-bit RISC-V assembler instruction uses 32-bit (4 byte). Using the .BYTE
+assembler instruction, the assembler can also place any number of bytes into
+the current section (meaning it is possible to place data that is not exactly
+four byte into the sections.)
+
+### Resolving Pseudo Instructions
+
+For convenience, often used combinations of instructions are combined into
+pseudo instructions. For example a XLEN=32-bit RISC-V CPU cannot load a 32 bit
+value into a register in a single step since instructions themselves are
+encoded into a 32-bit word.
+
+Therefore the 32-bit immediate is separated into a combination of lui and addi.
+As the user of an assembler, the need still exists to load a 32 bit value into
+a register. Therefore a li pseudo instruction exists which cannot be executed
+on the CPU directly but is resolved by the assembler into lui and addi
+instructions which perform the effective task and can be executed on the CPU.
+
+It is the assembler's task to resolve pseudo instructions.
+
+https://stackoverflow.com/questions/65006052/how-do-i-write-not-operation-for-the-risc-v-assembly-language
+
+```
+Pseudo Instruction   | Expansion                      | Function
+---------------------+--------------------------------+--------------------------
+nop                  | addi x0, x0, 0                 | No operation
+li rd, immediate     | Myriad sequences               | Load immediate
+mv rd, rs            | addi rd, rs, 0                 | Copy register
+not rd, rs           | xori rd, rs, -1                | One’s complement
+neg rd, rs           | sub rd, x0, rs                 | Two’s complement
+negw rd, rs          | subw rd, x0, rs                | Two’s complement word
+sext.w rd, rs        | addiw rd, rs, 0                | Sign extend word
+seqz rd, rs          | sltiu rd, rs, 1                | Set if = zero
+snez rd, rs          | sltu rd, x0, rs                | Set if ̸= zero
+sltz rd, rs          | slt rd, rs, x0                 | Set if < zero
+sgtz rd, rs          | slt rd, x0, rs                 | Set if > zero
+beqz rs, offset      | beq rs, x0, offset             | Branch if = zero
+bnez rs, offset      | bne rs, x0, offset             | Branch if ̸= zero
+blez rs, offset      | bge x0, rs, offset             | Branch if ≤ zero
+bgez rs, offset      | bge rs, x0, offset             | Branch if ≥ zero
+bltz rs, offset      | blt rs, x0, offset             | Branch if < zero
+bgtz rs, offset      | blt x0, rs, offset             | Branch if > zero
+bgt rs, rt, offset   | blt rt, rs, offset             | Branch if >
+ble rs, rt, offset   | bge rt, rs, offset             | Branch if ≤
+bgtu rs, rt, offset  | bltu rt, rs, offset            | Branch if >, unsigned
+bleu rs, rt, offset  | bgeu rt, rs, offset            | Branch if ≤, unsigned
+j offset             | jal x0, offset                 | Jump
+jal offset           | jal x1, offset                 | Jump and link
+jr rs                | jalr x0, 0(rs)                 | Jump register
+jalr rs              | jalr x1, 0(rs)                 | Jump and link register
+ret                  | jalr x0, 0(x1)                 | Return from subroutine
+call aa              | auipc x1, aa[31 : 12] + aa[11] | Call far-away subroutine
+                     | jalr x1, aa[11:0](x1)          | (two instructions)
+tail aa              | auipc x6, aa[31 : 12] + aa[11] | Tail call far-away subroutine
+                     | jalr x0, aa[11:0](x6)          | (also two instructions)
+```
+
+### Optimizing Instructions
+
+The pseudo instruction li is resolved into a combination of lui and addi.
+During the resolution, the assembler will not generate lui or addi depending
+on the parameters of li. If the entire parameter data is loaded by a single
+lui, then no addi needs to be generated and vice versa.
+
+The potential for optimization arises when the assembly source code contains
+a lui, addi combination that was manually added. When this combination can
+be transferred into a li pseudo instruction, then the assembler can optimize
+that pseudo instruction in a second step according to the means described above.
+
+The optimization step will therefore detect lui, addi combinations that can
+be combined into a li pseudo instruction.
+
+### Execute Assembler Instructions
+
+Assembler instructions are commands such as .include, .equ, .BYTE, .HALF, .WORD, .DWORD.
+They control the assembler itself.
+
+.BYTE places a single byte into current section.
+
+
 ## Building
 
 Install flex and bison. Use the Makefile to build the assembler and the emulator.
@@ -187,42 +315,3 @@ Initially the stack is empty but by convention, the stack points to 0x880000 whi
 The convention says that the stack pointer always points to the last cell that is in use. Initially,
 the first cell is really unused but the convention still holds, so the first cell 0x880000 will always be wasted
 and will never actually be used! This is ok and works as designed.
-
-# RISC-V Pseudo Instruction
-
-https://stackoverflow.com/questions/65006052/how-do-i-write-not-operation-for-the-risc-v-assembly-language
-
-```
-Pseudo Instruction   | Expansion                      | Function
----------------------+--------------------------------+--------------------------
-nop                  | addi x0, x0, 0                 | No operation
-li rd, immediate     | Myriad sequences               | Load immediate
-mv rd, rs            | addi rd, rs, 0                 | Copy register
-not rd, rs           | xori rd, rs, -1                | One’s complement
-neg rd, rs           | sub rd, x0, rs                 | Two’s complement
-negw rd, rs          | subw rd, x0, rs                | Two’s complement word
-sext.w rd, rs        | addiw rd, rs, 0                | Sign extend word
-seqz rd, rs          | sltiu rd, rs, 1                | Set if = zero
-snez rd, rs          | sltu rd, x0, rs                | Set if ̸= zero
-sltz rd, rs          | slt rd, rs, x0                 | Set if < zero
-sgtz rd, rs          | slt rd, x0, rs                 | Set if > zero
-beqz rs, offset      | beq rs, x0, offset             | Branch if = zero
-bnez rs, offset      | bne rs, x0, offset             | Branch if ̸= zero
-blez rs, offset      | bge x0, rs, offset             | Branch if ≤ zero
-bgez rs, offset      | bge rs, x0, offset             | Branch if ≥ zero
-bltz rs, offset      | blt rs, x0, offset             | Branch if < zero
-bgtz rs, offset      | blt x0, rs, offset             | Branch if > zero
-bgt rs, rt, offset   | blt rt, rs, offset             | Branch if >
-ble rs, rt, offset   | bge rt, rs, offset             | Branch if ≤
-bgtu rs, rt, offset  | bltu rt, rs, offset            | Branch if >, unsigned
-bleu rs, rt, offset  | bgeu rt, rs, offset            | Branch if ≤, unsigned
-j offset             | jal x0, offset                 | Jump
-jal offset           | jal x1, offset                 | Jump and link
-jr rs                | jalr x0, 0(rs)                 | Jump register
-jalr rs              | jalr x1, 0(rs)                 | Jump and link register
-ret                  | jalr x0, 0(x1)                 | Return from subroutine
-call aa              | auipc x1, aa[31 : 12] + aa[11] | Call far-away subroutine
-                     | jalr x1, aa[11:0](x1)          | (two instructions)
-tail aa              | auipc x6, aa[31 : 12] + aa[11] | Tail call far-away subroutine
-                     | jalr x0, aa[11:0](x6)          | (also two instructions)
-```

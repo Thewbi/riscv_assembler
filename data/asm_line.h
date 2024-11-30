@@ -163,7 +163,9 @@ typedef struct asm_line {
     //uint8_t size_in_bytes;
 
     uint8_t use_raw_data;
-    uint32_t raw_data;
+    uint32_t raw_data_length;
+    uint8_t raw_data[100];
+    //uint32_t raw_data;
 
     //
     // Label to jump to in assembler code
@@ -219,6 +221,7 @@ typedef struct asm_line {
  * @param data the asm_line to reset.
  */
 void reset_asm_line(asm_line_t *data);
+void reset_offsets_and_modifiers(asm_line_t *data);
 void reset_asm_lines(asm_line_t *data, const int size);
 
 void copy_asm_line(asm_line_t* target, asm_line_t* source);
