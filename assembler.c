@@ -30,6 +30,8 @@ extern FILE* yyin;
 extern int yy_flex_debug;
 extern int yydebug;
 
+#define FACTOR 1
+
 // https://www.geeksforgeeks.org/function-pointer-in-c/
 //
 // fp_emit() which stands for function pointer emit() is provided
@@ -273,13 +275,6 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
 
             tuple_set_element->value = current_address;
         }
-        //else {
-            //printf("size_in_bytes:%d\n", asm_line_array[i].size_in_bytes);
-        //}
-
-        //printf("current_address: %d, determine_instruction_size: %d\n", current_address, determine_instruction_size(&asm_line_array[i]));
-
-        //uint32_t label_exists_in_file = retrieve_by_key_tuple_set(label_address_map, 20, asm_line_array[i].label, NULL);
 
         uint32_t label_exists_in_file = 0;
         if (asm_line_array[i].offset_0_expression != NULL) {
@@ -291,6 +286,7 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
 
         if (asm_line_array[i].instruction != I_UNDEFINED_INSTRUCTION) {
             asm_line_array[i].instruction_index = byte_index;
+
             byte_index += instr_size;
         }
     }
@@ -504,10 +500,8 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
 
                 // the assembler instruction .byte, .half and .word place the
                 // data directly into the text segment!
-                //asm_line_array[i].asm_instruction = AI_UNDEFINED;
                 asm_line_array[i].use_raw_data = 1;
                 asm_line_array[i].raw_data_length = length;
-                //asm_line_array[i].raw_data = asm_line_array[i].asm_instruction_expr->int_val;
 
                 int64_t int_val = asm_line_array[i].asm_instruction_expr->int_val;
                 for (int j = 0; j < length; j++) {
@@ -562,6 +556,7 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
             }
             break;
 
+            case AI_ASCIZ:
             case AI_STRING:
             {
 
@@ -585,10 +580,44 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                 string_val++;
 
                 // iterate for one character less to skip the trailing space
+                int index = 0;
+                char char_1 = 0;
+                char char_2 = 0;
                 for (int j = 0; j < length-2; j++) {
-                    //asm_line_array[i].raw_data[j] = (int_val >> (8*(length-1-i))) & 0xFF;
-                    asm_line_array[i].raw_data[j] = *string_val;
-                    string_val++;
+
+                    if (*string_val == '\\') {
+                        char_1 = *string_val;
+
+                        string_val++;
+                        continue;
+                    } else if (char_1 == '\\')  {
+
+                        char_2 = *string_val;
+
+                        if (char_2 == 'n') {
+                            asm_line_array[i].raw_data[index] = 0x0A;
+
+                            index++;
+                            string_val++;
+
+                            char_1 = 0;
+                            char_2 = 0;
+                        } else {
+                            asm_line_array[i].raw_data[index] = '\\';
+                            index++;
+
+                            asm_line_array[i].raw_data[index] = *string_val;
+                            index++;
+
+                            char_1 = 0;
+                        }
+                    } else {
+
+                        asm_line_array[i].raw_data[index] = *string_val;
+
+                        index++;
+                        string_val++;
+                    }
                 }
 
                 // get the label which might be stored in the previous line
@@ -812,7 +841,7 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                         case IT_B:
                         case IT_J:
                         case IT_P:
-                            asm_line_array[i].offset_0 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * 4);
+                            asm_line_array[i].offset_0 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * FACTOR);
                             break;
                         default:
                             asm_line_array[i].offset_0 = tuple_set_element->value;
@@ -830,7 +859,7 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                         case IT_B:
                         case IT_J:
                         case IT_P:
-                            asm_line_array[i].offset_0 = tuple_set_element->value - ((asm_line_array[i].instruction_index -1) * 4);
+                            asm_line_array[i].offset_0 = tuple_set_element->value - ((asm_line_array[i].instruction_index -1) * FACTOR);
                             break;
                         default:
                             asm_line_array[i].offset_0 = tuple_set_element->value;
@@ -851,7 +880,7 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                         case IT_B:
                         case IT_J:
                         case IT_P:
-                            asm_line_array[i].offset_0 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * 4);
+                            asm_line_array[i].offset_0 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * FACTOR);
                             break;
                         default:
                             asm_line_array[i].offset_0 = tuple_set_element->value;
@@ -881,7 +910,7 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                         case IT_B:
                         case IT_J:
                         case IT_P:
-                            asm_line_array[i].offset_1 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * 4);
+                            asm_line_array[i].offset_1 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * FACTOR);
                             break;
                         default:
                             asm_line_array[i].offset_1 = tuple_set_element->value;
@@ -899,7 +928,7 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                         case IT_B:
                         case IT_J:
                         case IT_P:
-                            asm_line_array[i].offset_1 = tuple_set_element->value - ((asm_line_array[i].instruction_index - 1) * 4);
+                            asm_line_array[i].offset_1 = tuple_set_element->value - ((asm_line_array[i].instruction_index - 1) * FACTOR);
                             break;
                         default:
                             asm_line_array[i].offset_1 = tuple_set_element->value;
@@ -920,7 +949,7 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                         case IT_B:
                         case IT_J:
                         case IT_P:
-                            asm_line_array[i].offset_1 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * 4);
+                            asm_line_array[i].offset_1 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * FACTOR);
                             break;
                         default:
                             asm_line_array[i].offset_1 = tuple_set_element->value;
@@ -948,7 +977,7 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                         case IT_B:
                         case IT_J:
                         case IT_P:
-                            asm_line_array[i].offset_2 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * 4);
+                            asm_line_array[i].offset_2 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * FACTOR);
                             break;
                         default:
                             asm_line_array[i].offset_2 = tuple_set_element->value;
@@ -966,7 +995,7 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                         case IT_B:
                         case IT_J:
                         case IT_P:
-                            asm_line_array[i].offset_2 = tuple_set_element->value - ((asm_line_array[i].instruction_index - 1) * 4);
+                            asm_line_array[i].offset_2 = tuple_set_element->value - ((asm_line_array[i].instruction_index - 1) * FACTOR);
                             break;
                         default:
                             asm_line_array[i].offset_2 = tuple_set_element->value;
@@ -987,7 +1016,7 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                         case IT_B:
                         case IT_J:
                         case IT_P:
-                            asm_line_array[i].offset_2 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * 4);
+                            asm_line_array[i].offset_2 = tuple_set_element->value - ((asm_line_array[i].instruction_index + 0) * FACTOR);
                             break;
                         default:
                             asm_line_array[i].offset_2 = tuple_set_element->value;
@@ -1040,7 +1069,7 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
         //printf("line %d\n", i);
         if ((asm_line_array[i].used != 0) && (asm_line_array[i].instruction != I_UNDEFINED_INSTRUCTION)) {
             //printf("%d) ", i);
-            printf("%d) ", asm_line_array[i].instruction_index * 4);
+            printf("%d) ", asm_line_array[i].instruction_index * FACTOR);
             serialize_asm_line(&asm_line_array[i]);
         }
     }
@@ -1070,11 +1099,6 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                     {
                         printf("AI_BYTE %s, %d\n", __FILE__, __LINE__);
 
-                        //uint32_t machine_code_for_instruction = asm_line->raw_data[0] << 24; // | asm_line->raw_data[1] << 16 | asm_line->raw_data[2] << 8 | asm_line->raw_data[3] << 0;
-
-                        //printf("%d) %08" PRIx64 "\n", instruction_index, machine_code_for_instruction);
-                        //printf("%08" PRIx64 "\n", machine_code_for_instruction);
-
                         for (int j = 0; j < asm_line->raw_data_length; j++) {
 
                             uint8_t machine_code_for_instruction = asm_line->raw_data[j];
@@ -1083,8 +1107,6 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                             byte_index += sizeof(uint8_t);
 
                         }
-
-                        //abort();
                     }
                     break;
 
@@ -1112,6 +1134,7 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                         printf("AI_DWORD\n");
                         break;
 
+                    case AI_ASCIZ:
                     case AI_STRING:
                     {
                         //printf("%d\n", encode(&asm_line_array[i]));

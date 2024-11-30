@@ -963,16 +963,8 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
                 jal.reg_rd = R_RA;
                 jal.reg_rs1 = R_ZERO;
 
-                //int32_t relative_offset = data_1 - ((data->instruction_index + 0) * 4);
                 int32_t relative_offset = data_1;
                 jal.imm = relative_offset;
-
-                // jal.offset_0_used = data->offset_0_used;
-                // jal.offset_0 = data->offset_0;
-                // jal.offset_1_used = data->offset_1_used;
-                // jal.offset_1 = data->offset_1;
-                // jal.offset_2_used = data->offset_2_used;
-                // jal.offset_2 = data->offset_2;
 
                 jal.offset_0_used = 0;
                 jal.offset_0 = 0;

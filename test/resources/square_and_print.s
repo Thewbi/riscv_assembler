@@ -1,4 +1,5 @@
 # source: https://mcyoung.xyz/2021/11/29/assembly-1/
+# file: square_and_print.s
 
         .text
         .file   "square.c"

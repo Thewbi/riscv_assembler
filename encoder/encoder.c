@@ -3,12 +3,6 @@
 int asm_line_array_index = 0;
 asm_line_t asm_line_array[100];
 
-
-
-// int32_t compute_relative_offset(int32_t imm, int32_t instruction_index) {
-//     return (imm - ((instruction_index + 0) * 4));
-// }
-
 // Whenever the parser reduces a rule for a asm_line, it is performing an action.
 // Inside this action, it calls the fp_emit function pointer.
 // This method "encoder_callback()" is registered as fp_emit function pointer
@@ -117,7 +111,6 @@ uint32_t encode_beq(asm_line_t* asm_line) {
     uint8_t rs2 = encode_register(asm_line->reg_rs2);
     int32_t imm = retrieve_immediate_part(asm_line);
 
-    //int32_t relative_offset = imm - ((asm_line->instruction_index + 0) * 4);
     int32_t relative_offset = imm;
 
     return encode_b_type(relative_offset, rs2, rs1, funct3, opcode);
@@ -132,7 +125,6 @@ uint32_t encode_bge(asm_line_t* asm_line) {
     uint8_t rs2 = encode_register(asm_line->reg_rs2);
     int32_t imm = retrieve_immediate_part(asm_line);
 
-    //int32_t relative_offset = imm - ((asm_line->instruction_index + 0) * 4);
     int32_t relative_offset = imm;
 
     return encode_b_type(relative_offset, rs2, rs1, funct3, opcode);
@@ -148,21 +140,7 @@ uint32_t encode_bne(asm_line_t* asm_line) {
 
     int32_t imm = retrieve_immediate_part(asm_line);
 
-    //int32_t relative_offset = imm - ((asm_line->instruction_index + 0) * 4);
-    //uint32_t relative_offset = sign_extend_uint16_t(imm);
     uint16_t relative_offset = imm;
-    //int32_t relative_offset = imm;
-
-    // relative_offset = relative_offset >> 1;
-    // relative_offset |= 0b1000000000000000;
-
-    // uint16_t test = relative_offset;
-    // for (int i = 15; i >= 0; --i) {
-    //     printf("%" PRIu32, test >> i & 1);
-    // }
-    // printf("\n");
-
-    //1111111111111110
 
     return encode_b_type(relative_offset, rs2, rs1, funct3, opcode);
 }
@@ -177,7 +155,6 @@ uint32_t encode_blt(asm_line_t* asm_line) {
 
     int32_t imm = retrieve_immediate_part(asm_line);
 
-    //int32_t relative_offset = imm - ((asm_line->instruction_index + 0) * 4);
     int32_t relative_offset = imm;
 
     return encode_b_type(relative_offset, rs2, rs1, funct3, opcode);
@@ -300,8 +277,6 @@ void encode_j(asm_line_t* asm_line, uint32_t* output_buffer) {
     uint8_t rs1 = encode_register(free_temp_register);
     imm = data_2;
 
-    //int32_t relative_offset = imm - ((asm_line->instruction_index + 1) * 4);
-
     uint32_t jalr_encoded = encode_i_type(imm, rs1, funct3, rd, opcode);
 
     // DEBUG
@@ -318,8 +293,6 @@ uint32_t encode_jal(asm_line_t* asm_line) {
     uint8_t rd = encode_register(asm_line->reg_rd);
     int32_t imm = retrieve_immediate_part(asm_line);
 
-    //int32_t relative_offset = imm - ((asm_line->instruction_index + 1) * 4);
-    //int32_t relative_offset = compute_relative_offset(imm, asm_line->instruction_index);
     int32_t relative_offset = imm;
 
     uint32_t result = encode_j_type(relative_offset, rd, opcode);

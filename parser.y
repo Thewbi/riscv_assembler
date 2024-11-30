@@ -535,19 +535,20 @@ assembler_instruction :
 
     }
     |
-    DOT_ASCIZ expr {
+    DOT_SKIP expr {
 
-        parser_asm_line.asm_instruction = AI_ASCIZ;
+        parser_asm_line.asm_instruction = AI_SKIP;
         parser_asm_line.asm_instruction_expr = $2;
 
         current_node = NULL;
 
     }
     |
-    DOT_SKIP expr {
+    DOT_ASCIZ STRING_LITERAL {
 
-        parser_asm_line.asm_instruction = AI_SKIP;
-        parser_asm_line.asm_instruction_expr = $2;
+        parser_asm_line.asm_instruction = AI_ASCIZ;
+        //parser_asm_line.asm_instruction_expr = $2;
+        insert_identifier_offset(&parser_asm_line, (char *)$2, 0);
 
         current_node = NULL;
 

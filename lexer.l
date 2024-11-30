@@ -16,8 +16,8 @@
 
 %%
 
-"%hi"       { /*printf("%hi\n");*/ return MODIFIER_HI; }
-"%lo"       { /*printf("%lo\n");*/ return MODIFIER_LO; }
+"%hi"           { /*printf("%hi\n");*/ return MODIFIER_HI; }
+"%lo"           { /*printf("%lo\n");*/ return MODIFIER_LO; }
 
 (?i:.equ)	    { /*printf(".equ\n");*/ return DOT_EQU; }
 (?i:.section)   { /*printf(".section\n");*/ return DOT_SECTION; }
@@ -35,90 +35,88 @@
 (?i:.skip)      { /*printf(".skip\n");*/ return DOT_SKIP; }
 (?i:.string)    { /*printf(".string\n");*/ return DOT_STRING; }
 
-
-
-(?i:add)       { /*printf("ADD\n");*/ return ADD; }
-(?i:addi)      { /*printf("ADDI\n");*/ return ADDI; }
-(?i:and)       { /*printf("AND\n");*/ return AND; }
+(?i:add)        { /*printf("ADD\n");*/ return ADD; }
+(?i:addi)       { /*printf("ADDI\n");*/ return ADDI; }
+(?i:and)        { /*printf("AND\n");*/ return AND; }
 (?i:andi)	    { /*printf("ANDI\n");*/ return ANDI; }
 (?i:auipc)	    { /*printf("ADDI\n");*/ return AUIPC; }
 
-(?i:beq)       { /*printf("BEQ\n");*/ return BEQ; }
-(?i:beqz)      { /*printf("BEQZ\n");*/ return BEQZ; }
-(?i:bge)       { /*printf("BGE\n");*/ return BGE; }
-(?i:bgt)       { /*printf("BGT\n");*/ return BGT; }
-(?i:blt)       { /*printf("BLT\n");*/ return BLT; }
-(?i:bne)       { /*printf("BNEZ\n");*/ return BNE; }
-(?i:bnez)      { /*printf("BNEZ\n");*/ return BNEZ; }
+(?i:beq)        { /*printf("BEQ\n");*/ return BEQ; }
+(?i:beqz)       { /*printf("BEQZ\n");*/ return BEQZ; }
+(?i:bge)        { /*printf("BGE\n");*/ return BGE; }
+(?i:bgt)        { /*printf("BGT\n");*/ return BGT; }
+(?i:blt)        { /*printf("BLT\n");*/ return BLT; }
+(?i:bne)        { /*printf("BNEZ\n");*/ return BNE; }
+(?i:bnez)       { /*printf("BNEZ\n");*/ return BNEZ; }
 
-(?i:call)      { /*printf("CALL\n");*/ return CALL; }
+(?i:call)       { /*printf("CALL\n");*/ return CALL; }
 
-(?i:j)         { /*printf("J\n");*/ return J; }
-(?i:jr)        { /*printf("JR\n");*/ return JR; }
-(?i:jalr)      { /*printf("JALR\n");*/ return JALR; }
+(?i:j)          { /*printf("J\n");*/ return J; }
+(?i:jr)         { /*printf("JR\n");*/ return JR; }
+(?i:jalr)       { /*printf("JALR\n");*/ return JALR; }
 
-(?i:ld)        { /*printf("LD\n");*/ return LD; }
-(?i:lw)        { /*printf("LW\n");*/ return LW; }
-(?i:lh)	    { /*printf("LH\n");*/ return LH; }
-(?i:lb)	    { /*printf("LB\n");*/ return LB; }
+(?i:ld)         { /*printf("LD\n");*/ return LD; }
+(?i:lw)         { /*printf("LW\n");*/ return LW; }
+(?i:lh)	        { /*printf("LH\n");*/ return LH; }
+(?i:lb)	        { /*printf("LB\n");*/ return LB; }
 (?i:lbu)	    { /*printf("LBU\n");*/ return LBU; }
-(?i:li)        { /*printf("LI\n");*/ return LI; }
-(?i:lui)       { /*printf("LUI\n");*/ return LUI; }
+(?i:li)         { /*printf("LI\n");*/ return LI; }
+(?i:lui)        { /*printf("LUI\n");*/ return LUI; }
 
-(?i:mul)       { /*printf("MUL\n");*/ return MUL; }
-(?i:mv)        { /*printf("MV\n");*/ return MV; }
+(?i:mul)        { /*printf("MUL\n");*/ return MUL; }
+(?i:mv)         { /*printf("MV\n");*/ return MV; }
 
-(?i:nop)       { /*printf("NOP\n");*/ return NOP; }
-(?i:not)       { /*printf("NOT\n");*/ return NOT; }
+(?i:nop)        { /*printf("NOP\n");*/ return NOP; }
+(?i:not)        { /*printf("NOT\n");*/ return NOT; }
 
-(?i:ret)       { /*printf("RET\n");*/ return RET; }
+(?i:ret)        { /*printf("RET\n");*/ return RET; }
 
-(?i:srli)      { /*printf("SRLI\n");*/ return SRLI; }
-(?i:slli)      { /*printf("SLLI\n");*/ return SLLI; }
-(?i:sd)        { /*printf("SD\n");*/ return SD; }
-(?i:sw)        { /*printf("SW\n");*/ return SW; }
-(?i:sh)        { /*printf("SH\n");*/ return SH; }
-(?i:sb)        { /*printf("SB\n");*/ return SB; }
+(?i:srli)       { /*printf("SRLI\n");*/ return SRLI; }
+(?i:slli)       { /*printf("SLLI\n");*/ return SLLI; }
+(?i:sd)         { /*printf("SD\n");*/ return SD; }
+(?i:sw)         { /*printf("SW\n");*/ return SW; }
+(?i:sh)         { /*printf("SH\n");*/ return SH; }
+(?i:sb)         { /*printf("SB\n");*/ return SB; }
 
-(?i:wfi)       { /*printf("WFI\n");*/ return WFI; }
+(?i:wfi)        { /*printf("WFI\n");*/ return WFI; }
 
-(?i:zero)      { /*printf("zero\n");*/ return REG_ZERO; }
-(?i:ra)        { /*printf("ra\n");*/ return REG_RA; }
-(?i:sp)        { /*printf("sp\n");*/ return REG_SP; }
-(?i:gp)        { /*printf("gp\n");*/ return REG_GP; }
-(?i:tp)        { /*printf("tp\n");*/ return REG_TP; }
+(?i:zero)       { /*printf("zero\n");*/ return REG_ZERO; }
+(?i:ra)         { /*printf("ra\n");*/ return REG_RA; }
+(?i:sp)         { /*printf("sp\n");*/ return REG_SP; }
+(?i:gp)         { /*printf("gp\n");*/ return REG_GP; }
+(?i:tp)         { /*printf("tp\n");*/ return REG_TP; }
 
-(?i:t0)        { /*printf("lexer t0\n");*/ return REG_T0; }
-(?i:t1)        { /*printf("lexer t1\n");*/ return REG_T1; }
-(?i:t2)        { /*printf("t2\n");*/ return REG_T2; }
-(?i:t3)        { /*printf("t3\n");*/ return REG_T3; }
-(?i:t4)        { /*printf("t4\n");*/ return REG_T4; }
-(?i:t5)        { /*printf("t5\n");*/ return REG_T5; }
-(?i:t6)        { /*printf("t6\n");*/ return REG_T6; }
+(?i:t0)         { /*printf("lexer t0\n");*/ return REG_T0; }
+(?i:t1)         { /*printf("lexer t1\n");*/ return REG_T1; }
+(?i:t2)         { /*printf("t2\n");*/ return REG_T2; }
+(?i:t3)         { /*printf("t3\n");*/ return REG_T3; }
+(?i:t4)         { /*printf("t4\n");*/ return REG_T4; }
+(?i:t5)         { /*printf("t5\n");*/ return REG_T5; }
+(?i:t6)         { /*printf("t6\n");*/ return REG_T6; }
 
-(?i:fp)        { /*printf("fp\n");*/ return REG_FP; }
+(?i:fp)         { /*printf("fp\n");*/ return REG_FP; }
 
-(?i:a0)        { /*printf("lexer a0\n");*/ return REG_A0; }
-(?i:a1)        { /*printf("a1\n");*/ return REG_A1; }
-(?i:a2)        { /*printf("a2\n");*/ return REG_A2; }
-(?i:a3)        { /*printf("a3\n");*/ return REG_A3; }
-(?i:a4)        { /*printf("a4\n");*/ return REG_A4; }
-(?i:a5)        { /*printf("a5\n");*/ return REG_A5; }
-(?i:a6)        { /*printf("a6\n");*/ return REG_A6; }
-(?i:a7)        { /*printf("a7\n");*/ return REG_A7; }
+(?i:a0)         { /*printf("lexer a0\n");*/ return REG_A0; }
+(?i:a1)         { /*printf("a1\n");*/ return REG_A1; }
+(?i:a2)         { /*printf("a2\n");*/ return REG_A2; }
+(?i:a3)         { /*printf("a3\n");*/ return REG_A3; }
+(?i:a4)         { /*printf("a4\n");*/ return REG_A4; }
+(?i:a5)         { /*printf("a5\n");*/ return REG_A5; }
+(?i:a6)         { /*printf("a6\n");*/ return REG_A6; }
+(?i:a7)         { /*printf("a7\n");*/ return REG_A7; }
 
-(?i:s0)        { /*printf("s0\n");*/ return REG_S0; }
-(?i:s1)        { /*printf("s1\n");*/ return REG_S1; }
-(?i:s2)        { /*printf("s2\n");*/ return REG_S2; }
-(?i:s3)        { /*printf("s3\n");*/ return REG_S3; }
-(?i:s4)        { /*printf("s4\n");*/ return REG_S4; }
-(?i:s5)        { /*printf("s5\n");*/ return REG_S5; }
-(?i:s6)        { /*printf("s6\n");*/ return REG_S6; }
-(?i:s7)        { /*printf("s7\n");*/ return REG_S7; }
-(?i:s8)        { /*printf("s8\n");*/ return REG_S8; }
-(?i:s9)        { /*printf("s9\n");*/ return REG_S9; }
-(?i:s10)       { /*printf("s10\n");*/ return REG_S10; }
-(?i:s11)       { /*printf("s11\n");*/ return REG_S11; }
+(?i:s0)         { /*printf("s0\n");*/ return REG_S0; }
+(?i:s1)         { /*printf("s1\n");*/ return REG_S1; }
+(?i:s2)         { /*printf("s2\n");*/ return REG_S2; }
+(?i:s3)         { /*printf("s3\n");*/ return REG_S3; }
+(?i:s4)         { /*printf("s4\n");*/ return REG_S4; }
+(?i:s5)         { /*printf("s5\n");*/ return REG_S5; }
+(?i:s6)         { /*printf("s6\n");*/ return REG_S6; }
+(?i:s7)         { /*printf("s7\n");*/ return REG_S7; }
+(?i:s8)         { /*printf("s8\n");*/ return REG_S8; }
+(?i:s9)         { /*printf("s9\n");*/ return REG_S9; }
+(?i:s10)        { /*printf("s10\n");*/ return REG_S10; }
+(?i:s11)        { /*printf("s11\n");*/ return REG_S11; }
 
 "x0" { /*printf("\n");*/ return REG_ZERO; }  // 0, Hard-wired zero
 "x1" { /*printf("\n");*/ return REG_RA; } // 1, Return address

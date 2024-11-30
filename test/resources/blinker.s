@@ -1,5 +1,6 @@
 # Simple blinker
 # Code is taken from here: https://github.com/BrunoLevy/learn-fpga/blob/master/FemtoRV/TUTORIALS/FROM_BLINKER_TO_RISCV/README.md
+# File: blinker.s
 
 # https://michaeljclark.github.io/asm.html
 

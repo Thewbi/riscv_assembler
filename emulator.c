@@ -116,14 +116,14 @@ int main(int argc, char **argv)
     printf("\n\n");
     printf("DEBUG print machine code\n");
 
-    for (int i = 0; i < machine_code_size; i++) {
+    for (int i = 0; i < machine_code_size-1; i++) {
 
         if ((i % 4) == 0) {
 
             uint32_t temp;
             memcpy(&temp, &machine_code[i], 4);
 
-            printf("0x%08" PRIx64 "\n", temp);
+            printf("%08" PRIx64 "\n", temp);
         }
     }
 
