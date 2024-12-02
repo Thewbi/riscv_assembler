@@ -1,43 +1,109 @@
-# Simple blinker
-# Code is taken from here: https://github.com/BrunoLevy/learn-fpga/blob/master/FemtoRV/TUTORIALS/FROM_BLINKER_TO_RISCV/README.md
-# File: blinker.s
+# https://matrix89.github.io/writes/writes/experiments-in-riscv/
+#
+# Compile with https://godbolt.org/ (SourceLanguage: C, TargetLanguage: RISC-V (32-bits) gcc (trunk))
+#
+#
+# typedef unsigned char uint8_t;
+#
+# static volatile uint8_t *uart = (void *)0x10000000;
+#
+# static int putchar(char ch) {
+#     static uint8_t THR    = 0x00;
+#     static uint8_t LSR    = 0x05;
+#     static uint8_t LSR_RI = 0x40;
+#
+#     while ((uart[LSR] & LSR_RI) == 0);
+#     return uart[THR] = ch;
+# }
+#
+# void puts(char *s) {
+#     while (*s) putchar(*s++);
+#     putchar('\n');
+# }
+#
+# void enter() {
+#     puts("Hello RISC-V");
+# }
 
-# https://michaeljclark.github.io/asm.html
-
-# assemble for testing here: https://riscvasm.lucasteske.dev/#
-
-# 1. Parse all lines into asm_line objects. For each instruction, store the amount of bytes it will take so that
-#    the label addresses can be computed correctly. All instructions take up 4 byte (32 bit) except for
-#    pseudo instructions which are resolved to more than 4 byte (mostly 8 byte)
-#    Do not resolve pseudo instructions just yet because labels and symbols are not replaced by concrete values
-# 2. Build a map from labels and symbols to addresses or values
-# 3. Replace all labels and symbols by numeric values (address or values) in each asm_line
-#    For addresses, remember that not each line is 4 byte long but use the length stored in each asm_line instead of just 4
-# 4. Replace all pseudo instructions by real instruction asm_line objects
-# 5. Encode asm_line objects into 32 bit machine code
-
-.equ IO_BASE, 0x400000
-.equ IO_LEDS, 4
-
-.section .text
-
-.globl start
-
-start:                          #  0        # addr: 0
-    li   gp, IO_BASE            #  0 +8     # addr: 0
-    li   sp, 0x1800             #  8 +8     # addr: 4
-.L0:                            # 16        # addr: 8
-    li   t0, 5                  # 16 +8     # addr: 8
-    sw   t0, IO_LEDS(gp)        # 24 +4     # addr: 12
-    call wait                   # 28 +8     # addr: 16
-    li   t0, 10                 # 36 +8     # addr: 20
-    sw   t0, IO_LEDS(gp)        # 44 +4     # addr: 24
-    call wait                   # 48 +8     # addr: 28 (encoded to jal)
-    j    .L0                    # 56 +8     # addr: 32
-wait:                           # 64        # addr: 36
-    li   t0, 1                  # 64 +8     # addr: 36
-    slli t0, t0, 17             # 72 +4     # addr: 40
-.L1:                            # 76        # addr: 44
-    addi t0, t0, -1             # 76 +4     # addr: 44
-    bnez t0, .L1                # 80 +4     # addr: 48
-    ret                         # 84 +4     # addr: 52
+uart:
+        #.word   268435456
+        .word   0x10000000
+putchar:
+        addi    sp,sp,-32
+        sw      ra,28(sp)
+        sw      s0,24(sp)
+        addi    s0,sp,32
+        mv      a5,a0
+        sb      a5,-17(s0)
+        nop
+.L2:
+        lui     a5,%hi(uart)
+        lw      a5,%lo(uart)(a5)
+        lui     a4,%hi(LSR.2)
+        lbu     a4,%lo(LSR.2)(a4)
+        add     a5,a5,a4
+        lbu     a5,0(a5)
+        andi    a4,a5,0xff
+        lui     a5,%hi(LSR_RI.1)
+        lbu     a5,%lo(LSR_RI.1)(a5)
+        and     a5,a4,a5
+        andi    a5,a5,0xff
+        beq     a5,zero,.L2
+        lui     a5,%hi(uart)
+        lw      a5,%lo(uart)(a5)
+        lui     a4,%hi(THR.0)
+        lbu     a4,%lo(THR.0)(a4)
+        add     a4,a5,a4
+        lbu     a5,-17(s0)
+        sb      a5,0(a4)
+        mv      a0,a5
+        lw      ra,28(sp)
+        lw      s0,24(sp)
+        addi    sp,sp,32
+        jr      ra
+puts:
+        addi    sp,sp,-32
+        sw      ra,28(sp)
+        sw      s0,24(sp)
+        addi    s0,sp,32
+        sw      a0,-20(s0)
+        j       .L5
+.L6:
+        lw      a5,-20(s0)
+        addi    a4,a5,1
+        sw      a4,-20(s0)
+        lbu     a5,0(a5)
+        mv      a0,a5
+        call    putchar
+.L5:
+        lw      a5,-20(s0)
+        lbu     a5,0(a5)
+        bne     a5,zero,.L6
+        li      a0,10
+        call    putchar
+        nop
+        lw      ra,28(sp)
+        lw      s0,24(sp)
+        addi    sp,sp,32
+        jr      ra
+.LC0:
+        .string "Hello RISC-V"
+enter:
+        addi    sp,sp,-16
+        sw      ra,12(sp)
+        sw      s0,8(sp)
+        addi    s0,sp,16
+        lui     a5,%hi(.LC0)
+        addi    a0,a5,%lo(.LC0)
+        call    puts
+        nop
+        lw      ra,12(sp)
+        lw      s0,8(sp)
+        addi    sp,sp,16
+        jr      ra
+THR.0:
+        .byte   0
+LSR.2:
+        .byte   5
+LSR_RI.1:
+        .byte   64

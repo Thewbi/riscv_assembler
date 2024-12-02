@@ -15,6 +15,8 @@ assembler <INPUT_FILE>
 
 ## Functions of an Assembler
 
+Read this document: https://michaeljclark.github.io/asm.html
+
 The basic function of an assembler is to encode mnemonic / RISC-V instructions
 into machine code that can be executed by the CPU.
 

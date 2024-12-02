@@ -219,6 +219,18 @@ void encode_call(asm_line_t* asm_line, uint32_t* output_buffer) {
     output_buffer[1] = jalr_encoded;
 }
 
+uint32_t encode_ecall(asm_line_t* asm_line) {
+
+    uint8_t funct3 = 0b000;
+    uint8_t opcode = 0b1110011;
+
+    uint8_t rs1 = 0x00;
+    uint8_t rd = 0x00;
+    int32_t imm = 0x00;
+
+    return encode_i_type(imm, rs1, funct3, rd, opcode);
+}
+
 // j 0xBFFF00
 void encode_j(asm_line_t* asm_line, uint32_t* output_buffer) {
 
@@ -700,6 +712,10 @@ uint32_t encode(asm_line_t* asm_line) {
 
         case I_BLT:
             encoded_asm_line = encode_blt(asm_line);
+            break;
+
+        case I_ECALL:
+            encoded_asm_line = encode_ecall(asm_line);
             break;
 
         case I_JAL:

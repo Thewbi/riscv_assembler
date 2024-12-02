@@ -54,8 +54,8 @@ void (*fp_emit)(asm_line_t*);
     node_t* expr_ptr;
 };
 
-%token <sym> DOT_EQU DOT_SECTION DOT_GLOBL DOT_GLOBAL DOT_TEXT DOT_DATA DOT_BYTE DOT_HALF DOT_WORD DOT_DWORD DOT_FILE DOT_RODATA DOT_ASCIZ DOT_SKIP DOT_STRING
-%token <sym> ADD ADDI AND ANDI AUIPC BEQ BEQZ BGE BLT BGT BNE BNEZ CALL J JR JALR LD LW LH LB LBU LI LUI MUL MV NOP NOT RET SRLI SLLI SD SW SH SB WFI
+%token <sym> DOT_EQU DOT_SECTION DOT_GLOBL DOT_GLOBAL DOT_TEXT DOT_DATA DOT_BYTE DOT_SPACE DOT_HALF DOT_WORD DOT_DWORD DOT_FILE DOT_RODATA DOT_ASCIZ DOT_SKIP DOT_STRING
+%token <sym> ADD ADDI AND ANDI AUIPC BEQ BEQZ BGE BLT BGT BNE BNEZ CALL ECALL J JR JALR LA LD LW LH LB LBU LI LUI MUL MV NOP NOT RET SRLI SLLI SD SW SH SB WFI
 %token <sym> NEW_LINE
 %token <sym> MODIFIER_HI MODIFIER_LO
 %token <int_val> NUMERIC
@@ -95,9 +95,6 @@ line_end : NEW_LINE
 
 asm_line :
     label mnemonic params {
-        //printf("label mnemonic params\n");
-        /*print_asm_line(&parser_asm_line);*/
-        //printf("Line: %d\n", (yylineno -1));
 
         parser_asm_line.line_nr = (yylineno -1);
 
@@ -108,9 +105,6 @@ asm_line :
     }
 	|
 	mnemonic params {
-        //printf("mnemonic params\n");
-        /*print_asm_line(&parser_asm_line);*/
-        //printf("Line: %d\n", (yylineno -1));
 
         parser_asm_line.line_nr = (yylineno -1);
 
@@ -118,8 +112,6 @@ asm_line :
     }
 	|
 	label mnemonic {
-        //printf("label mnemonic\n");
-        //printf("Line: %d\n", (yylineno -1));
 
         parser_asm_line.line_nr = (yylineno - 1);
 
@@ -130,8 +122,6 @@ asm_line :
     }
 	|
 	mnemonic {
-        //printf("mnemonic\n");
-        //printf("Line: %d\n", yylineno);
 
         parser_asm_line.line_nr = yylineno;
 
@@ -140,7 +130,6 @@ asm_line :
     |
     assembler_instruction {
         printf("assembler_instruction without label\n");
-        //printf("Line: %d\n", yylineno);
 
         parser_asm_line.line_nr = yylineno;
 
@@ -149,7 +138,6 @@ asm_line :
     |
     label assembler_instruction {
         printf("assembler_instruction with label\n");
-        //printf("Line: %d\n", yylineno);
 
         parser_asm_line.line_nr = yylineno;
 
@@ -160,49 +148,36 @@ asm_line :
     }
     |
     label {
-        //printf("label\n");
-        //printf("label Line: %d\n", (yylineno-1));
 
         memset(parser_asm_line.label, 0, 100);
         memcpy(parser_asm_line.label, $1, strlen($1));
 
         parser_asm_line.line_nr = (yylineno - 1);
 
-        //printf("Line: %d label: %s \n", parser_asm_line.label, yylineno);
-        //printf("Line: %d\n", yylineno);
-
         if (fp_emit != NULL) { (*fp_emit)(&parser_asm_line); }
     }
 
 modifier :
     MODIFIER_HI OPENING_BRACKET expr CLOSING_BRACKET {
-        /*printf("MODIFIER_HI\n");*/
         strncpy($$, "HI", 2);
     }
     |
     MODIFIER_LO OPENING_BRACKET expr CLOSING_BRACKET {
-        /*printf("MODIFIER_LO\n");*/
         strncpy($$, "LO", 2);
     }
     ;
 
 params : param_1 COMMA param_2 COMMA param_3 {
-        //printf("param_1 COMMA param_2 COMMA param_3\n");
     }
     | param_1 COMMA param_2 COMMA param_3 COMMA {
-        //printf("param_1 COMMA param_2 COMMA param_3\n");
     }
     | param_1 COMMA param_2 COMMA {
-        //printf("param_1 COMMA param_2\n");
     }
     | param_1 COMMA param_2 {
-        //printf("param_1 COMMA param_2\n");
     }
     | param_1 COMMA {
-        //printf("param_1\n");
     }
     | param_1 {
-        //printf("param_1\n");
     }
 
 param_1 :
@@ -257,7 +232,6 @@ param_2 :
     }
     |
     modifier OPENING_BRACKET expr CLOSING_BRACKET {
-        //printf("modifier 2: '%s' \n", (char *) $1);
         insert_modifier(&parser_asm_line, (char *)$1, 1);
 
         insert_expr(&parser_asm_line, current_node, 1);
@@ -265,7 +239,6 @@ param_2 :
     }
     |
     modifier {
-        //printf("modifier 2: '%s' \n", (char *) $1);
         insert_modifier(&parser_asm_line, (char *)$1, 1);
 
         insert_expr(&parser_asm_line, current_node, 1);
@@ -293,9 +266,6 @@ param_3 :
     }
     |
     modifier OPENING_BRACKET expr CLOSING_BRACKET {
-        //printf("modifier 3: '%s' \n", (char *) $1);
-
-
         insert_modifier(&parser_asm_line, (char *)$1, 2);
 
         insert_expr(&parser_asm_line, current_node, 2);
@@ -303,9 +273,6 @@ param_3 :
     }
     |
     modifier {
-        //printf("modifier 3: '%s' \n", (char *) $1);
-
-
         insert_modifier(&parser_asm_line, (char *)$1, 2);
 
         insert_expr(&parser_asm_line, current_node, 2);
@@ -313,19 +280,16 @@ param_3 :
     }
     |
     expr {
-        //printf("expr 3\n");
         insert_expr(&parser_asm_line, current_node, 2);
         current_node = NULL;
     }
 
 label :
     IDENTIFIER COLON {
-        //printf("label A detected!\n");
         strncpy($$, $1, 100);
     }
     |
     NUMERIC COLON {
-        //printf("label B detected!\n");
         char buffer[100];
         memset(buffer, 0, 100);
         snprintf(buffer, 100, "%d", $1);
@@ -336,23 +300,14 @@ label :
 expr:
     NUMERIC {
         printf("PARSER-NUMERIC: %16" PRIx64 "\n", $1);
-        //insert_integer_immediate(&parser_asm_line, $1);
 
         if (current_node == NULL) {
-            //current_node = new node_t;
             current_node = (node_t *)malloc(sizeof(node_t));
-
-            //printf("Line: %d\n", yylineno);
 
             reset_node(current_node);
 
-            //printf("PARSER-NUMERIC: creating node: %d\n", $1);
             printf("PARSER-NUMERIC: creating node: %16" PRIx64 "\n", $1);
-            //current_node->int_val = sign_extend_20_bit_to_uint32_t($1);
             current_node->int_val = $1;
-            //printf("PARSER-NUMERIC: creating node: %d\n", current_node->int_val);
-
-            //printf("PARSER-NUMERIC: creating node: %d\n", current_node->int_val);
 
             $$ = current_node;
         } else {
@@ -361,7 +316,6 @@ expr:
     }
     |
     register {
-        //printf("expr - register\n");
         $$ = current_node;
     }
     |
@@ -379,10 +333,6 @@ expr:
 
             $$ = current_node;
         }
-
-        //  else {
-        //     printf("expr - IDENTIFIER: not null!\n");
-        // }
     }
     |
     STRING_LITERAL {
@@ -493,9 +443,14 @@ assembler_instruction :
         parser_asm_line.asm_instruction = AI_BYTE;
 
         insert_numeric_list_end_raw_data(&parser_asm_line, $2);
-        //parser_asm_line.asm_instruction_expr = $2;
 
-        //current_node = NULL;
+    }
+    |
+    DOT_SPACE csv_numeric_list {
+
+        parser_asm_line.asm_instruction = AI_SPACE;
+
+        insert_numeric_list_end_raw_data(&parser_asm_line, $2);
 
     }
     |
@@ -508,12 +463,14 @@ assembler_instruction :
 
     }
     |
-    DOT_WORD expr {
+    DOT_WORD csv_numeric_list {
 
         parser_asm_line.asm_instruction = AI_WORD;
-        parser_asm_line.asm_instruction_expr = $2;
+        //parser_asm_line.asm_instruction_expr = $2;
 
-        current_node = NULL;
+        insert_numeric_list_end_raw_data(&parser_asm_line, $2);
+
+        //current_node = NULL;
 
     }
     |
@@ -592,9 +549,11 @@ mnemonic : ADD { /*printf("Parser-ADD: %d\n", I_ADD);*/ /*parser_asm_line.instru
     | BLT { /*printf("Parser-BLT: %d\n", I_BLT);*/ /*parser_asm_line.instruction = I_BLT; parser_asm_line.instruction_type = IT_B;*/ set_instruction(&parser_asm_line, I_BLT, IT_B); }
     | BNEZ { /*printf("Parser-BNEZ: %d\n", I_BNEZ);*/ /*parser_asm_line.instruction = I_BNEZ; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_BNEZ, IT_P); }
     | CALL { /*printf("Parser-CALL: %d\n", I_CALL);*/ /*parser_asm_line.instruction = I_CALL; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_CALL, IT_P); }
+    | ECALL { set_instruction(&parser_asm_line, I_ECALL, IT_P); }
     | J { /*printf("Parser-J: %d\n", I_J);*/ /*parser_asm_line.instruction = I_J; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_J, IT_P); }
     | JR { /*printf("Parser-JR: %d\n", I_JR);*/ /*parser_asm_line.instruction = I_JR; parser_asm_line.instruction_type = IT_P;*/ set_instruction(&parser_asm_line, I_JR, IT_P); }
     | JALR { /*printf("Parser-JALR: %d\n", I_JALR);*/ /*parser_asm_line.instruction = I_JALR; parser_asm_line.instruction_type = IT_J;*/ set_instruction(&parser_asm_line, I_JALR, IT_J); }
+    | LA { set_instruction(&parser_asm_line, I_LA, IT_P); }
     | LB { /*printf("Parser-LB: %d\n", I_LB);*/ /*parser_asm_line.instruction = I_LB; parser_asm_line.instruction_type = IT_I;*/ set_instruction(&parser_asm_line, I_LB, IT_I); }
     | LBU { set_instruction(&parser_asm_line, I_LBU, IT_I); }
     | LH { /*printf("Parser-LH: %d\n", I_LH);*/ /*parser_asm_line.instruction = I_LH; parser_asm_line.instruction_type = IT_I;*/ set_instruction(&parser_asm_line, I_LH, IT_I); }

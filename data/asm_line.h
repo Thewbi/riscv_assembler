@@ -40,6 +40,7 @@ enum instruction {
     I_ORI,
     I_ANDI,
 
+    I_LA,
     I_LB,
     I_LH,
     I_LW,
@@ -77,6 +78,7 @@ enum instruction {
     I_BEQZ, // pseudo instruction
     I_BNEZ, // pseudo instruction
     I_CALL, // pseudo instruction
+    I_ECALL, // pseudo instruction
     I_J, // pseudo instruction
     I_JR, // pseudo instruction
     I_MV, // pseudo instruction
@@ -131,6 +133,7 @@ enum assembler_instruction {
     AI_TEXT,
     AI_DATA,
     AI_BYTE,
+    AI_SPACE,
     AI_HALF,
     AI_WORD,
     AI_DWORD,
@@ -161,12 +164,10 @@ typedef struct asm_line {
     uint8_t used;
     uint32_t line_nr;
     int32_t instruction_index;
-    //uint8_t size_in_bytes;
 
     uint8_t use_raw_data;
     uint32_t raw_data_length;
-    uint8_t raw_data[100];
-    //uint32_t raw_data;
+    uint32_t raw_data[100];
 
     uint32_t numeric_csv_index;
     uint32_t numeric_csv[100];

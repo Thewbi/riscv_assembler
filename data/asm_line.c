@@ -89,12 +89,10 @@ void copy_asm_line(asm_line_t* target, asm_line_t* source) {
     target->used = source->used;
     target->line_nr = source->line_nr;
     target->instruction_index = source->instruction_index;
-    //target->size_in_bytes = source->size_in_bytes;
 
     target->use_raw_data = source->use_raw_data;
-    //target->raw_data = source->raw_data;
     target->raw_data_length = source->raw_data_length;
-    memcpy(target->raw_data, source->raw_data, 100);
+    memcpy(target->raw_data, source->raw_data, sizeof(uint32_t) * 100);
 
     target->tuple_set_element = source->tuple_set_element;
 
@@ -163,6 +161,47 @@ void print_asm_line(const asm_line_t *data) {
             data->label,
             assembler_instruction_to_string(data->asm_instruction),
             data->asm_instruction_symbol, buffer_3);
+
+    } if (data->use_raw_data == 1) {
+
+        printf("[ RAW-DATA: \n");
+
+        switch (data->asm_instruction) {
+
+            case AI_BYTE: {
+                printf("AI_BYTE ");
+                for (int k = 0; k < data->raw_data_length; k++) {
+                    printf(" %02d", (uint8_t) (data->raw_data[k] & 0xFF));
+                }
+                printf("\n");
+            }
+            break;
+
+            case AI_WORD: {
+                printf("AI_WORD ");
+                for (int k = 0; k < data->raw_data_length; k++) {
+                    printf(" %08" PRIx64 "", data->raw_data[k]);
+                }
+                printf("\n");
+            }
+            break;
+
+            case AI_STRING: {
+                printf("AI_STRING ");
+                for (int k = 0; k < data->raw_data_length; k++) {
+                    printf("%c", (char) (data->raw_data[k] & 0xFF));
+                }
+                printf("\n");
+            }
+            break;
+
+            default:
+                printf("Unknown asm_instruction: %s\n", assembler_instruction_to_string(data->asm_instruction));
+                abort();
+                break;
+        }
+
+        printf("]\n");
 
     } else {
 
@@ -281,6 +320,7 @@ void serialize_asm_line(const asm_line_t *data) {
                 break;
 
             // R-Type
+            case I_AND:
             case I_ADD:
             case I_MUL:
                 printf("%s, ", register_to_string(data->reg_rd));
@@ -331,6 +371,10 @@ void serialize_asm_line(const asm_line_t *data) {
 
             // // undefined
             // I_UNDEFINED_INSTRUCTION
+
+            default:
+                abort();
+                break;
         }
 
         printf("\n");
@@ -369,6 +413,266 @@ void print_expression(const node_t* data, char* buffer) {
     snprintf(buffer, 100, "0x%" PRIx64 "", data->int_val);
 }
 
+const char* instruction_to_string(enum instruction data) {
+
+    if (data == I_UNDEFINED_INSTRUCTION) {
+        return "I_UNDEFINED_INSTRUCTION";
+    }
+
+    int uppercase = 0;
+
+    if (uppercase) {
+
+        switch (data) {
+
+            case I_ADD: return "ADD";
+            case I_ADDI: return "ADDI";
+            case I_ADDIW: return "ADDIW"; // part of RV64I
+            case I_AND: return "AND";
+            case I_ANDI: return "ANDI";
+            case I_AUIPC: return "AUIPC";
+
+            case I_BEQ: return "BEQ";
+            case I_BEQZ: return "BEQZ"; // pseudo instruction
+            case I_BGE: return "BGE";
+            case I_BLT: return "BLT";
+            case I_BNEZ: return "BNEZ";
+            case I_BNE: return "BNE";
+
+            case I_CALL: return "CALL"; // pseudo instruction
+            case I_ECALL: return "ECALL"; // pseudo instruction
+
+            case I_J: return "J"; // pseudo instruction
+            case I_JR: return "JR"; // pseudo instruction
+            case I_JAL: return "JAL";
+            case I_JALR: return "JALR";
+
+            case I_LA: return "LA";
+            case I_LD: return "LD";
+            case I_LW: return "LW";
+            case I_LH: return "LH";
+            case I_LB: return "LB";
+            case I_LBU: return "LBU";
+            case I_LHU: return "LHU";
+            case I_LI: return "LI"; // pseudo instruction
+            case I_LUI: return "LUI";
+
+            case I_MUL: return "MUL";
+            case I_MV: return "MV"; // pseudo instruction
+
+            case I_NOP: return "NOP"; // pseudo instruction
+            case I_NOT: return "NOT"; // pseudo instruction
+
+            case I_ORI: return "ORI";
+
+            case I_RET: return "RET";
+
+            case I_SLLI: return "SLLI";
+            case I_SRLI: return "SRLI";
+            case I_SLTIU: return "SLTIU";
+            case I_SD: return "SD";
+            case I_SW: return "SW";
+            case I_SH: return "SH";
+            case I_SB: return "SB";
+
+            case I_WFI: return "WFI";
+
+            case I_XORI: return "XORI";
+
+            default: {
+                return "UNKNOWN";
+            }
+
+        }
+    } else {
+
+        switch (data) {
+
+            case I_ADD: return "add";
+            case I_ADDI: return "addi";
+            case I_ADDIW: return "addiw"; // part of RV64I
+            case I_AND: return "and";
+            case I_ANDI: return "andi";
+            case I_AUIPC: return "auipc";
+
+            case I_BEQ: return "beq";
+            case I_BEQZ: return "beqz"; // pseudo instruction
+            case I_BGE: return "bge";
+            case I_BLT: return "blt";
+            case I_BNEZ: return "bnez";
+            case I_BNE: return "bne";
+
+            case I_CALL: return "call"; // pseudo instruction
+            case I_ECALL: return "ecall"; // pseudo instruction
+
+            case I_J: return "j"; // pseudo instruction
+            case I_JR: return "jr"; // pseudo instruction
+            case I_JAL: return "jal";
+            case I_JALR: return "jalr";
+
+            case I_LA: return "la";
+            case I_LD: return "ld";
+            case I_LW: return "lw";
+            case I_LH: return "lh";
+            case I_LB: return "lb";
+            case I_LBU: return "lbu";
+            case I_LHU: return "lhu";
+            case I_LI: return "li"; // pseudo instruction
+            case I_LUI: return "lui";
+
+            case I_MUL: return "mul";
+            case I_MV: return "mv"; // pseudo instruction
+
+            case I_NOP: return "nop"; // pseudo instruction
+            case I_NOT: return "not"; // pseudo instruction
+
+            case I_ORI: return "ori";
+
+            case I_RET: return "ret";
+
+            case I_SLLI: return "slli";
+            case I_SRLI: return "srli";
+            case I_SLTIU: return "sltiu";
+            case I_SD: return "sd";
+            case I_SW: return "sw";
+            case I_SH: return "sh";
+            case I_SB: return "sb";
+
+            case I_WFI: return "wfi";
+
+            case I_XORI: return "xori";
+
+            default: {
+                return "UNKNOWN";
+            }
+
+        }
+
+    }
+}
+
+const char* assembler_instruction_to_string(enum assembler_instruction data) {
+
+    switch (data) {
+
+        case AI_EQU: return "EQU";
+        case AI_SECTION: return "SECTION";
+        case AI_GLOBL: return "GLOBL";
+        case AI_TEXT: return "TEXT";
+        case AI_DATA: return "DATA";
+        case AI_BYTE: return "BYTE";
+        case AI_SPACE: return "SPACE";
+        case AI_HALF: return "HALF";
+        case AI_WORD: return "WORD";
+        case AI_DWORD: return "DWORD";
+        case AI_FILE: return "FILE";
+        case AI_ASCIZ: return "ASCIZ";
+        case AI_SKIP: return "SKIP";
+        case AI_STRING: return "STRING";
+
+        default: return "UNKNOWN ASSEMBLER INSTRUCTION!";
+    }
+}
+
+const char* register_to_string(enum register_ data) {
+
+    int outputABIName = 1;
+    if (outputABIName) {
+
+        switch (data) {
+            case R_ZERO: return "zero"; // 0, Hard-wired zero
+            case R_RA: return "ra"; // 1, Return address
+            case R_SP: return "sp"; // 2, Stack pointer
+            case R_GP: return "gp"; // 3, Global pointer
+            case R_TP: return "tp"; // 4, Thread pointer
+            case R_T0: return "t0"; // 5, Temporary/alternate link register
+            case R_T1: return "t1"; // 6, Temporary
+            case R_T2: return "t2"; // 7, Temporary
+            case R_S0: return "fp"; // 8, Saved register/frame pointer
+            case R_S1: return "s1"; // 9, Saved register
+            case R_A0: return "a0"; // 10, Function arguments/return values
+            case R_A1: return "a1"; // 11, Function arguments/return values
+            case R_A2: return "a2"; // 12, Function arguments
+            case R_A3: return "a3"; // 13, Function arguments
+            case R_A4: return "a4"; // 14, Function arguments
+            case R_A5: return "a5"; // 15, Function arguments
+            case R_A6: return "a6"; // 16, Function arguments
+            case R_A7: return "a7"; // 17, Function arguments
+            case R_S2: return "s2"; // 18, Saved registers
+            case R_S3: return "s3"; // 19, Saved registers
+            case R_S4: return "s4"; // 20, Saved registers
+            case R_S5: return "s5"; // 21, Saved registers
+            case R_S6: return "s6"; // 22, Saved registers
+            case R_S7: return "s7"; // 23, Saved registers
+            case R_S8: return "s8"; // 24, Saved registers
+            case R_S9: return "s9"; // 25, Saved registers
+            case R_S10: return "s10"; // 26, Saved registers
+            case R_S11: return "s11"; // 27, Saved registers
+            case R_T3: return "t3"; // 28, Temporary
+            case R_T4: return "t4"; // 29, Temporary
+            case R_T5: return "t5"; // 30, Temporary
+            case R_T6: return "t6"; // 31, Temporary
+
+            default: return "R_UNDEFINED_REGISTER";
+        }
+
+    } else {
+
+        switch(data) {
+            case R_ZERO: return "x0"; // 0, Hard-wired zero
+            case R_RA: return "x1"; // 1, Return address
+            case R_SP: return "x2"; // 2, Stack pointer
+            case R_GP: return "x3"; // 3, Global pointer
+            case R_TP: return "x4"; // 4, Thread pointer
+            case R_T0: return "x5"; // 5, Temporary/alternate link register
+            case R_T1: return "x6"; // 6, Temporary
+            case R_T2: return "x7"; // 7, Temporary
+            case R_S0: return "x8"; // 8, Saved register/frame pointer
+            case R_S1: return "x9"; // 9, Saved register
+            case R_A0: return "x10"; // 10, Function arguments/return values
+            case R_A1: return "x11"; // 11, Function arguments/return values
+            case R_A2: return "x12"; // 12, Function arguments
+            case R_A3: return "x13"; // 13, Function arguments
+            case R_A4: return "x14"; // 14, Function arguments
+            case R_A5: return "x15"; // 15, Function arguments
+            case R_A6: return "x16"; // 16, Function arguments
+            case R_A7: return "x17"; // 17, Function arguments
+            case R_S2: return "x18"; // 18, Saved registers
+            case R_S3: return "x19"; // 19, Saved registers
+            case R_S4: return "x20"; // 20, Saved registers
+            case R_S5: return "x21"; // 21, Saved registers
+            case R_S6: return "x22"; // 22, Saved registers
+            case R_S7: return "x23"; // 23, Saved registers
+            case R_S8: return "x24"; // 24, Saved registers
+            case R_S9: return "x25"; // 25, Saved registers
+            case R_S10: return "x26"; // 26, Saved registers
+            case R_S11: return "x27"; // 27, Saved registers
+            case R_T3: return "x28"; // 28, Temporary
+            case R_T4: return "x29"; // 29, Temporary
+            case R_T5: return "x30"; // 30, Temporary
+            case R_T6: return "x31"; // 31, Temporary
+
+            default: return "R_UNDEFINED_REGISTER";
+        }
+
+    }
+}
+
+const char* print_parameter_modifier(const enum parameter_modifier data) {
+
+    switch (data) {
+
+        case PM_HI:
+            return "%hi";
+
+        case PM_LO:
+            return "%LO";
+
+        default:
+            return "PM_UNDEFINED";
+    }
+}
+
 void insert_numeric_list_raw_data(asm_line_t *data, uint32_t numeric) {
     printf("insert_numeric_list_raw_data\n");
 
@@ -379,16 +683,25 @@ void insert_numeric_list_raw_data(asm_line_t *data, uint32_t numeric) {
 void insert_numeric_list_end_raw_data(asm_line_t *data, uint32_t numeric) {
     printf("insert_numeric_list_end_raw_data\n");
 
-    // copy numeric csv data into raw data
-    for (int i = 0; i < data->numeric_csv_index; i++) {
-        data->raw_data[i] = (uint8_t) data->numeric_csv[i];
-    }
-    data->use_raw_data = 1;
-    data->raw_data_length = data->numeric_csv_index;
+    if (data->asm_instruction == AI_SPACE) {
 
-    // clear
-    data->numeric_csv_index = 0;
-    memset(data->numeric_csv, 0, 100);
+        data->use_raw_data = 1;
+        data->raw_data_length = numeric;
+
+    } else {
+
+        // copy numeric csv data into raw data
+        for (int i = 0; i < data->numeric_csv_index; i++) {
+            data->raw_data[i] = (uint32_t) data->numeric_csv[i];
+        }
+        data->use_raw_data = 1;
+        data->raw_data_length = data->numeric_csv_index;
+
+        // clear
+        data->numeric_csv_index = 0;
+        memset(data->numeric_csv, 0, 100);
+
+    }
 }
 
 void insert_register(asm_line_t *data, enum register_ reg) {
@@ -552,261 +865,6 @@ void insert_modifier(asm_line_t *data, char* modifier, uint8_t index) {
             break;
     }
 
-}
-
-const char* instruction_to_string(enum instruction data) {
-
-    if (data == I_UNDEFINED_INSTRUCTION) {
-        return "I_UNDEFINED_INSTRUCTION";
-    }
-
-    int uppercase = 0;
-
-    if (uppercase) {
-
-        switch (data) {
-
-            case I_ADD: return "ADD";
-            case I_ADDI: return "ADDI";
-            case I_ADDIW: return "ADDIW"; // part of RV64I
-            case I_AND: return "AND";
-            case I_ANDI: return "ANDI";
-            case I_AUIPC: return "AUIPC";
-
-            case I_BEQ: return "BEQ";
-            case I_BEQZ: return "BEQZ"; // pseudo instruction
-            case I_BGE: return "BGE";
-            case I_BLT: return "BLT";
-            case I_BNEZ: return "BNEZ";
-            case I_BNE: return "BNE";
-
-            case I_CALL: return "CALL"; // pseudo instruction
-
-            case I_J: return "J"; // pseudo instruction
-            case I_JR: return "JR"; // pseudo instruction
-            case I_JAL: return "JAL";
-            case I_JALR: return "JALR";
-
-            case I_LD: return "LD";
-            case I_LW: return "LW";
-            case I_LH: return "LH";
-            case I_LB: return "LB";
-            case I_LBU: return "LBU";
-            case I_LHU: return "LHU";
-            case I_LI: return "LI"; // pseudo instruction
-            case I_LUI: return "LUI";
-
-            case I_MUL: return "MUL";
-            case I_MV: return "MV"; // pseudo instruction
-
-            case I_NOP: return "NOP"; // pseudo instruction
-            case I_NOT: return "NOT"; // pseudo instruction
-
-            case I_ORI: return "ORI";
-
-            case I_RET: return "RET";
-
-            case I_SLLI: return "SLLI";
-            case I_SRLI: return "SRLI";
-            case I_SLTIU: return "SLTIU";
-            case I_SD: return "SD";
-            case I_SW: return "SW";
-            case I_SH: return "SH";
-            case I_SB: return "SB";
-
-            case I_WFI: return "WFI";
-
-            case I_XORI: return "XORI";
-
-            default: {
-                return "UNKNOWN";
-            }
-
-        }
-    } else {
-
-        switch (data) {
-
-            case I_ADD: return "add";
-            case I_ADDI: return "addi";
-            case I_ADDIW: return "addiw"; // part of RV64I
-            case I_AND: return "and";
-            case I_ANDI: return "andi";
-            case I_AUIPC: return "auipc";
-
-            case I_BEQ: return "beq";
-            case I_BEQZ: return "beqz"; // pseudo instruction
-            case I_BGE: return "bge";
-            case I_BLT: return "blt";
-            case I_BNEZ: return "bnez";
-            case I_BNE: return "bne";
-
-            case I_CALL: return "call"; // pseudo instruction
-
-            case I_J: return "j"; // pseudo instruction
-            case I_JR: return "jr"; // pseudo instruction
-            case I_JAL: return "jal";
-            case I_JALR: return "jalr";
-
-            case I_LD: return "ld";
-            case I_LW: return "lw";
-            case I_LH: return "lh";
-            case I_LB: return "lb";
-            case I_LBU: return "lbu";
-            case I_LHU: return "lhu";
-            case I_LI: return "li"; // pseudo instruction
-            case I_LUI: return "lui";
-
-            case I_MUL: return "mul";
-            case I_MV: return "mv"; // pseudo instruction
-
-            case I_NOP: return "nop"; // pseudo instruction
-            case I_NOT: return "not"; // pseudo instruction
-
-            case I_ORI: return "ori";
-
-            case I_RET: return "ret";
-
-            case I_SLLI: return "slli";
-            case I_SRLI: return "srli";
-            case I_SLTIU: return "sltiu";
-            case I_SD: return "sd";
-            case I_SW: return "sw";
-            case I_SH: return "sh";
-            case I_SB: return "sb";
-
-            case I_WFI: return "wfi";
-
-            case I_XORI: return "xori";
-
-            default: {
-                return "UNKNOWN";
-            }
-
-        }
-
-    }
-}
-
-const char* assembler_instruction_to_string(enum assembler_instruction data) {
-
-    switch (data) {
-
-        case AI_EQU: return "EQU";
-        case AI_SECTION: return "SECTION";
-        case AI_GLOBL: return "GLOBL";
-        case AI_TEXT: return "TEXT";
-        case AI_DATA: return "DATA";
-        case AI_BYTE: return "BYTE";
-        case AI_HALF: return "HALF";
-        case AI_WORD: return "WORD";
-        case AI_DWORD: return "DWORD";
-        case AI_FILE: return "FILE";
-        case AI_ASCIZ: return "ASCIZ";
-        case AI_SKIP: return "SKIP";
-        case AI_STRING: return "STRING";
-
-        default: return "UNKNOWN ASSEMBLER INSTRUCTION!";
-    }
-}
-
-const char* register_to_string(enum register_ data) {
-
-    int outputABIName = 1;
-    if (outputABIName) {
-
-        switch (data) {
-            case R_ZERO: return "zero"; // 0, Hard-wired zero
-            case R_RA: return "ra"; // 1, Return address
-            case R_SP: return "sp"; // 2, Stack pointer
-            case R_GP: return "gp"; // 3, Global pointer
-            case R_TP: return "tp"; // 4, Thread pointer
-            case R_T0: return "t0"; // 5, Temporary/alternate link register
-            case R_T1: return "t1"; // 6, Temporary
-            case R_T2: return "t2"; // 7, Temporary
-            case R_S0: return "fp"; // 8, Saved register/frame pointer
-            case R_S1: return "s1"; // 9, Saved register
-            case R_A0: return "a0"; // 10, Function arguments/return values
-            case R_A1: return "a1"; // 11, Function arguments/return values
-            case R_A2: return "a2"; // 12, Function arguments
-            case R_A3: return "a3"; // 13, Function arguments
-            case R_A4: return "a4"; // 14, Function arguments
-            case R_A5: return "a5"; // 15, Function arguments
-            case R_A6: return "a6"; // 16, Function arguments
-            case R_A7: return "a7"; // 17, Function arguments
-            case R_S2: return "s2"; // 18, Saved registers
-            case R_S3: return "s3"; // 19, Saved registers
-            case R_S4: return "s4"; // 20, Saved registers
-            case R_S5: return "s5"; // 21, Saved registers
-            case R_S6: return "s6"; // 22, Saved registers
-            case R_S7: return "s7"; // 23, Saved registers
-            case R_S8: return "s8"; // 24, Saved registers
-            case R_S9: return "s9"; // 25, Saved registers
-            case R_S10: return "s10"; // 26, Saved registers
-            case R_S11: return "s11"; // 27, Saved registers
-            case R_T3: return "t3"; // 28, Temporary
-            case R_T4: return "t4"; // 29, Temporary
-            case R_T5: return "t5"; // 30, Temporary
-            case R_T6: return "t6"; // 31, Temporary
-
-            default: return "R_UNDEFINED_REGISTER";
-        }
-
-    } else {
-
-        switch(data) {
-            case R_ZERO: return "x0"; // 0, Hard-wired zero
-            case R_RA: return "x1"; // 1, Return address
-            case R_SP: return "x2"; // 2, Stack pointer
-            case R_GP: return "x3"; // 3, Global pointer
-            case R_TP: return "x4"; // 4, Thread pointer
-            case R_T0: return "x5"; // 5, Temporary/alternate link register
-            case R_T1: return "x6"; // 6, Temporary
-            case R_T2: return "x7"; // 7, Temporary
-            case R_S0: return "x8"; // 8, Saved register/frame pointer
-            case R_S1: return "x9"; // 9, Saved register
-            case R_A0: return "x10"; // 10, Function arguments/return values
-            case R_A1: return "x11"; // 11, Function arguments/return values
-            case R_A2: return "x12"; // 12, Function arguments
-            case R_A3: return "x13"; // 13, Function arguments
-            case R_A4: return "x14"; // 14, Function arguments
-            case R_A5: return "x15"; // 15, Function arguments
-            case R_A6: return "x16"; // 16, Function arguments
-            case R_A7: return "x17"; // 17, Function arguments
-            case R_S2: return "x18"; // 18, Saved registers
-            case R_S3: return "x19"; // 19, Saved registers
-            case R_S4: return "x20"; // 20, Saved registers
-            case R_S5: return "x21"; // 21, Saved registers
-            case R_S6: return "x22"; // 22, Saved registers
-            case R_S7: return "x23"; // 23, Saved registers
-            case R_S8: return "x24"; // 24, Saved registers
-            case R_S9: return "x25"; // 25, Saved registers
-            case R_S10: return "x26"; // 26, Saved registers
-            case R_S11: return "x27"; // 27, Saved registers
-            case R_T3: return "x28"; // 28, Temporary
-            case R_T4: return "x29"; // 29, Temporary
-            case R_T5: return "x30"; // 30, Temporary
-            case R_T6: return "x31"; // 31, Temporary
-
-            default: return "R_UNDEFINED_REGISTER";
-        }
-
-    }
-}
-
-const char* print_parameter_modifier(const enum parameter_modifier data) {
-
-    switch (data) {
-
-        case PM_HI:
-            return "%hi";
-
-        case PM_LO:
-            return "%LO";
-
-        default:
-            return "PM_UNDEFINED";
-    }
 }
 
 // called by the parser, when a mnemonic is parsed
@@ -1100,6 +1158,167 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
         }
         break;
 
+        case I_LA: {
+
+            int line_nr = data->line_nr;
+
+            // // take the 32 bit value (data_0)
+            // uint32_t data_0 = 0;
+
+            // if (data->offset_0_used) {
+            //     data_0 = data->offset_1;
+            // } else {
+            //     data_0 = data->offset_1_expression->int_val;
+            // }
+
+            uint32_t data_0 = retrieve_immediate_part(data);
+
+            // split it into a 20 bit (upper_data) and a lower twelve bit part (is ignored)
+            uint32_t upper_data = ((data_0 & 0b11111111111111111111000000000000) >> 12);
+            //printf("upper_data: %08" PRIx32 "\n", upper_data);
+
+            uint32_t lower_data = data_0 & 0xFFF;
+            //printf("lower_data: %08" PRIx32 "\n", lower_data);
+
+            int upper_part_used = upper_data;
+            int lower_part_used = lower_data;
+
+/*
+            if (upper_part_used == 0 && lower_part_used == 0) {
+
+                // Case 0: addi to fill entire 32bit register with zero
+
+                //
+                // addi
+                //
+
+                uint8_t rd = encode_register(data->reg_rd);
+                uint8_t rs1 = encode_register(data->reg_rd);
+                uint32_t imm = 0x00;
+
+                asm_line_t addi;
+                reset_asm_line(&addi);
+                addi.used = 1;
+                addi.line_nr = line_nr + 1;
+                addi.instruction = I_ADDI;
+                addi.instruction_type = IT_I;
+                addi.instruction_index = data->instruction_index + 1;
+                addi.reg_rd = data->reg_rd;
+                addi.reg_rs1 = R_ZERO;
+                addi.imm = imm;
+
+                copy_asm_line(data, &addi);
+
+            } else if (upper_part_used == 0 && lower_part_used != 0) {
+
+                // Case 1: CONSTANT fits into 12 lower bits.
+                // For CASE 1, a addi instruction is generated since addi handles 12 bit sufficiently
+
+                data->instruction = I_ADDI;
+                data->reg_rs1 = R_ZERO;
+
+            } else if (upper_part_used != 0 && lower_part_used == 0) {
+
+                // Case 2: CONSTANT fits into the 20 upper bits.
+
+                //
+                // lui - LUI (load upper immediate) is used to build 32-bit constants and uses the U-type format. LUI
+                // places the U-immediate value in the top 20 bits of the destination register rd, filling in the lowest
+                // 12 bits with zeros.
+                //
+
+                uint8_t rd = encode_register(data->reg_rd);
+                uint32_t imm = upper_data;
+
+                asm_line_t lui;
+                reset_asm_line(&lui);
+                lui.used = 1;
+                lui.line_nr = line_nr;
+                lui.instruction = I_LUI;
+                lui.instruction_type = IT_U;
+                lui.instruction_index = data->instruction_index;
+                lui.reg_rd = data->reg_rd;
+                lui.imm = imm;
+
+                copy_asm_line(data, &lui);
+
+            } else {
+            */
+
+                // CASE 3 For CASE 3
+                // auipc rd, symbol[31:12]
+                // addi rd, rd, symbol[11:0]
+
+                // the 20 bit part is incremented by 1, (then shifted left by 12 bits to get (data_2))
+                //data_1 = data_1 + 1;
+
+                int32_t twelve_bit_sign_extended = sign_extend_12_bit_to_int32_t(data_0);
+                int udata = data_0 - twelve_bit_sign_extended;
+                udata = udata >> 12;
+
+                // // if the lower 12 bits have a 1 in the most signifiant bit, output an optimized sequence
+                // if ((lower_data & 0x08) > 0) {
+
+                // }
+
+                //
+                // auipc
+                //
+
+                uint8_t rd = encode_register(data->reg_rd);
+                uint32_t imm = udata;
+
+                asm_line_t auipc;
+                reset_asm_line(&auipc);
+                auipc.used = 1;
+                auipc.line_nr = line_nr;
+                auipc.instruction = I_AUIPC;
+                auipc.instruction_type = IT_U;
+                auipc.instruction_index = data->instruction_index;
+                auipc.reg_rd = data->reg_rd;
+                auipc.imm = imm;
+
+                copy_asm_line(data, &auipc);
+
+                //
+                // addi
+                //
+
+                rd = encode_register(data->reg_rd);
+                uint8_t rs1 = encode_register(data->reg_rd);
+                imm = lower_data;
+
+                asm_line_t addi;
+                reset_asm_line(&addi);
+                addi.used = 1;
+                addi.line_nr = line_nr + 1;
+                addi.instruction = I_ADDI;
+                addi.instruction_type = IT_I;
+                addi.instruction_index = data->instruction_index + 1;
+                addi.reg_rd = data->reg_rd;
+                addi.reg_rs1 = data->reg_rd;
+                addi.imm = imm;
+
+                reset_asm_line(data);
+
+                for (int i = size-1; i > index; i--) {
+                    //printf("index: %d\n", (i > index));
+                    //printf("copy %d <- %d\n", i+1, i);
+                    copy_asm_line(&asm_line_array[i + 1], &asm_line_array[i]);
+                    asm_line_array[i + 1].line_nr++;
+
+                    if (asm_line_array[i + 1].instruction_index != -1) {
+                        asm_line_array[i + 1].instruction_index++;
+                    }
+                }
+
+                copy_asm_line(data, &auipc);
+                copy_asm_line(&asm_line_array[index + 1], &addi);
+
+//            }
+        }
+        break;
+
         case I_LI: {
 
             int line_nr = data->line_nr;
@@ -1229,16 +1448,16 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
                 uint8_t rs1 = encode_register(data->reg_rd);
                 imm = lower_data;
 
-                asm_line_t addi;
-                reset_asm_line(&addi);
-                addi.used = 1;
-                addi.line_nr = line_nr + 1;
-                addi.instruction = I_ADDIW;
-                addi.instruction_type = IT_I;
-                addi.instruction_index = data->instruction_index + 1;
-                addi.reg_rd = data->reg_rd;
-                addi.reg_rs1 = data->reg_rd;
-                addi.imm = imm;
+                asm_line_t addiw;
+                reset_asm_line(&addiw);
+                addiw.used = 1;
+                addiw.line_nr = line_nr + 1;
+                addiw.instruction = I_ADDIW;
+                addiw.instruction_type = IT_I;
+                addiw.instruction_index = data->instruction_index + 1;
+                addiw.reg_rd = data->reg_rd;
+                addiw.reg_rs1 = data->reg_rd;
+                addiw.imm = imm;
 
                 reset_asm_line(data);
 
@@ -1254,7 +1473,7 @@ void resolve_pseudo_instructions_asm_line(asm_line_t* asm_line_array, const int 
                 }
 
                 copy_asm_line(data, &lui);
-                copy_asm_line(&asm_line_array[index + 1], &addi);
+                copy_asm_line(&asm_line_array[index + 1], &addiw);
 
             }
         }

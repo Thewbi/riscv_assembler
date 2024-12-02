@@ -96,6 +96,37 @@ int mem_preload_value(std::map<uint32_t, uint32_t*>* segments,
 
 uint32_t determine_instruction_size(asm_line_t* data, int label_exists_in_file) {
 
+    if (data->use_raw_data == 1) {
+
+        uint32_t element_size = 0;
+
+        switch (data->asm_instruction) {
+
+            case AI_STRING:
+                element_size = 1;
+
+                // +1 for zero termination
+                return ((data->raw_data_length + 1) * element_size);
+                break;
+
+            case AI_BYTE:
+                element_size = 1;
+                break;
+
+            case AI_WORD:
+                element_size = 4;
+                break;
+
+            default:
+                abort();
+                break;
+
+        }
+
+
+        return (data->raw_data_length * element_size);
+    }
+
     if (data->instruction == I_UNDEFINED_INSTRUCTION) {
         return 0;
     }
@@ -114,6 +145,9 @@ uint32_t determine_instruction_size(asm_line_t* data, int label_exists_in_file) 
         // pseudo instruction -> is replaced with JAL
         case I_J:
             return 4;
+
+        case I_LA:
+            return 8;
 
         case I_LI:
             // if the immediate is twelve bits only, the LUI is not needed and only I_ADDI is generated
@@ -137,7 +171,7 @@ uint32_t determine_instruction_size(asm_line_t* data, int label_exists_in_file) 
     return 4;
 }
 
-int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uint32_t*>* segments) {
+uint32_t assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uint32_t*>* segments) {
 
     // this is the address where constants defined by assembler instructions .byte, .half, .word, .dword are placed
     //uint32_t constants_address = 0x00CC0000;
@@ -164,7 +198,7 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
         print_asm_line(&asm_line_array[i]);
     }
 
-//#if 0
+#if 0
     //
     // optimize
     //
@@ -214,11 +248,15 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
         //printf("line %d\n", i);
         print_asm_line(&asm_line_array[i]);
     }
-//#endif
+#endif
 
     //
-    // collect all labels and store them inside the label_address_map.
-    // In this step, no real address is inserted. The dummy value 0x00 is inserted.
+    // Collect all labels and store them inside the label_address_map.
+    //
+    // In this step, no real address is inserted because the size of the
+    // instructions is not known yet.
+    //
+    // The dummy value 0x00 is inserted instead.
     //
 
     tuple_set_element_t label_address_map[20];
@@ -246,19 +284,21 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
     //
 
     uint32_t current_address = 0;
-    int8_t byte_index = 0;
+    int32_t byte_index = 0;
 
     for (int i = 0; i < asm_line_array_index; i++) {
 
-        // the assembler instructions .byte, .half, .word, and .dword
-        // use labels to define constants but these labels do not go into
-        // the label map because they are not used to jump to a specific
-        // address
-        if (asm_line_array[i].asm_instruction != AI_UNDEFINED) {
-            continue;
-        }
+        // // the assembler instructions .byte, .half, .word, and .dword
+        // // use labels to define constants but these labels do not go into
+        // // the label map because they are not used to jump to a specific
+        // // address
+        // if (asm_line_array[i].asm_instruction != AI_UNDEFINED) {
+        //     continue;
+        // }
 
-        if (strnlen(asm_line_array[i].label, 100) > 0) {
+        asm_line_t* ptr = &(asm_line_array[i]);
+
+        if (strnlen(ptr->label, 100) > 0) {
 
             // tuple_set_element_t* tuple_set_element = NULL;
             // retrieve_by_key_tuple_set(label_address_map, 20, asm_line_array[i].label, &tuple_set_element);
@@ -270,19 +310,19 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
             //
             //tuple_set_element->value = current_address;
 
-            asm_line_array[i].tuple_set_element->value = current_address;
+            ptr->tuple_set_element->value = current_address;
         }
 
         uint32_t label_exists_in_file = 0;
-        if (asm_line_array[i].offset_0_expression != NULL) {
+        if (ptr->offset_0_expression != NULL) {
             label_exists_in_file = retrieve_by_key_tuple_set(label_address_map, 20, asm_line_array[i].offset_0_expression->string_val, NULL);
         }
 
-        uint32_t instr_size = determine_instruction_size(&asm_line_array[i], label_exists_in_file);
+        uint32_t instr_size = determine_instruction_size(ptr, label_exists_in_file);
         current_address += instr_size;
 
-        if (asm_line_array[i].instruction != I_UNDEFINED_INSTRUCTION) {
-            asm_line_array[i].instruction_index = byte_index;
+        if (ptr->instruction != I_UNDEFINED_INSTRUCTION) {
+            ptr->instruction_index = byte_index;
 
             byte_index += instr_size;
         }
@@ -346,16 +386,6 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
 
                 asm_line->imm = (address >> 12) & 0xFFFFF;
                 asm_line->offset_1 = (address >> 12) & 0xFFFFF; // this is for the LBU instruction which encode offset_1 into imm12
-
-                // TODO:
-                // %lo(symbol)
-                // The low 12 bits of absolute address for symbol.
-                //
-                // %hi(symbol)
-                // The high 20 bits of absolute address for symbol.
-
-                //asm_line->offset_1 = 1;
-                //asm_line->offset_1_expression->int_val = 0x00;
             }
             break;
 
@@ -377,20 +407,12 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                 }
 
                 uint32_t address = tuple_set_element->value;
-                //uint32_t address = 278; // hex 116
                 printf("%08" PRIx64 "\n", address);
 
                 reset_offsets_and_modifiers(asm_line);
 
                 asm_line->imm = address & 0xFFF;
                 asm_line->offset_1 = address & 0xFFF; // this is for the LBU instruction which encode offset_1 into imm12
-
-                // TODO:
-                // %lo(symbol)
-                // The low 12 bits of absolute address for symbol.
-                //
-                // %hi(symbol)
-                // The high 20 bits of absolute address for symbol.
             }
             break;
 
@@ -402,14 +424,49 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
 
         switch (asm_line->parameter_modifier_2) {
 
-            case PM_HI:
-                printf("Process Modifier 2 - HI\n");
-                abort();
+            case PM_HI: {
+                    printf("Process Modifier 2 - HI\n");
+
+                    tuple_set_element_t* tuple_set_element = NULL;
+
+                    int str_len = strnlen(asm_line->offset_2_expression->string_val, 100);
+                    int label_found = retrieve_by_key_tuple_set(label_address_map, 20, asm_line->offset_2_expression->string_val, &tuple_set_element);
+
+                    if (!label_found) {
+                        printf("Label not found!\n");
+                        abort();
+                    }
+
+                    uint32_t address = tuple_set_element->value;
+                    printf("%08" PRIx64 "\n", address);
+
+                    reset_offsets_and_modifiers(asm_line);
+
+                    asm_line->imm = (address >> 12) & 0xFFFFF;
+                    asm_line->offset_2 = (address >> 12) & 0xFFFFF; // this is for the LBU instruction which encode offset_2 into imm12
+                }
                 break;
 
-            case PM_LO:
+            case PM_LO: {
                 printf("Process Modifier 2 - LO\n");
-                abort();
+                    tuple_set_element_t* tuple_set_element = NULL;
+
+                    int str_len = strnlen(asm_line->offset_2_expression->string_val, 100);
+                    int label_found = retrieve_by_key_tuple_set(label_address_map, 20, asm_line->offset_2_expression->string_val, &tuple_set_element);
+
+                    if (!label_found) {
+                        printf("Label not found!\n");
+                        abort();
+                    }
+
+                    uint32_t address = tuple_set_element->value;
+                    printf("%08" PRIx64 "\n", address);
+
+                    reset_offsets_and_modifiers(asm_line);
+
+                    asm_line->imm = address & 0xFFF;
+                    asm_line->offset_2 = address & 0xFFF; // this is for the LBU instruction which encode offset_2 into imm12
+                }
                 break;
 
             case PM_UNDEFINED:
@@ -463,13 +520,9 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
 
         switch (asm_line_array[i].asm_instruction) {
 
+            case AI_SPACE:
             case AI_BYTE:
             {
-                printf("AI_BYTE\n");
-
-                //asm_line_array[i].use_raw_data = 1;
-                //asm_line_array[i].raw_data_length = 1;
-
                 if (strnlen(asm_line_array[i].label, 100) != 0) {
 
                     // get the label which might be stored in the previous line
@@ -494,31 +547,32 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
 
                 }
 
-                current_address += asm_line_array[i].raw_data_length;
+                current_address += (asm_line_array[i].raw_data_length * sizeof(uint8_t));
             }
             break;
 
             case AI_HALF: {
                 printf("AI_HALF %s, %d\n", __FILE__, __LINE__);
+
                 abort();
             }
             break;
 
             case AI_WORD:
             {
-                int length = 4;
+                // int length = 4;
 
-                // the assembler instruction .byte, .half and .word place the
-                // data directly into the text segment!
-                asm_line_array[i].use_raw_data = 1;
-                asm_line_array[i].raw_data_length = length;
+                // // the assembler instruction .byte, .half and .word place the
+                // // data directly into the text segment!
+                // asm_line_array[i].use_raw_data = 1;
+                // asm_line_array[i].raw_data_length = length;
 
-                int64_t int_val = asm_line_array[i].asm_instruction_expr->int_val;
-                for (int j = 0; j < length; j++) {
+                // int64_t int_val = asm_line_array[i].asm_instruction_expr->int_val;
+                // for (int j = 0; j < length; j++) {
 
-                    uint8_t temp = (int_val >> (8*(length-1-j))) & 0xFF;
-                    asm_line_array[i].raw_data[j] = temp;
-                }
+                //     uint8_t temp = (int_val >> (8*(length-1-j))) & 0xFF;
+                //     asm_line_array[i].raw_data[j] = temp;
+                // }
 
                 // get the label which might be stored in the previous line
                 char use_label[100];
@@ -540,7 +594,9 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                     abort();
                 }
 
-                current_address += length;
+                current_address += (asm_line_array[i].raw_data_length * sizeof(uint32_t));
+
+                //current_address += length;
 
                 //printf("key:%s value:%d\n", asm_line_array[i].asm_instruction_symbol,
                 //    asm_line_array[i].asm_instruction_expr->int_val);
@@ -563,6 +619,8 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                 // mem_preload_value(segments, equ_map, &asm_line_array[i], constants_address, low, false);
 
                 current_address += 8;
+
+                abort();
 
             }
             break;
@@ -859,7 +917,7 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                     }
                     asm_line_array[i].offset_0_used = 1;
                 } else {
-                    printf("greater_than \"%s\" label not defined!\n", asm_line_array[i].offset_0_expression->string_val);
+                    printf("%s:%d greater_than \"%s\" label not defined!\n", __FILE__, __LINE__, asm_line_array[i].offset_0_expression->string_val);
                     abort();
                 }
             } else if (strncmp(last_character, "b", 1) == 0) {
@@ -877,7 +935,7 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                     }
                     asm_line_array[i].offset_0_used = 1;
                 } else {
-                    printf("less_than \"%s\" label not defined!\n", asm_line_array[i].offset_0_expression->string_val);
+                    printf("%s:%d less_than \"%s\" label not defined!\n", __FILE__, __LINE__, asm_line_array[i].offset_0_expression->string_val);
                     abort();
                 }
             } else {
@@ -898,7 +956,7 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                     }
                     asm_line_array[i].offset_0_used = 1;
                 } else {
-                    printf("direct_match \"%s\" label not defined!\n", asm_line_array[i].offset_0_expression->string_val);
+                    printf("%s:%d direct_match \"%s\" label not defined!\n", __FILE__, __LINE__, asm_line_array[i].offset_0_expression->string_val);
                     abort();
                 }
             }
@@ -915,7 +973,7 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
             if (strncmp(last_character, "f", 1) == 0) {
                 retrieve_by_key_greater_than_value_tuple_set(label_address_map, 20, asm_line_array[i].offset_1_expression->string_val, str_len-1, address, &tuple_set_element);
                 if (tuple_set_element != NULL) {
-                    printf("greater_than: %d\n", tuple_set_element->value);
+                    //printf("greater_than: %d\n", tuple_set_element->value);
                     switch (asm_line_array[i].instruction_type) {
                         case IT_B:
                         case IT_J:
@@ -928,12 +986,12 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                     }
                     asm_line_array[i].offset_1_used = 1;
                 } else {
-                    printf("greater_than \"%s\" label not defined!\n", asm_line_array[i].offset_1_expression->string_val);
+                    printf("%s:%d greater_than \"%s\" label not defined!\n", __FILE__, __LINE__, asm_line_array[i].offset_1_expression->string_val);
                 }
             } else if (strncmp(last_character, "b", 1) == 0) {
                 retrieve_by_key_less_than_value_tuple_set(label_address_map, 20, asm_line_array[i].offset_1_expression->string_val, str_len-1, address, &tuple_set_element);
                 if (tuple_set_element != NULL) {
-                    printf("less_than: %d\n", tuple_set_element->value);
+                    //printf("less_than: %d\n", tuple_set_element->value);
                     switch (asm_line_array[i].instruction_type) {
                         case IT_B:
                         case IT_J:
@@ -946,7 +1004,7 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                     }
                     asm_line_array[i].offset_1_used = 1;
                 } else {
-                    printf("less_than \"%s\" label not defined!\n", asm_line_array[i].offset_1_expression->string_val);
+                    printf("%s:%d less_than \"%s\" label not defined!\n", __FILE__, __LINE__, asm_line_array[i].offset_1_expression->string_val);
                 }
             } else {
                 retrieve_by_key_tuple_set(label_address_map, 20, asm_line_array[i].offset_1_expression->string_val, &tuple_set_element);
@@ -967,7 +1025,7 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                     }
                     asm_line_array[i].offset_1_used = 1;
                 } else {
-                    printf("direct_match \"%s\" label not defined!\n", asm_line_array[i].offset_1_expression->string_val);
+                    printf("%s:%d direct_match \"%s\" label not defined!\n", __FILE__, __LINE__, asm_line_array[i].offset_1_expression->string_val);
                 }
             }
         }
@@ -995,7 +1053,7 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                     }
                     asm_line_array[i].offset_2_used = 1;
                 } else {
-                    printf("greater_than \"%s\" label not defined!\n", asm_line_array[i].offset_2_expression->string_val);
+                    printf("%s:%d greater_than \"%s\" label not defined!\n", __FILE__, __LINE__, asm_line_array[i].offset_2_expression->string_val);
                     abort();
                 }
             } else if (strncmp(last_character, "b", 1) == 0) {
@@ -1013,7 +1071,7 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                     }
                     asm_line_array[i].offset_2_used = 1;
                 } else {
-                    printf("less_than \"%s\" label not defined!\n", asm_line_array[i].offset_2_expression->string_val);
+                    printf("%s:%d less_than \"%s\" label not defined!\n", __FILE__, __LINE__, asm_line_array[i].offset_2_expression->string_val);
                     abort();
                 }
             } else {
@@ -1034,7 +1092,7 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                     }
                     asm_line_array[i].offset_2_used = 1;
                 } else {
-                    printf("direct_match \"%s\" label not defined!\n", asm_line_array[i].offset_2_expression->string_val);
+                    printf("%s:%d direct_match \"%s\" label not defined!\n", __FILE__, __LINE__, asm_line_array[i].offset_2_expression->string_val);
                     abort();
                 }
             }
@@ -1105,6 +1163,19 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
 
                 switch (asm_line->asm_instruction)
                 {
+                    case AI_SPACE:
+                    {
+                        printf("AI_SPACE %s, %d\n", __FILE__, __LINE__);
+
+                        for (int j = 0; j < asm_line->raw_data_length; j++) {
+
+                            machine_code[byte_index] = 0x00;
+                            byte_index += sizeof(uint8_t);
+
+                        }
+                    }
+                    break;
+
                     case AI_BYTE:
                     {
                         printf("AI_BYTE %s, %d\n", __FILE__, __LINE__);
@@ -1130,13 +1201,25 @@ int assemble(const char* filename, uint8_t* machine_code, std::map<uint32_t, uin
                     case AI_WORD: {
                         //printf("AI_WORD\n");
 
-                        uint32_t machine_code_for_instruction = asm_line->raw_data[0] << 24 | asm_line->raw_data[1] << 16 | asm_line->raw_data[2] << 8 | asm_line->raw_data[3] << 0;
+                        // uint32_t machine_code_for_instruction = asm_line->raw_data[0] << 24 | asm_line->raw_data[1] << 16 | asm_line->raw_data[2] << 8 | asm_line->raw_data[3] << 0;
 
-                        //printf("%d) %08" PRIx64 "\n", instruction_index, machine_code_for_instruction);
-                        printf("%08" PRIx64 "\n", machine_code_for_instruction);
+                        // //printf("%d) %08" PRIx64 "\n", instruction_index, machine_code_for_instruction);
+                        // printf("%08" PRIx64 "\n", machine_code_for_instruction);
 
-                        machine_code[byte_index] = machine_code_for_instruction;
-                        byte_index += sizeof(uint32_t);
+                        // machine_code[byte_index] = machine_code_for_instruction;
+                        // byte_index += sizeof(uint32_t);
+
+                        for (int j = 0; j < asm_line->raw_data_length; j++) {
+
+                            uint32_t machine_code_for_instruction = asm_line->raw_data[0];
+
+                            machine_code[byte_index + 3] = (machine_code_for_instruction >> 24) & 0xFF;
+                            machine_code[byte_index + 2] = (machine_code_for_instruction >> 16) & 0xFF;
+                            machine_code[byte_index + 1] = (machine_code_for_instruction >> 8) & 0xFF;
+                            machine_code[byte_index + 0] = (machine_code_for_instruction >> 0) & 0xFF;
+
+                            byte_index += sizeof(uint32_t);
+                        }
                     }
                     break;
 

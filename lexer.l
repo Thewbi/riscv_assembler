@@ -26,6 +26,7 @@
 (?i:.text)      { /*printf(".text\n");*/ return DOT_TEXT; }
 (?i:.data)      { /*printf(".data\n");*/ return DOT_DATA; }
 (?i:.byte)      { /*printf(".byte\n");*/ return DOT_BYTE; }
+(?i:.space)      { /*printf(".space\n");*/ return DOT_SPACE; }
 (?i:.half)      { /*printf(".half\n");*/ return DOT_HALF; }
 (?i:.word)      { /*printf(".word\n");*/ return DOT_WORD; }
 (?i:.dword)     { /*printf(".dword\n");*/ return DOT_DWORD; }
@@ -50,11 +51,13 @@
 (?i:bnez)       { /*printf("BNEZ\n");*/ return BNEZ; }
 
 (?i:call)       { /*printf("CALL\n");*/ return CALL; }
+(?i:ecall)       { /*printf("CALL\n");*/ return ECALL; }
 
 (?i:j)          { /*printf("J\n");*/ return J; }
 (?i:jr)         { /*printf("JR\n");*/ return JR; }
 (?i:jalr)       { /*printf("JALR\n");*/ return JALR; }
 
+(?i:la)         { /*printf("LA\n");*/ return LA; }
 (?i:ld)         { /*printf("LD\n");*/ return LD; }
 (?i:lw)         { /*printf("LW\n");*/ return LW; }
 (?i:lh)	        { /*printf("LH\n");*/ return LH; }
